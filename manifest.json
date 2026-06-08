@@ -2,7 +2,7 @@
   "name": "Charlotte",
   "short_name": "Charlotte",
   "description": "Gestionale parcheggi — Charlotte App",
-  "start_url": "/charlotte-garage/",
+  "start_url": "/charlotte-commercial/",
   "display": "fullscreen",
   "background_color": "#0a0a0f",
   "theme_color": "#7c3aed",
@@ -14,5 +14,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "scope": "/charlotte-commercial/",
+  "id": "/charlotte-commercial/"
 }
