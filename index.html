@@ -313,13 +313,12 @@ let convenzioniList = [];
     <div class="logo-icon">C</div>
     <div class="logo-text">CHARLOTTE</div>
   </div>
-  <div class="garage-badge">
-    <select id="garage-select" onchange="cambiaGarage(this.value)">
-      
-      
-      
-      
-    </select>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="garage-badge">
+      <select id="garage-select" onchange="cambiaGarage(this.value)">
+      </select>
+    </div>
+    <button onclick="doLogout()" title="Esci" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--muted);font-size:16px;cursor:pointer;line-height:1;">⏻</button>
   </div>
 </div>
 
@@ -1180,6 +1179,17 @@ function wzInit() {
 }
 
 // ─── AUTH & INIT ───
+// ─── LOGOUT ───
+async function doLogout() {
+  if (!confirm('Vuoi uscire da Charlotte?')) return;
+  await sbClient.auth.signOut();
+  sessionStorage.removeItem('charlotte_auth');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pin-screen').style.display = 'none';
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.main').style.display = 'none';
+}
+
 // ─── RESET PASSWORD ───
 function mostraResetPassword() {
   const f = document.getElementById('reset-form');
