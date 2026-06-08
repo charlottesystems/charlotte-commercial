@@ -215,12 +215,11 @@
 #splash-icon{width:90px;height:90px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:44px;color:white;box-shadow:0 0 40px rgba(124,58,237,0.8)}
 #splash-title{font-size:2.8rem;font-weight:900;color:white;letter-spacing:0.45em;text-shadow:0 0 30px #7c3aed}
 #splash-sub{font-size:0.75rem;color:rgba(192,132,252,0.8);letter-spacing:0.35em;text-transform:uppercase}</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const SUPABASE_URL = 'https://cmglerkaiycllfvgjuww.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtZ2xlcmthaXljbGxmdmdqdXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Mzk3MzEsImV4cCI6MjA5NjUxNTczMX0.Rq1BMRKhQium6tFCmZvid53rjcAXNpckmsSSnTlAiDE';
-const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let garagesList = [];
 let convenzioniList = [];
@@ -883,7 +882,7 @@ async function doLogin() {
   errEl.textContent = '';
   if (!email || !pwd) { errEl.textContent = 'Inserisci email e password'; return; }
   loadEl.style.display = 'block';
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
+  const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pwd });
   loadEl.style.display = 'none';
   if (error) { errEl.textContent = '❌ ' + (error.message === 'Invalid login credentials' ? 'Credenziali non valide' : error.message); return; }
   await onLoginSuccess(data.user);
@@ -920,7 +919,7 @@ async function caricaGarages() {
 
 document.addEventListener('DOMContentLoaded', async function() {
   // Controlla sessione esistente
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sbClient.auth.getSession();
   if (session?.user) {
     document.getElementById('login-screen').style.display = 'none';
     await onLoginSuccess(session.user);
@@ -1137,7 +1136,7 @@ async function salvaSostaRemota(sosta) {
     const conv = sosta.convenzione && sosta.convenzione !== 'NESSUNA'
       ? convenzioniList.find(c => c.nome === sosta.convenzione)
       : null;
-    const { error } = await supabase.from('soste').insert({
+    const { error } = await sbClient.from('soste').insert({
       garage_id: garage?.id,
       targa: sosta.targa,
       tipo_veicolo: sosta.tipo,
@@ -1169,7 +1168,7 @@ async function aggiornaSostaRemota(targa, garageNome, uscitaStr, durataStr) {
     const uscita = new Date();
     const ingresso = new Date(sosta.ingresso);
     const durata_minuti = Math.floor((uscita - ingresso) / 60000);
-    const { error } = await supabase.from('soste').update({
+    const { error } = await sbClient.from('soste').update({
       uscita: uscita.toISOString(),
       durata_minuti
     }).eq('id', sosta.id);
@@ -1182,7 +1181,7 @@ async function caricaSosteRemote(garageNome, soloAttive) {
   try {
     const garage = garagesList.find(g => g.name.toLowerCase() === garageNome.toLowerCase() || g.id === garageNome);
     if (!garage) return [];
-    let q = supabase.from('soste').select('*, convenzioni(nome)').eq('garage_id', garage.id).order('ingresso', { ascending: false });
+    let q = sbClient.from('soste').select('*, convenzioni(nome)').eq('garage_id', garage.id).order('ingresso', { ascending: false });
     if (soloAttive) q = q.is('uscita', null);
     const { data, error } = await q;
     if (error) { console.error('Supabase fetch soste:', error); return []; }
