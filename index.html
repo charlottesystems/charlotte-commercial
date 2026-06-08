@@ -21,23 +21,23 @@
   }
 
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { background:var(--bg)!important; color:var(--text); font-family:'Exo 2',sans-serif; min-height:100vh; overflow-x:hidden; }
+  html,body { background:var(--bg)!important; color:var(--text); font-family:Exo 2,sans-serif; min-height:100vh; overflow-x:hidden; }
   select option { background:var(--bg2); color:var(--text); }
 
   .header { background:var(--panel); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
   .logo { display:flex; align-items:center; gap:10px; }
-  .logo-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; color:white; box-shadow:0 0 16px rgba(124,58,237,0.5); }
-  .logo-text { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px; letter-spacing:1px; background:linear-gradient(90deg,var(--accent3),var(--white)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  .garage-badge { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:4px 10px; font-size:11px; color:var(--muted); font-family:'Share Tech Mono',monospace; }
-  .garage-badge select { background:none; border:none; color:var(--accent3); font-family:'Share Tech Mono',monospace; font-size:11px; outline:none; cursor:pointer; }
+  .logo-icon { width:36px; height:36px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:Rajdhani,sans-serif; font-weight:700; font-size:18px; color:white; box-shadow:0 0 16px rgba(124,58,237,0.5); }
+  .logo-text { font-family:Rajdhani,sans-serif; font-weight:700; font-size:20px; letter-spacing:1px; background:linear-gradient(90deg,var(--accent3),var(--white)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .garage-badge { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:4px 10px; font-size:11px; color:var(--muted); font-family:Share Tech Mono,monospace; }
+  .garage-badge select { background:none; border:none; color:var(--accent3); font-family:Share Tech Mono,monospace; font-size:11px; outline:none; cursor:pointer; }
 
   .main { padding:16px; max-width:500px; margin:0 auto; }
   .screen { display:none; }
   .screen.active { display:block; }
 
   .time-display { text-align:center; padding:10px 0 8px; }
-  .time-display .time { font-family:'Share Tech Mono',monospace; font-size:52px; color:var(--white); letter-spacing:4px; text-shadow:0 0 30px rgba(124,58,237,0.4); }
-  .time-display .date { font-size:18px; color:var(--muted); margin-top:4px; font-family:'Share Tech Mono',monospace; letter-spacing:2px; }
+  .time-display .time { font-family:Share Tech Mono,monospace; font-size:52px; color:var(--white); letter-spacing:4px; text-shadow:0 0 30px rgba(124,58,237,0.4); }
+  .time-display .date { font-size:18px; color:var(--muted); margin-top:4px; font-family:Share Tech Mono,monospace; letter-spacing:2px; }
 
   .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
   .action-btn { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:38px 16px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; user-select:none; }
@@ -48,7 +48,7 @@
   .action-btn.ricerca::before { background:var(--red); }
   .action-btn:active { transform:scale(0.96); opacity:0.85; }
   .action-btn .btn-icon { font-size:72px; margin-bottom:12px; display:block; }
-  .action-btn .btn-label { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:28px; letter-spacing:1px; text-transform:uppercase; }
+  .action-btn .btn-label { font-family:Rajdhani,sans-serif; font-weight:700; font-size:28px; letter-spacing:1px; text-transform:uppercase; }
   .action-btn.ingresso .btn-label { color:var(--green); }
   .action-btn.uscita .btn-label { color:var(--accent2); }
   .action-btn.lista .btn-label { color:var(--amber); }
@@ -57,21 +57,21 @@
 
   .stats-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
   .stat { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:8px; text-align:center; }
-  .stat .val { font-family:'Share Tech Mono',monospace; font-size:28px; font-weight:bold; color:var(--accent3); }
+  .stat .val { font-family:Share Tech Mono,monospace; font-size:28px; font-weight:bold; color:var(--accent3); }
   .stat .lbl { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
 
   .screen-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
   .back-btn { width:36px; height:36px; background:var(--panel); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; flex-shrink:0; }
-  .screen-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; letter-spacing:1px; text-transform:uppercase; }
+  .screen-title { font-family:Rajdhani,sans-serif; font-weight:700; font-size:22px; letter-spacing:1px; text-transform:uppercase; }
 
   .targa-display { background:var(--panel); border:2px solid var(--border); border-radius:16px; padding:20px; text-align:center; margin-bottom:16px; position:relative; min-height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .targa-display.has-targa { border-color:var(--green); box-shadow:0 0 20px rgba(16,185,129,0.15); }
-  .targa-value { font-family:'Share Tech Mono',monospace; font-size:42px; font-weight:bold; letter-spacing:6px; color:var(--white); text-transform:uppercase; }
+  .targa-value { font-family:Share Tech Mono,monospace; font-size:42px; font-weight:bold; letter-spacing:6px; color:var(--white); text-transform:uppercase; }
   .targa-placeholder { font-size:14px; color:var(--muted); }
 
   /* Pulsanti camera — due bottoni affiancati */
   .camera-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-  .camera-btn { background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:14px; padding:16px 10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; text-transform:uppercase; color:white; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 20px rgba(124,58,237,0.4); transition:all 0.2s; }
+  .camera-btn { background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:14px; padding:16px 10px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:15px; letter-spacing:1px; text-transform:uppercase; color:white; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; box-shadow:0 4px 20px rgba(124,58,237,0.4); transition:all 0.2s; }
   .camera-btn.gallery { background:linear-gradient(135deg,#0f766e,#0d9488); box-shadow:0 4px 20px rgba(13,148,136,0.4); }
   .camera-btn:active { transform:scale(0.97); }
   .camera-btn .btn-emoji { font-size:26px; }
@@ -80,7 +80,7 @@
   .manual-section { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px; }
   .manual-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
   .manual-input-row { display:flex; gap:8px; }
-  .manual-input { flex:1; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px; font-family:'Share Tech Mono',monospace; font-size:20px; letter-spacing:3px; color:var(--white); text-transform:uppercase; outline:none; text-align:center; }
+  .manual-input { flex:1; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px; font-family:Share Tech Mono,monospace; font-size:20px; letter-spacing:3px; color:var(--white); text-transform:uppercase; outline:none; text-align:center; }
   .manual-input:focus { border-color:var(--accent); }
   .manual-confirm-btn { background:var(--bg2); border:1px solid var(--accent); border-radius:10px; padding:12px 16px; color:var(--accent3); font-size:20px; cursor:pointer; }
 
@@ -90,37 +90,37 @@
   .tipo-btn.selected { background:rgba(124,58,237,0.2); border-color:var(--accent); color:var(--accent3); }
   .tipo-btn .tipo-icon { font-size:20px; display:block; margin-bottom:4px; }
 
-  .conferma-btn { width:100%; background:var(--green); border:none; border-radius:14px; padding:18px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px; letter-spacing:2px; text-transform:uppercase; color:white; cursor:pointer; box-shadow:0 4px 20px rgba(16,185,129,0.3); transition:all 0.2s; opacity:0.4; pointer-events:none; }
+  .conferma-btn { width:100%; background:var(--green); border:none; border-radius:14px; padding:18px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:20px; letter-spacing:2px; text-transform:uppercase; color:white; cursor:pointer; box-shadow:0 4px 20px rgba(16,185,129,0.3); transition:all 0.2s; opacity:0.4; pointer-events:none; }
   .conferma-btn.enabled { opacity:1; pointer-events:all; }
   .conferma-btn:active { transform:scale(0.97); }
 
   .sosta-card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; }
   .sosta-card.attiva { border-left:3px solid var(--green); }
   .sosta-card.chiusa { border-left:3px solid var(--muted); opacity:0.7; }
-  .sosta-targa { font-family:'Share Tech Mono',monospace; font-size:18px; font-weight:bold; color:var(--white); letter-spacing:2px; }
+  .sosta-targa { font-family:Share Tech Mono,monospace; font-size:18px; font-weight:bold; color:var(--white); letter-spacing:2px; }
   .sosta-info { flex:1; }
   .sosta-tipo { font-size:11px; color:var(--muted); margin-top:2px; }
-  .sosta-time { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--accent3); text-align:right; }
+  .sosta-time { font-family:Share Tech Mono,monospace; font-size:12px; color:var(--accent3); text-align:right; }
   .sosta-duration { font-size:11px; color:var(--muted); text-align:right; margin-top:2px; }
-  .uscita-quick-btn { background:var(--accent); border:none; border-radius:8px; padding:8px 12px; color:white; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .uscita-quick-btn { background:var(--accent); border:none; border-radius:8px; padding:8px 12px; color:white; font-family:Rajdhani,sans-serif; font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; }
 
   /* Overlay conferma targa OCR */
   .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:300; align-items:center; justify-content:center; flex-direction:column; gap:14px; padding:24px; }
   .overlay.show { display:flex; }
   .overlay-icon { font-size:72px; animation:pop 0.4s ease; }
-  .overlay-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:28px; letter-spacing:2px; color:var(--white); text-align:center; }
+  .overlay-title { font-family:Rajdhani,sans-serif; font-weight:700; font-size:28px; letter-spacing:2px; color:var(--white); text-align:center; }
   .overlay-sub { font-size:14px; color:var(--muted); text-align:center; }
-  .overlay-targa { font-family:'Share Tech Mono',monospace; font-size:36px; letter-spacing:4px; color:var(--green); background:rgba(16,185,129,0.1); padding:12px 24px; border-radius:12px; border:1px solid var(--green); }
+  .overlay-targa { font-family:Share Tech Mono,monospace; font-size:36px; letter-spacing:4px; color:var(--green); background:rgba(16,185,129,0.1); padding:12px 24px; border-radius:12px; border:1px solid var(--green); }
   @keyframes pop { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
 
   /* Overlay conferma OCR (mostra targa rilevata + input correzione) */
   .ocr-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:400; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:24px; }
   .ocr-overlay.show { display:flex; }
-  .ocr-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; letter-spacing:2px; color:var(--white); text-align:center; }
+  .ocr-title { font-family:Rajdhani,sans-serif; font-weight:700; font-size:22px; letter-spacing:2px; color:var(--white); text-align:center; }
   .ocr-conf { font-size:13px; color:var(--muted); }
-  .ocr-input { font-family:'Share Tech Mono',monospace; font-size:38px; letter-spacing:6px; color:var(--white); background:var(--bg2); border:2px solid var(--accent); border-radius:14px; padding:14px 20px; text-align:center; text-transform:uppercase; outline:none; width:100%; max-width:340px; }
+  .ocr-input { font-family:Share Tech Mono,monospace; font-size:38px; letter-spacing:6px; color:var(--white); background:var(--bg2); border:2px solid var(--accent); border-radius:14px; padding:14px 20px; text-align:center; text-transform:uppercase; outline:none; width:100%; max-width:340px; }
   .ocr-btns { display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; max-width:340px; }
-  .ocr-btn { padding:14px; border:none; border-radius:12px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; cursor:pointer; }
+  .ocr-btn { padding:14px; border:none; border-radius:12px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; cursor:pointer; }
   .ocr-btn.confirm { background:var(--green); color:white; }
   .ocr-btn.cancel { background:var(--panel); border:1px solid var(--border); color:var(--muted); }
 
@@ -131,7 +131,7 @@
   .empty-state .empty-icon { font-size:52px; margin-bottom:12px; }
   .empty-state .empty-text { font-size:14px; }
 
-  .search-input { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; font-family:'Share Tech Mono',monospace; font-size:18px; letter-spacing:2px; color:var(--white); text-transform:uppercase; outline:none; margin-bottom:16px; }
+  .search-input { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; font-family:Share Tech Mono,monospace; font-size:18px; letter-spacing:2px; color:var(--white); text-transform:uppercase; outline:none; margin-bottom:16px; }
   .search-input:focus { border-color:var(--accent); }
   .section-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; padding-left:2px; }
 
@@ -166,8 +166,8 @@
   /* PIN SCREEN */
   .pin-screen { position:fixed; inset:0; background:var(--bg); z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:32px; }
   .pin-logo { display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:10px; }
-  .pin-logo-icon { width:72px; height:72px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:36px; color:white; box-shadow:0 0 30px rgba(124,58,237,0.5); }
-  .pin-logo-text { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:28px; letter-spacing:2px; background:linear-gradient(90deg,var(--accent3),var(--white)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .pin-logo-icon { width:72px; height:72px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:Rajdhani,sans-serif; font-weight:700; font-size:36px; color:white; box-shadow:0 0 30px rgba(124,58,237,0.5); }
+  .pin-logo-text { font-family:Rajdhani,sans-serif; font-weight:700; font-size:28px; letter-spacing:2px; background:linear-gradient(90deg,var(--accent3),var(--white)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
   .pin-subtitle { font-size:13px; color:var(--muted); letter-spacing:1px; }
   .pin-dots { display:flex; gap:14px; margin:8px 0; }
   .pin-dot { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); background:transparent; transition:all 0.2s; }
@@ -175,7 +175,7 @@
   .pin-dot.error { background:var(--red); border-color:var(--red); }
   .pin-error { font-size:13px; color:var(--red); min-height:18px; }
   .pin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:280px; }
-  .pin-btn { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--white); cursor:pointer; text-align:center; transition:all 0.15s; user-select:none; }
+  .pin-btn { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:26px; color:var(--white); cursor:pointer; text-align:center; transition:all 0.15s; user-select:none; }
   .pin-btn:active { transform:scale(0.92); background:rgba(124,58,237,0.2); border-color:var(--accent); }
   .pin-btn.zero { grid-column:2; }
   .pin-btn.canc { background:transparent; border-color:transparent; color:var(--muted); font-size:20px; }
@@ -194,7 +194,7 @@
   .conv-btn.selected { background:rgba(16,185,129,0.15); border-color:var(--green); color:var(--green); }
   .conv-btn .conv-icon { font-size:18px; display:block; margin-bottom:3px; }
   .cat-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
-  .cat-btn { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center; cursor:pointer; font-size:13px; color:var(--muted); transition:all 0.2s; font-family:'Share Tech Mono',monospace; }
+  .cat-btn { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center; cursor:pointer; font-size:13px; color:var(--muted); transition:all 0.2s; font-family:Share Tech Mono,monospace; }
   .cat-btn.selected { background:rgba(245,158,11,0.15); border-color:var(--amber); color:var(--amber); }
   @media (min-width:600px) {
     .conv-btn { font-size:16px; padding:14px 8px; } .conv-btn .conv-icon { font-size:28px; }
@@ -205,14 +205,14 @@
   .conv-item { padding:12px 16px; cursor:pointer; font-size:14px; color:var(--text); border-bottom:1px solid var(--border); transition:background 0.15s; }
   .conv-item:last-child { border-bottom:none; }
   .conv-item:hover, .conv-item:active { background:rgba(124,58,237,0.15); color:var(--accent3); }
-  .conv-item .conv-item-sub { font-size:11px; color:var(--muted); margin-top:2px; font-family:'Share Tech Mono',monospace; }
+  .conv-item .conv-item-sub { font-size:11px; color:var(--muted); margin-top:2px; font-family:Share Tech Mono,monospace; }
   @media (min-width:600px) { .conv-item { font-size:18px; padding:14px 18px; } .conv-item .conv-item-sub { font-size:14px; } }
 
 #splash-screen{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease}
 #splash-screen.fadeout{opacity:0;pointer-events:none}
 #splash-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55}
 #splash-logo{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:16px}
-#splash-icon{width:90px;height:90px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:44px;color:white;box-shadow:0 0 40px rgba(124,58,237,0.8)}
+#splash-icon{width:90px;height:90px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:44px;color:white;box-shadow:0 0 40px rgba(124,58,237,0.8)}
 #splash-title{font-size:2.8rem;font-weight:900;color:white;letter-spacing:0.45em;text-shadow:0 0 30px #7c3aed}
 #splash-sub{font-size:0.75rem;color:rgba(192,132,252,0.8);letter-spacing:0.35em;text-transform:uppercase}
   .wz-dot { flex:1; height:4px; background:var(--border); border-radius:2px; transition:background 0.3s; }
@@ -220,10 +220,10 @@
   .wz-dot.done { background:var(--green); }
   .wz-step { animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .wz-input { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; color:var(--text); font-family:'Exo 2',sans-serif; font-size:16px; outline:none; }
+  .wz-input { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; color:var(--text); font-family:Exo 2,sans-serif; font-size:16px; outline:none; }
   .wz-input:focus { border-color:var(--accent); }
-  .wz-btn-primary { width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:12px; padding:16px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; color:white; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 20px rgba(124,58,237,0.4); }
-  .wz-btn-secondary { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; color:var(--muted); cursor:pointer; margin-bottom:10px; }
+  .wz-btn-primary { width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:12px; padding:16px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:18px; letter-spacing:1px; color:white; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+  .wz-btn-secondary { width:100%; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:16px; color:var(--muted); cursor:pointer; margin-bottom:10px; }
   .wz-error { color:var(--red); font-size:13px; min-height:18px; margin-bottom:10px; text-align:center; }
   .wz-garage-row { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; position:relative; }
   .wz-garage-remove { position:absolute; top:10px; right:10px; background:none; border:none; color:var(--red); font-size:18px; cursor:pointer; }
@@ -406,11 +406,11 @@ let convenzioniList = [];
         autocomplete="off"
         oninput="filtraConvenzioni(this.value)"
         onfocus="mostraDropdownConv()"
-        style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:15px;outline:none;">
+        style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:Exo 2,sans-serif;font-size:15px;outline:none;">
       <div id="conv-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--panel);border:1px solid var(--accent);border-radius:10px;max-height:220px;overflow-y:auto;z-index:99;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
     </div>
-    <div id="conv-selected-badge" style="display:none;margin-top:8px;background:rgba(124,58,237,0.15);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--accent3);font-family:'Share Tech Mono',monospace;"></div>
-    <div id="conv-info" style="margin-top:6px;font-size:12px;color:var(--green);display:none;font-family:'Share Tech Mono',monospace;"></div>
+    <div id="conv-selected-badge" style="display:none;margin-top:8px;background:rgba(124,58,237,0.15);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--accent3);font-family:Share Tech Mono,monospace;"></div>
+    <div id="conv-info" style="margin-top:6px;font-size:12px;color:var(--green);display:none;font-family:Share Tech Mono,monospace;"></div>
     <div id="cat-section" style="display:none; margin-top:10px;">
       <div class="manual-label" style="margin-bottom:6px;">Categoria veicolo</div>
       <div class="cat-row">
@@ -464,9 +464,9 @@ let convenzioniList = [];
     <div class="tipo-section" style="border-color:var(--accent);margin-bottom:16px;">
       <div class="manual-label">Sosta trovata</div>
       <div style="margin-top:8px;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);">Ingresso: <span id="out-ingresso" style="color:var(--accent3)"></span></div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);margin-top:4px;">Tipo: <span id="out-tipo" style="color:var(--accent3)"></span></div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);margin-top:4px;">Durata: <span id="out-durata" style="color:var(--green);font-weight:bold;"></span></div>
+        <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:var(--muted);">Ingresso: <span id="out-ingresso" style="color:var(--accent3)"></span></div>
+        <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:var(--muted);margin-top:4px;">Tipo: <span id="out-tipo" style="color:var(--accent3)"></span></div>
+        <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:var(--muted);margin-top:4px;">Durata: <span id="out-durata" style="color:var(--green);font-weight:bold;"></span></div>
       </div>
       <div id="out-prezzo" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);"></div>
     </div>
@@ -506,7 +506,7 @@ let convenzioniList = [];
     <div class="screen-title" style="color:var(--accent3)">📊 Report Storico</div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-    <select id="filter-conv" onchange="aggiornaReport()" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;">
+    <select id="filter-conv" onchange="aggiornaReport()" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:Exo 2,sans-serif;font-size:13px;outline:none;">
       <option value="">Tutte le convenzioni</option>
       <option value="NESSUNA">Nessuna</option>
       <option value="HOTEL MEDICI">Hotel Medici</option>
@@ -540,7 +540,7 @@ let convenzioniList = [];
       <option value="BAVARIA">Bavaria</option>
       <option value="CANTO DEGLI ARANCI">Canto degli Aranci</option>
     </select>
-    <select id="filter-stato" onchange="aggiornaReport()" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:13px;outline:none;">
+    <select id="filter-stato" onchange="aggiornaReport()" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:Exo 2,sans-serif;font-size:13px;outline:none;">
       <option value="">Tutte le soste</option>
       <option value="attiva">Soste in corso</option>
       <option value="chiusa">Soste terminate</option>
@@ -1367,7 +1367,7 @@ function creMasterInput() {
   div.innerHTML = `
     <div style="font-size:12px;color:var(--muted);letter-spacing:1px;">PASSWORD AMMINISTRATORE</div>
     <input id="master-input" type="password" placeholder="Password master..."
-      style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;text-align:center;"
+      style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:Exo 2,sans-serif;font-size:16px;outline:none;text-align:center;"
       oninput="verificaMaster(this.value)">
   `;
   document.getElementById('pin-screen').appendChild(div);
@@ -1800,7 +1800,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
   if (risultato) {
     prezzoEl.style.display = 'block';
     prezzoEl.innerHTML = `
-      <div style="color:var(--green);font-size:18px;font-weight:bold;font-family:'Share Tech Mono',monospace;">
+      <div style="color:var(--green);font-size:18px;font-weight:bold;font-family:Share Tech Mono,monospace;">
         💶 ${risultato.importo}€
       </div>
       <div style="color:var(--muted);font-size:11px;margin-top:2px;">${risultato.dettaglio}</div>
@@ -1831,8 +1831,8 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
     <!-- STEP 1: Benvenuto -->
     <div id="wz-step-1" class="wz-step">
       <div style="text-align:center;margin-bottom:32px;">
-        <div style="width:90px;height:90px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:44px;color:white;box-shadow:0 0 40px rgba(124,58,237,0.6);margin:0 auto 20px;">C</div>
-        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CHARLOTTE</div>
+        <div style="width:90px;height:90px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:44px;color:white;box-shadow:0 0 40px rgba(124,58,237,0.6);margin:0 auto 20px;">C</div>
+        <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CHARLOTTE</div>
         <div style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-top:6px;">GARAGE MANAGEMENT SYSTEM</div>
       </div>
       <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
@@ -1843,7 +1843,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
 
     <!-- STEP 2: Account -->
     <div id="wz-step-2" class="wz-step" style="display:none;">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">CREA IL TUO ACCOUNT</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">CREA IL TUO ACCOUNT</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Le credenziali per accedere a Charlotte</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
         <input id="wz-email" type="email" placeholder="Email aziendale" class="wz-input">
@@ -1858,7 +1858,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
 
     <!-- STEP 3: Azienda -->
     <div id="wz-step-3" class="wz-step" style="display:none;">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">LA TUA AZIENDA</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">LA TUA AZIENDA</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Dati della società di parcheggi</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
         <input id="wz-company" type="text" placeholder="Nome società (es. Parcheggi Roma Srl)" class="wz-input">
@@ -1872,7 +1872,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
 
     <!-- STEP 4: Garage -->
     <div id="wz-step-4" class="wz-step" style="display:none;">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">I TUOI GARAGE</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">I TUOI GARAGE</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Aggiungi le sedi della tua attività</div>
       <div id="wz-garages-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
       <button onclick="wzAddGarage()" class="wz-btn-secondary" style="margin-bottom:20px;">+ Aggiungi garage</button>
@@ -1883,7 +1883,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
 
     <!-- STEP 5: PIN -->
     <div id="wz-step-5" class="wz-step" style="display:none;">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">SICUREZZA</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:22px;font-weight:700;color:var(--accent3);margin-bottom:6px;letter-spacing:1px;">SICUREZZA</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Imposta il PIN di accesso ai terminali</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
         <div>
@@ -1906,7 +1906,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
     <!-- STEP FINALE: Loading -->
     <div id="wz-step-loading" class="wz-step" style="display:none;text-align:center;">
       <div style="font-size:52px;margin-bottom:20px;">⚙️</div>
-      <div style="font-family:'Rajdhani',sans-serif;font-size:22px;color:var(--accent3);margin-bottom:10px;">Configurazione in corso...</div>
+      <div style="font-family:Rajdhani,sans-serif;font-size:22px;color:var(--accent3);margin-bottom:10px;">Configurazione in corso...</div>
       <div id="wz-loading-msg" style="font-size:13px;color:var(--muted);">Creazione account</div>
     </div>
 
@@ -1916,21 +1916,21 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
 <!-- ═══ LOGIN SCREEN ═══ -->
 <div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;">
   <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:10px;">
-    <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:36px;color:white;box-shadow:0 0 30px rgba(124,58,237,0.5);">C</div>
-    <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:28px;letter-spacing:2px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CHARLOTTE</div>
+    <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:36px;color:white;box-shadow:0 0 30px rgba(124,58,237,0.5);">C</div>
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:28px;letter-spacing:2px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CHARLOTTE</div>
     <div style="font-size:13px;color:var(--muted);letter-spacing:1px;">ACCESSO ACCOUNT</div>
   </div>
   <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;">
     <input id="login-email" type="email" placeholder="Email account" autocomplete="email"
-      style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;text-align:center;"
+      style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:Exo 2,sans-serif;font-size:16px;outline:none;text-align:center;"
       onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
     <input id="login-password" type="password" placeholder="Password" autocomplete="current-password"
-      style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;text-align:center;"
+      style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:Exo 2,sans-serif;font-size:16px;outline:none;text-align:center;"
       onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
       onkeydown="if(event.key==='Enter') doLogin()">
     <div id="login-error" style="color:var(--red);font-size:13px;text-align:center;min-height:18px;"></div>
     <button onclick="doLogin()"
-      style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:16px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:18px;letter-spacing:2px;color:white;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
+      style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:16px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;letter-spacing:2px;color:white;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
       ACCEDI
     </button>
     <div id="login-loading" style="display:none;text-align:center;color:var(--muted);font-size:13px;">⏳ Accesso in corso...</div>
@@ -1941,10 +1941,10 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
     <div id="reset-form" style="display:none;margin-top:16px;display:none;flex-direction:column;gap:10px;">
       <div style="font-size:13px;color:var(--muted);text-align:center;">Inserisci la tua email per ricevere il link di reset</div>
       <input id="reset-email" type="email" placeholder="Email account"
-        style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;text-align:center;">
+        style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:Exo 2,sans-serif;font-size:16px;outline:none;text-align:center;">
       <div id="reset-msg" style="font-size:13px;text-align:center;min-height:18px;"></div>
       <button onclick="inviaResetPassword()"
-        style="width:100%;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:var(--accent3);cursor:pointer;">
+        style="width:100%;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--accent3);cursor:pointer;">
         INVIA EMAIL DI RESET
       </button>
       <span onclick="nascondiResetPassword()" style="font-size:13px;color:var(--muted);cursor:pointer;text-align:center;text-decoration:underline;">Annulla</span>
