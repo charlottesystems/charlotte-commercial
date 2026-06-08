@@ -1089,29 +1089,53 @@ async function wzCompleta() {
 }
 
 function wzShowSchermataConfermaEmail() {
-  // Sostituisci contenuto loading con messaggio attesa
   const loadingEl = document.getElementById('wz-step-loading');
-  loadingEl.innerHTML = `
-    <div style="text-align:center;">
-      <div style="font-size:64px;margin-bottom:20px;">📧</div>
-      <div style="font-family:'Rajdhani',sans-serif;font-size:22px;color:var(--accent3);margin-bottom:12px;letter-spacing:1px;">CONTROLLA LA TUA EMAIL</div>
-      <div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px;">
-        Abbiamo inviato un link di conferma a<br>
-        <strong style="color:var(--text);">${wzData.email}</strong><br><br>
-        Clicca il link nell'email per attivare il tuo account, poi torna qui e premi il bottone qui sotto.
-      </div>
-      <button onclick="wzProvaLoginDopoConferma()"
-        style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:16px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:18px;color:white;cursor:pointer;margin-bottom:12px;">
-        HO CONFERMATO LA EMAIL →
-      </button>
-      <div id="wz-conferma-msg" style="font-size:13px;color:var(--muted);min-height:18px;"></div>
-      <div style="margin-top:16px;font-size:12px;color:var(--muted);">
-        Non hai ricevuto l'email?
-        <span onclick="wzReinviaConferma()" style="color:var(--accent3);cursor:pointer;text-decoration:underline;">Reinvia</span>
-      </div>
-    </div>
-  `;
+  const email = wzData.email || localStorage.getItem('charlotte_wizard_email') || '';
+  
+  const wrapper = document.createElement('div');
+  wrapper.style.textAlign = 'center';
+  
+  const icon = document.createElement('div');
+  icon.style.cssText = 'font-size:64px;margin-bottom:20px;';
+  icon.textContent = '📧';
+  
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:22px;color:var(--accent3);margin-bottom:12px;letter-spacing:1px;font-weight:700;';
+  title.textContent = 'CONTROLLA LA TUA EMAIL';
+  
+  const desc = document.createElement('div');
+  desc.style.cssText = 'font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:24px;';
+  desc.innerHTML = 'Abbiamo inviato un link di conferma a<br><strong style="color:var(--text);">' + email + '</strong><br><br>Clicca il link nella email per attivare il tuo account, poi torna qui e premi il bottone qui sotto.';
+  
+  const btn = document.createElement('button');
+  btn.style.cssText = 'width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:16px;font-size:18px;font-weight:700;color:white;cursor:pointer;margin-bottom:12px;';
+  btn.textContent = 'HO CONFERMATO LA EMAIL →';
+  btn.onclick = wzProvaLoginDopoConferma;
+  
+  const msgEl = document.createElement('div');
+  msgEl.id = 'wz-conferma-msg';
+  msgEl.style.cssText = 'font-size:13px;color:var(--muted);min-height:18px;margin-bottom:12px;';
+  
+  const reinviaRow = document.createElement('div');
+  reinviaRow.style.cssText = 'margin-top:16px;font-size:12px;color:var(--muted);';
+  const reinviaSpan = document.createElement('span');
+  reinviaSpan.style.cssText = 'color:var(--accent3);cursor:pointer;text-decoration:underline;';
+  reinviaSpan.textContent = 'Reinvia email';
+  reinviaSpan.onclick = wzReinviaConferma;
+  reinviaRow.appendChild(document.createTextNode('Non hai ricevuto la email? '));
+  reinviaRow.appendChild(reinviaSpan);
+  
+  wrapper.appendChild(icon);
+  wrapper.appendChild(title);
+  wrapper.appendChild(desc);
+  wrapper.appendChild(btn);
+  wrapper.appendChild(msgEl);
+  wrapper.appendChild(reinviaRow);
+  
+  loadingEl.innerHTML = '';
+  loadingEl.appendChild(wrapper);
 }
+
 
 async function wzProvaLoginDopoConferma() {
   const msg = document.getElementById('wz-conferma-msg');
@@ -1125,7 +1149,7 @@ async function wzProvaLoginDopoConferma() {
   if (error) {
     if (error.message.includes('Email not confirmed')) {
       msg.style.color = 'var(--red)';
-      msg.textContent = 'Email non ancora confermata. Clicca il link nell'email prima di procedere.';
+      msg.textContent = 'Email non ancora confermata. Clicca il link nella email prima di procedere.';
     } else {
       msg.style.color = 'var(--red)';
       msg.textContent = 'Errore: ' + error.message;
