@@ -1287,8 +1287,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ─── PIN ───
-const PIN_CORRETTO = localStorage.getItem('charlotte_pin') || '0000';
-const PIN_MASTER = localStorage.getItem('charlotte_pin_master') || '';
+// PIN letti dinamicamente da localStorage ad ogni verifica
+function getPIN() { return localStorage.getItem('charlotte_pin') || '0000'; }
+function getPINMaster() { return localStorage.getItem('charlotte_pin_master') || ''; }
 const PIN_SESSION_KEY = 'charlotte_auth';
 const PIN_TENTATIVI_KEY = 'charlotte_tentativi';
 const PIN_BLOCCO_KEY = 'charlotte_blocco';
@@ -1367,7 +1368,7 @@ function creMasterInput() {
 }
 
 function verificaMaster(val) {
-  if (val === PIN_MASTER) {
+  if (val === getPINMaster()) {
     localStorage.removeItem(PIN_BLOCCO_KEY);
     localStorage.removeItem(PIN_TENTATIVI_KEY);
     sessionStorage.setItem(PIN_SESSION_KEY, 'ok');
@@ -1398,7 +1399,7 @@ function aggiornaDots() {
 }
 
 function verificaPin() {
-  if (pinInserito === PIN_CORRETTO) {
+  if (pinInserito === getPIN()) {
     localStorage.removeItem(PIN_TENTATIVI_KEY);
     localStorage.removeItem(PIN_BLOCCO_KEY);
     sessionStorage.setItem(PIN_SESSION_KEY, 'ok');
