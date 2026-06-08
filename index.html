@@ -897,24 +897,28 @@ async function onLoginSuccess(user) {
 }
 
 async function caricaGarages() {
-  const { data, error } = await supabase
-    .from('garages')
-    .select('id, name, address, ztl_enabled')
-    .eq('active', true)
-    .order('name');
-  if (error) { console.error('caricaGarages:', error); return; }
-  garagesList = data || [];
-  const sel = document.getElementById('garage-select');
-  sel.innerHTML = '<option value="">— Seleziona garage —</option>';
-  garagesList.forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g.id; opt.textContent = '📍 ' + g.name.toUpperCase();
-    sel.appendChild(opt);
-  });
-  if (garagesList.length === 1) {
-    sel.value = garagesList[0].id;
-    cambiaGarage(garagesList[0].id);
-  }
+  try {
+    const { data, error } = await sbClient
+      .from('garages')
+      .select('id, name, address, ztl_enabled, active')
+      .order('name');
+    if (error) { console.error('caricaGarages error:', error.message); return; }
+    console.log('Garages caricati:', JSON.stringify(data));
+    garagesList = data || [];
+    const sel = document.getElementById('garage-select');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Seleziona garage —</option>';
+    garagesList.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = '📍 ' + g.name.toUpperCase();
+      sel.appendChild(opt);
+    });
+    if (garagesList.length === 1) {
+      sel.value = garagesList[0].id;
+      cambiaGarage(garagesList[0].id);
+    }
+  } catch(e) { console.error('caricaGarages exception:', e.message); }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -1155,7 +1159,7 @@ async function aggiornaSostaRemota(targa, garageNome, uscitaStr, durataStr) {
     const garage = garagesList.find(g => g.name.toLowerCase() === garageNome.toLowerCase() || g.id === garageNome);
     if (!garage) return;
     // Trova sosta attiva per targa+garage
-    const { data: sosteAttive } = await supabase
+    const { data: sosteAttive } = await sbClient
       .from('soste')
       .select('id, ingresso')
       .eq('garage_id', garage.id)
@@ -1240,7 +1244,7 @@ async function caricaConvenzioniGarage() {
   if (!garageAttuale) return;
   const garage = garagesList.find(g => g.name === garageAttuale || g.id === garageAttuale);
   if (!garage) return;
-  const { data, error } = await supabase
+  const { data, error } = await sbClient
     .from('convenzioni')
     .select('id, nome, note, tariffe_convenzioni(categoria, prezzo_ora, prezzo_giorno)')
     .eq('garage_id', garage.id)
