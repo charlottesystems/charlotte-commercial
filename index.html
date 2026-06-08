@@ -1184,10 +1184,16 @@ async function doLogout() {
   if (!confirm('Vuoi uscire da Charlotte?')) return;
   await sbClient.auth.signOut();
   sessionStorage.removeItem('charlotte_auth');
-  document.getElementById('login-screen').style.display = 'flex';
+  localStorage.removeItem('charlotte_pin_attempts');
+  localStorage.removeItem('charlotte_blocco');
+  // Nascondi tutto tranne login
   document.getElementById('pin-screen').style.display = 'none';
   document.querySelector('.header').style.display = 'none';
   document.querySelector('.main').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  // Reset PIN inserito
+  pinInserito = '';
+  masterInserito = '';
 }
 
 // ─── RESET PASSWORD ───
@@ -1245,6 +1251,11 @@ async function doLogin() {
 async function onLoginSuccess(user) {
   currentUser = user;
   document.getElementById('login-screen').style.display = 'none';
+  // Mostra struttura app
+  const header = document.querySelector('.header');
+  const main = document.querySelector('.main');
+  if (header) header.style.display = 'flex';
+  if (main) main.style.display = 'block';
   // Carica garage account
   await caricaGarages();
   pinInit();
