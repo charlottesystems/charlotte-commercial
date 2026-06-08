@@ -1425,6 +1425,12 @@ function verificaPin() {
     localStorage.removeItem(PIN_BLOCCO_KEY);
     sessionStorage.setItem(PIN_SESSION_KEY, 'ok');
     document.getElementById('pin-screen').style.display = 'none';
+    // Mostra app
+    const header = document.querySelector('.header');
+    const main = document.querySelector('.main');
+    if (header) header.style.display = 'flex';
+    if (main) main.style.display = 'block';
+    aggiornaStats();
   } else {
     // Incrementa tentativi
     let tentativi = parseInt(localStorage.getItem(PIN_TENTATIVI_KEY) || '0') + 1;
