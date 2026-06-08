@@ -1114,13 +1114,16 @@ async function caricaGarages() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-  // Controlla se wizard già completato
   const wizardDone = localStorage.getItem('charlotte_wizard_done');
   if (!wizardDone) {
-    wzInit();
+    // Primo avvio — mostra wizard
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('wizard-screen').style.display = 'block';
+    wzShowStep(1);
+    wzRenderGarages();
     return;
   }
-  // Controlla sessione esistente
+  // Wizard già completato — controlla sessione
   const { data: { session } } = await sbClient.auth.getSession();
   if (session?.user) {
     document.getElementById('login-screen').style.display = 'none';
