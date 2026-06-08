@@ -936,10 +936,12 @@ function wzBack(current) { wzShowStep(current - 1); }
 
 function wzStep2() {
   const email = document.getElementById('wz-email').value.trim();
+  const email2 = document.getElementById('wz-email2').value.trim();
   const pwd = document.getElementById('wz-password').value;
   const pwd2 = document.getElementById('wz-password2').value;
   const err = document.getElementById('wz-err-2');
   if (!email || !email.includes('@')) { err.textContent = 'Inserisci una email valida'; return; }
+  if (email !== email2) { err.textContent = 'Le email non coincidono'; return; }
   if (pwd.length < 8) { err.textContent = 'La password deve avere almeno 8 caratteri'; return; }
   if (pwd !== pwd2) { err.textContent = 'Le password non coincidono'; return; }
   err.textContent = '';
@@ -1091,6 +1093,44 @@ function wzInit() {
 }
 
 // ─── AUTH & INIT ───
+// ─── RESET PASSWORD ───
+function mostraResetPassword() {
+  const f = document.getElementById('reset-form');
+  f.style.display = 'flex';
+  f.style.flexDirection = 'column';
+  document.getElementById('reset-msg').textContent = '';
+  const emailInput = document.getElementById('login-email');
+  if (emailInput && emailInput.value) {
+    document.getElementById('reset-email').value = emailInput.value;
+  }
+}
+
+function nascondiResetPassword() {
+  document.getElementById('reset-form').style.display = 'none';
+}
+
+async function inviaResetPassword() {
+  const email = document.getElementById('reset-email').value.trim();
+  const msg = document.getElementById('reset-msg');
+  if (!email || !email.includes('@')) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Inserisci una email valida';
+    return;
+  }
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Invio in corso...';
+  const { error } = await sbClient.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://charlottesystems.github.io/charlotte-commercial/'
+  });
+  if (error) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Errore: ' + error.message;
+  } else {
+    msg.style.color = 'var(--green)';
+    msg.textContent = 'Email inviata! Controlla la tua casella.';
+  }
+}
+
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pwd = document.getElementById('login-password').value;
@@ -1712,6 +1752,7 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
       <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Le credenziali per accedere a Charlotte</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
         <input id="wz-email" type="email" placeholder="Email aziendale" class="wz-input">
+        <input id="wz-email2" type="email" placeholder="Ripeti email" class="wz-input">
         <input id="wz-password" type="password" placeholder="Password (min. 8 caratteri)" class="wz-input">
         <input id="wz-password2" type="password" placeholder="Ripeti password" class="wz-input">
       </div>
@@ -1798,6 +1839,21 @@ function aggiornaPrezzoUscita(sosta, minutiTotali) {
       ACCEDI
     </button>
     <div id="login-loading" style="display:none;text-align:center;color:var(--muted);font-size:13px;">⏳ Accesso in corso...</div>
+    <div style="text-align:center;margin-top:8px;">
+      <span onclick="mostraResetPassword()" style="font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline;">Password dimenticata?</span>
+    </div>
+    <!-- Reset password form (nascosto) -->
+    <div id="reset-form" style="display:none;margin-top:16px;display:none;flex-direction:column;gap:10px;">
+      <div style="font-size:13px;color:var(--muted);text-align:center;">Inserisci la tua email per ricevere il link di reset</div>
+      <input id="reset-email" type="email" placeholder="Email account"
+        style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:16px;outline:none;text-align:center;">
+      <div id="reset-msg" style="font-size:13px;text-align:center;min-height:18px;"></div>
+      <button onclick="inviaResetPassword()"
+        style="width:100%;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:var(--accent3);cursor:pointer;">
+        INVIA EMAIL DI RESET
+      </button>
+      <span onclick="nascondiResetPassword()" style="font-size:13px;color:var(--muted);cursor:pointer;text-align:center;text-decoration:underline;">Annulla</span>
+    </div>
   </div>
 </div>
 
