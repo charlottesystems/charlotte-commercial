@@ -1064,20 +1064,15 @@ async function wzCompleta() {
     localStorage.setItem('charlotte_wizard_done', '1');
     localStorage.setItem('charlotte_wizard_email', wzData.email);
 
-    // 5. Controlla se email confermata o no
-    document.getElementById('wz-loading-msg').textContent = 'Verifica account...';
-    
-    // Se Supabase richiede conferma email, authData.session sarà null
-    // anche se non c'e errore
-    if (!authData.session) {
-      // Email di conferma inviata — mostra schermata attesa
-      wzShowSchermataConfermaEmail();
-      return;
-    }
-
-    // Sessione attiva subito (confirm email disabilitato)
+    // 5. Login diretto dopo registrazione
+    document.getElementById('wz-loading-msg').textContent = 'Accesso in corso...';
+    const { data: loginData, error: loginErr } = await sbClient.auth.signInWithPassword({
+      email: wzData.email,
+      password: wzData.password
+    });
+    if (loginErr) throw new Error('Errore login: ' + loginErr.message);
     document.getElementById('wizard-screen').style.display = 'none';
-    await onLoginSuccess(authData.user);
+    await onLoginSuccess(loginData.user);
 
   } catch(e) {
     wzShowStep(5);
