@@ -73,7 +73,6 @@ async function renderTariffe() {
 
   tariffeCorrente = data || [];
 
-  // Mostra una card per ogni categoria
   container.innerHTML = CATEGORIE.map(cat => {
     const t = tariffeCorrente.find(r => r.categoria === cat.id) || {};
     return `
@@ -115,6 +114,11 @@ async function renderTariffe() {
               <input type="number" step="1" min="0" max="120" class="wz-input"
                      id="t-${cat.id}-toll" value="${t.tolleranza_minuti || 30}">
             </div>
+            <div class="tariffa-field">
+              <label>Tolleranza per ora (min)</label>
+              <input type="number" step="1" min="0" max="59" class="wz-input"
+                     id="t-${cat.id}-tollora" value="${t.tolleranza_ora_minuti ?? 10}">
+            </div>
           </div>
           <button class="wz-btn-primary" style="margin-top:8px"
                   onclick="salvaTariffa('${cat.id}', '${t.id || ''}')">
@@ -132,6 +136,7 @@ async function salvaTariffa(categoriaId, esistenteId) {
   const giorn = parseFloat(document.getElementById(`t-${categoriaId}-giorn`)?.value || 0);
   const soglia = parseInt(document.getElementById(`t-${categoriaId}-soglia`)?.value || 4);
   const toll = parseInt(document.getElementById(`t-${categoriaId}-toll`)?.value || 30);
+  const tollOra = parseInt(document.getElementById(`t-${categoriaId}-tollora`)?.value || 10);
   const msg = document.getElementById(`msg-${categoriaId}`);
 
   const payload = {
@@ -142,6 +147,7 @@ async function salvaTariffa(categoriaId, esistenteId) {
     prezzo_giornaliero: giorn,
     soglia_giornaliero_ore: soglia,
     tolleranza_minuti: toll,
+    tolleranza_ora_minuti: tollOra,
     updated_at: new Date().toISOString()
   };
 
@@ -261,7 +267,6 @@ async function salvaConvenzione(convId) {
     const val = parseFloat(document.getElementById(`tc-${convId}-${cat.id}`)?.value || 0);
     if (val <= 0) continue;
 
-    // Upsert tariffe_convenzioni
     await sbClient.from('tariffe_convenzioni').upsert({
       convenzione_id: convId,
       categoria: cat.id,
