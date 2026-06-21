@@ -10,6 +10,86 @@
   <title>Charlotte</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .badge-screen { padding: 16px; }
+    .badge-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .badge-nome {
+      font-family: Rajdhani, sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .badge-ultimo {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 20px;
+    }
+    .badge-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .badge-btn-entrata {
+      background: linear-gradient(135deg, var(--green), #059669);
+      border: none;
+      border-radius: 14px;
+      padding: 24px 16px;
+      font-family: Rajdhani, sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.3);
+      transition: all 0.2s;
+    }
+    .badge-btn-uscita {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 14px;
+      padding: 24px 16px;
+      font-family: Rajdhani, sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+      transition: all 0.2s;
+    }
+    .badge-btn-entrata:active, .badge-btn-uscita:active { transform: scale(0.96); }
+    .badge-stato {
+      font-size: 13px;
+      min-height: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      padding: 8px;
+    }
+    .owner-lock {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 32px;
+    }
+    .owner-lock.hidden { display: none; }
+  </style>
 </head>
 <body>
 
@@ -25,6 +105,24 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
+     OWNER LOCK (protezione pannello owner)
+═══════════════════════════════════════════════════════ -->
+<div class="owner-lock hidden" id="owner-lock">
+  <div class="pin-logo-icon" style="margin:0 auto">🔐</div>
+  <div class="pin-logo-text">Pannello Owner</div>
+  <div class="pin-subtitle">Inserisci la password owner per continuare</div>
+  <input id="owner-lock-password" type="password" class="wz-input"
+         style="max-width:300px;width:100%;text-align:center"
+         placeholder="Password owner"
+         onkeydown="if(event.key==='Enter') verificaPasswordOwner()">
+  <div class="wz-error" id="owner-lock-error"></div>
+  <button class="wz-btn-primary" style="max-width:300px;width:100%"
+          onclick="verificaPasswordOwner()">ACCEDI</button>
+  <button class="wz-btn-secondary" style="max-width:300px;width:100%"
+          onclick="chiudiOwnerLock()">Annulla</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
      HEADER
 ═══════════════════════════════════════════════════════ -->
 <div class="header" id="main-header" style="display:none">
@@ -36,7 +134,10 @@
     <select id="garage-select"></select>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <a href="owner.html" style="background:rgba(124,58,237,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--accent3);font-family:'Share Tech Mono',monospace;text-decoration:none;">⚙ OWNER</a>
+    <button onclick="apriOwnerLock()"
+            style="background:rgba(124,58,237,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--accent3);font-family:'Share Tech Mono',monospace;cursor:pointer;">
+      ⚙ OWNER
+    </button>
     <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;" title="Logout">⏻</button>
   </div>
 </div>
@@ -132,10 +233,10 @@
         <div class="btn-label">Lista</div>
         <div class="btn-sub">Soste attive</div>
       </div>
-      <div class="action-btn ricerca" onclick="apriRicerca()">
-        <span class="btn-icon">🔍</span>
-        <div class="btn-label">Cerca</div>
-        <div class="btn-sub">Cerca targa</div>
+      <div class="action-btn" style="border-top:2px solid var(--green)" onclick="apriBadge()">
+        <span class="btn-icon">📍</span>
+        <div class="btn-label" style="color:var(--green)">Badge</div>
+        <div class="btn-sub">Timbra turno</div>
       </div>
     </div>
   </div>
@@ -146,12 +247,10 @@
       <div class="back-btn" onclick="tornaHome()">←</div>
       <div class="screen-title">🚗 Ingresso</div>
     </div>
-
     <div class="targa-display" id="targa-display">
       <div class="targa-value" id="targa-value"></div>
       <div class="targa-placeholder" id="targa-placeholder">Scansiona o inserisci targa</div>
     </div>
-
     <div class="camera-btns">
       <button class="camera-btn" onclick="apriCamera()">
         <span class="btn-emoji">📷</span>
@@ -162,7 +261,6 @@
         <span class="btn-txt">GALLERIA</span>
       </button>
     </div>
-
     <div class="manual-section">
       <div class="manual-label">Inserimento manuale</div>
       <div class="manual-input-row">
@@ -171,21 +269,17 @@
         <button class="manual-confirm-btn" onclick="confermaTArgaManuale()">✓</button>
       </div>
     </div>
-
     <div class="tipo-section">
       <div class="manual-label">Categoria veicolo</div>
       <div class="tipo-grid" id="tipo-grid"></div>
     </div>
-
     <div class="conv-section" id="conv-section" style="display:none">
       <div class="manual-label">Convenzione</div>
       <div class="conv-grid" id="conv-grid"></div>
     </div>
-
     <button class="conferma-btn" id="conferma-ingresso-btn" onclick="confermaIngresso()">
       ✓ CONFERMA INGRESSO
     </button>
-
     <input type="file" id="camera-input" accept="image/*" capture="environment"
            onchange="gestisciImmagineOCR(this.files[0])">
     <input type="file" id="gallery-input" accept="image/*"
@@ -220,6 +314,33 @@
            placeholder="ES: AB123CD" maxlength="8"
            oninput="eseguiRicerca()" onkeyup="eseguiRicerca()">
     <div id="ricerca-risultati"></div>
+  </div>
+
+  <!-- ── BADGE ── -->
+  <div class="screen" id="badge-screen">
+    <div class="screen-header">
+      <div class="back-btn" onclick="tornaHome()">←</div>
+      <div class="screen-title">📍 Timbra Turno</div>
+    </div>
+    <div class="badge-card">
+      <div class="badge-nome" id="badge-nome-operatore">—</div>
+      <div class="badge-ultimo" id="badge-ultimo">Nessuna timbratura recente</div>
+      <div class="badge-btns">
+        <button class="badge-btn-entrata" id="badge-btn-entrata" onclick="timbra('entrata')">
+          🟢<br>ENTRATA
+        </button>
+        <button class="badge-btn-uscita" id="badge-btn-uscita" onclick="timbra('uscita')">
+          🔴<br>USCITA
+        </button>
+      </div>
+      <div class="badge-stato" id="badge-stato">Premi un bottone per timbrare</div>
+    </div>
+    <div style="text-align:center">
+      <button onclick="cambioNomeOperatore()"
+              style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;color:var(--muted);cursor:pointer;font-size:13px">
+        ✏️ Cambia nome operatore
+      </button>
+    </div>
   </div>
 
 </div>
@@ -284,6 +405,7 @@
 <script src="js/auth.js"></script>
 <script src="js/tariffe.js"></script>
 <script src="js/app.js"></script>
+<script src="js/badge.js"></script>
 
 <script>
   // ── INIT ────────────────────────────────────────────────
@@ -297,6 +419,58 @@
     initSupabase();
     await controllaSessione();
   });
+
+  // ── BADGE SCREEN ────────────────────────────────────────
+  function apriBadge() {
+    mostraSchermata('badge-screen');
+    aggiornaUIBadge();
+  }
+
+  // ── OWNER LOCK ───────────────────────────────────────────
+  function apriOwnerLock() {
+    document.getElementById('owner-lock').classList.remove('hidden');
+    document.getElementById('owner-lock-password').value = '';
+    document.getElementById('owner-lock-error').textContent = '';
+    setTimeout(() => document.getElementById('owner-lock-password').focus(), 100);
+  }
+
+  function chiudiOwnerLock() {
+    document.getElementById('owner-lock').classList.add('hidden');
+  }
+
+  async function verificaPasswordOwner() {
+    const pwd = document.getElementById('owner-lock-password').value;
+    const errEl = document.getElementById('owner-lock-error');
+    if (!pwd) { errEl.textContent = 'Inserisci la password.'; return; }
+
+    const accountId = localStorage.getItem('charlotte_account_id');
+    const { data } = await sbClient
+      .from('accounts')
+      .select('owner_password')
+      .eq('id', accountId)
+      .single();
+
+    if (!data?.owner_password) {
+      // Prima volta — imposta la password
+      const { error } = await sbClient
+        .from('accounts')
+        .update({ owner_password: pwd })
+        .eq('id', accountId);
+      if (!error) {
+        chiudiOwnerLock();
+        window.location.href = 'owner.html';
+      }
+      return;
+    }
+
+    if (data.owner_password === pwd) {
+      chiudiOwnerLock();
+      window.location.href = 'owner.html';
+    } else {
+      errEl.textContent = 'Password non corretta.';
+      document.getElementById('owner-lock-password').value = '';
+    }
+  }
 
   // ── WIZARD ONBOARDING ───────────────────────────────────
   let wzStep = 0;
@@ -324,6 +498,14 @@
         <div class="wz-error" id="wz-err"></div>
         <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
       </div>` },
+    { title: 'Password Owner', html: `
+      <div class="wz-step">
+        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Imposta una password per proteggere il pannello Owner</p>
+        <input id="wz-owner-pwd" class="wz-input" type="password" placeholder="Password owner" style="margin-bottom:8px">
+        <input id="wz-owner-pwd2" class="wz-input" type="password" placeholder="Conferma password" style="margin-bottom:12px">
+        <div class="wz-error" id="wz-err"></div>
+        <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
+      </div>` },
     { title: 'Abbonamento', html: `
       <div class="wz-step">
         <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Scegli il tuo piano</p>
@@ -348,18 +530,20 @@
       <div class="wz-step" style="text-align:center;padding:20px 0">
         <div style="font-size:72px;margin-bottom:16px">🎉</div>
         <div class="pin-logo-text" style="margin-bottom:8px">Tutto pronto!</div>
-        <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Il tuo account Charlotte è configurato. Configura le tariffe dal pannello Owner prima di iniziare.</p>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Configura le tariffe e le coordinate GPS dei garage dal pannello Owner.</p>
         <button class="wz-btn-primary" onclick="wzComplete()">INIZIA AD USARE CHARLOTTE</button>
       </div>` }
   ];
 
   let wzPlanSelected = null;
   let wzGarages = [{ name: '', address: '' }];
+  let wzOwnerPwd = '';
 
   function avviaWizard() {
     wzStep = 0;
     wzGarages = [{ name: '', address: '' }];
     wzPlanSelected = null;
+    wzOwnerPwd = '';
     renderWzDots();
     renderWzStep();
   }
@@ -383,7 +567,7 @@
     if (!el) return;
     el.innerHTML = wzGarages.map((g, i) => `
       <div class="wz-garage-row" style="margin-bottom:10px">
-        <input class="wz-input" placeholder="Nome garage (es. Garage Centro)" value="${g.name}"
+        <input class="wz-input" placeholder="Nome garage" value="${g.name}"
                oninput="wzGarages[${i}].name=this.value" style="margin-bottom:6px">
         <input class="wz-input" placeholder="Indirizzo" value="${g.address}"
                oninput="wzGarages[${i}].address=this.value">
@@ -391,15 +575,8 @@
       </div>`).join('');
   }
 
-  function wzAddGarage() {
-    wzGarages.push({ name: '', address: '' });
-    renderWzGarages();
-  }
-
-  function wzRemoveGarage(i) {
-    wzGarages.splice(i, 1);
-    renderWzGarages();
-  }
+  function wzAddGarage() { wzGarages.push({ name: '', address: '' }); renderWzGarages(); }
+  function wzRemoveGarage(i) { wzGarages.splice(i, 1); renderWzGarages(); }
 
   function wzSelectPlan(plan, el) {
     wzPlanSelected = plan;
@@ -428,14 +605,18 @@
       localStorage.setItem('charlotte_pin', p1);
     }
     if (wzStep === 3) {
+      const p1 = document.getElementById('wz-owner-pwd')?.value;
+      const p2 = document.getElementById('wz-owner-pwd2')?.value;
+      if (!p1 || p1.length < 4) { if (errEl) errEl.textContent = 'Password minimo 4 caratteri'; return; }
+      if (p1 !== p2) { if (errEl) errEl.textContent = 'Le password non coincidono'; return; }
+      wzOwnerPwd = p1;
+    }
+    if (wzStep === 4) {
       if (!wzPlanSelected) { if (errEl) errEl.textContent = 'Seleziona un piano'; return; }
     }
 
     wzStep++;
-    if (wzStep < wzSteps.length) {
-      renderWzDots();
-      renderWzStep();
-    }
+    if (wzStep < wzSteps.length) { renderWzDots(); renderWzStep(); }
   }
 
   async function wzComplete() {
@@ -446,6 +627,7 @@
       company_name: company,
       plan: wzPlanSelected || 'base',
       onboarding_complete: true,
+      owner_password: wzOwnerPwd,
       trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
     }).select().single();
 
