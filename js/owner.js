@@ -1,6 +1,6 @@
 // ============================================================
 // CHARLOTTE COMMERCIAL — owner.js
-// Pannello owner: gestione tariffe e convenzioni per garage
+// Pannello owner: gestione tariffe, convenzioni, storico
 // ============================================================
 
 let ownerGarageId = null;
@@ -58,6 +58,7 @@ function mostraSezioneOwner(sezione) {
   if (sezione === 'tariffe') return renderTariffe();
   if (sezione === 'convenzioni') return renderConvenzioni();
   if (sezione === 'garages') return renderGarages();
+  if (sezione === 'storico') return renderStorico();
 }
 
 // ── TARIFFE ──────────────────────────────────────────────────
@@ -250,11 +251,11 @@ async function apriFormConvenzione() {
   const nome = prompt('Nome della convenzione (es. Hotel Bellavista):');
   if (!nome || !nome.trim()) return;
 
-  const { data, error } = await sbClient.from('convenzioni').insert({
+  const { error } = await sbClient.from('convenzioni').insert({
     garage_id: ownerGarageId,
     nome: nome.trim(),
     attiva: true
-  }).select().single();
+  });
 
   if (error) { alert('Errore nella creazione.'); return; }
   await renderConvenzioni();
@@ -382,4 +383,153 @@ async function aggiungiGarage() {
   if (error) { alert('Errore nella creazione.'); return; }
   await caricaGaragesOwner();
   await renderGarages();
+}
+
+// ── STORICO ──────────────────────────────────────────────────
+
+function renderStorico() {
+  const container = document.getElementById('storico-container');
+  if (!container) return;
+
+  // Data default: oggi
+  const oggi = new Date().toISOString().split('T')[0];
+
+  container.innerHTML = `
+    <div class="tariffa-card" style="margin-bottom:16px">
+      <div class="tariffa-fields">
+        <div class="tariffa-row">
+          <div class="tariffa-field">
+            <label>Targa (anche parziale)</label>
+            <input class="wz-input" id="storico-targa" placeholder="Es. FL13"
+                   style="text-transform:uppercase"
+                   oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="tariffa-field">
+            <label>Data centrale</label>
+            <input class="wz-input" id="storico-data" type="date" value="${oggi}">
+          </div>
+        </div>
+        <div class="tariffa-row" style="align-items:center;margin-bottom:4px">
+          <div class="tariffa-field">
+            <label>Range giorni (±)</label>
+            <input class="wz-input" id="storico-range" type="number" min="1" max="365" value="10">
+          </div>
+          <div class="tariffa-field">
+            <label>Garage</label>
+            <select class="wz-input" id="storico-garage">
+              <option value="">Tutti i garage</option>
+              ${ownerGarageList.map(g => `<option value="${g.id}">${g.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <button class="wz-btn-primary" style="margin-top:8px" onclick="cercaStorico()">
+          🔍 Cerca
+        </button>
+      </div>
+    </div>
+    <div id="storico-risultati"></div>`;
+}
+
+async function cercaStorico() {
+  const targa = document.getElementById('storico-targa')?.value?.trim() || '';
+  const dataInput = document.getElementById('storico-data')?.value;
+  const range = parseInt(document.getElementById('storico-range')?.value || 10);
+  const garageId = document.getElementById('storico-garage')?.value || '';
+  const container = document.getElementById('storico-risultati');
+
+  if (!container) return;
+  container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Ricerca in corso...</div>';
+
+  // Calcola date
+  const dataCentrale = new Date(dataInput);
+  const dataInizio = new Date(dataCentrale);
+  dataInizio.setDate(dataInizio.getDate() - range);
+  const dataFine = new Date(dataCentrale);
+  dataFine.setDate(dataFine.getDate() + range);
+
+  // Costruisci query
+  let query = sbClient
+    .from('soste')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, importo, convenzione_id, garage_id')
+    .gte('ingresso_at', dataInizio.toISOString())
+    .lte('ingresso_at', dataFine.toISOString())
+    .order('ingresso_at', { ascending: false })
+    .limit(100);
+
+  if (targa) query = query.ilike('targa', `%${targa}%`);
+
+  if (garageId) {
+    query = query.eq('garage_id', garageId);
+  } else {
+    // Tutti i garage dell'account
+    const garageIds = ownerGarageList.map(g => g.id);
+    query = query.in('garage_id', garageIds);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">Nessuna sosta trovata nel periodo selezionato</div>
+      </div>`;
+    return;
+  }
+
+  // Raggruppa per data
+  const perData = {};
+  data.forEach(s => {
+    const giorno = new Date(s.ingresso_at).toLocaleDateString('it-IT', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    if (!perData[giorno]) perData[giorno] = [];
+    perData[giorno].push(s);
+  });
+
+  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:12px">
+    ${data.length} soste trovate · dal ${dataInizio.toLocaleDateString('it-IT')} al ${dataFine.toLocaleDateString('it-IT')}
+  </div>`;
+
+  for (const [giorno, soste] of Object.entries(perData)) {
+    const totaleGiorno = soste.reduce((sum, s) => sum + (s.importo || 0), 0);
+    html += `
+      <div style="margin-bottom:4px;padding:8px 12px;background:rgba(124,58,237,0.1);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3);text-transform:capitalize">${giorno}</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green)">${soste.length} soste · ${formatEuro(totaleGiorno)}</span>
+      </div>`;
+
+    soste.forEach(s => {
+      const garage = ownerGarageList.find(g => g.id === s.garage_id);
+      const cat = CATEGORIE.find(c => c.id === s.tipo_veicolo);
+      const oraIngresso = new Date(s.ingresso_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      const oraUscita = s.uscita_at
+        ? new Date(s.uscita_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+        : '—';
+      const durata = s.uscita_at ? calcolaDurataStorico(s.ingresso_at, s.uscita_at) : 'In sosta';
+
+      html += `
+        <div class="sosta-card ${s.uscita_at ? 'chiusa' : 'attiva'}" style="margin-bottom:6px">
+          <div class="sosta-info">
+            <div class="sosta-targa">${s.targa}</div>
+            <div class="sosta-tipo">${cat?.icon || '🚗'} ${cat?.label || s.tipo_veicolo}${garage ? ' · ' + garage.name : ''}</div>
+          </div>
+          <div>
+            <div class="sosta-time">${oraIngresso} → ${oraUscita}</div>
+            <div class="sosta-duration">${durata}</div>
+            ${s.importo ? `<div class="sosta-time" style="color:var(--green)">${formatEuro(s.importo)}</div>` : ''}
+          </div>
+        </div>`;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+function calcolaDurataStorico(ingressoAt, uscitaAt) {
+  const diff = Math.floor((new Date(uscitaAt) - new Date(ingressoAt)) / 1000);
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
