@@ -22,28 +22,31 @@
     }
     .owner-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin: 16px 0;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 4px;
+      overflow-x: auto;
     }
     .owner-tab {
       flex: 1;
-      padding: 10px 8px;
+      min-width: 60px;
+      padding: 10px 6px;
       text-align: center;
       border-radius: 9px;
       cursor: pointer;
       font-family: Rajdhani, sans-serif;
       font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 1px;
+      font-size: 12px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       color: var(--muted);
       transition: all 0.2s;
       border: none;
       background: none;
+      white-space: nowrap;
     }
     .owner-tab.active {
       background: var(--accent);
@@ -85,36 +88,12 @@
       color: var(--red);
       border: 1px solid var(--red);
     }
-    .tariffa-fields {
-      padding: 14px 16px;
-    }
-    .tariffa-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .tariffa-field {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .tariffa-field label {
-      font-size: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .tariffa-field .wz-input {
-      padding: 10px 12px;
-      font-size: 15px;
-    }
-    .tariffa-msg {
-      font-size: 13px;
-      margin-top: 6px;
-      min-height: 18px;
-      text-align: center;
-    }
+    .tariffa-fields { padding: 14px 16px; }
+    .tariffa-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .tariffa-field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .tariffa-field label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .tariffa-field .wz-input { padding: 10px 12px; font-size: 15px; }
+    .tariffa-msg { font-size: 13px; margin-top: 6px; min-height: 18px; text-align: center; }
     .garage-select-bar {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -125,24 +104,8 @@
       align-items: center;
       gap: 10px;
     }
-    .garage-select-bar label {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      white-space: nowrap;
-    }
-    .garage-select-bar select {
-      flex: 1;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      color: var(--text);
-      font-family: Rajdhani, sans-serif;
-      font-size: 15px;
-      outline: none;
-    }
+    .garage-select-bar label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+    .garage-select-bar select { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-family: Rajdhani, sans-serif; font-size: 15px; outline: none; }
   </style>
 </head>
 <body>
@@ -151,7 +114,7 @@
 <div class="owner-header">
   <div style="display:flex;align-items:center;gap:10px">
     <a href="index.html" style="width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:16px">←</a>
-    <div class="logo-text" style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;letter-spacing:1px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;letter-spacing:1px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
       Pannello Owner
     </div>
   </div>
@@ -173,7 +136,10 @@
       💰 Tariffe
     </button>
     <button class="owner-tab" data-tab="convenzioni" onclick="mostraSezioneOwner('convenzioni')">
-      🤝 Convenzioni
+      🤝 Conv.
+    </button>
+    <button class="owner-tab" data-tab="storico" onclick="mostraSezioneOwner('storico')">
+      📊 Storico
     </button>
     <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">
       🏢 Garages
@@ -182,25 +148,25 @@
 
   <!-- Sezione Tariffe -->
   <div class="owner-section" id="owner-tariffe">
-    <div class="section-label" style="margin-bottom:12px">
-      Configura le tariffe per ogni categoria di veicolo
-    </div>
+    <div class="section-label" style="margin-bottom:12px">Configura le tariffe per ogni categoria di veicolo</div>
     <div id="tariffe-container"></div>
   </div>
 
   <!-- Sezione Convenzioni -->
   <div class="owner-section" id="owner-convenzioni" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">
-      Gestisci le convenzioni con hotel e aziende
-    </div>
+    <div class="section-label" style="margin-bottom:12px">Gestisci le convenzioni con hotel e aziende</div>
     <div id="convenzioni-container"></div>
+  </div>
+
+  <!-- Sezione Storico -->
+  <div class="owner-section" id="owner-storico" style="display:none">
+    <div class="section-label" style="margin-bottom:12px">Ricerca soste per targa e periodo</div>
+    <div id="storico-container"></div>
   </div>
 
   <!-- Sezione Garages -->
   <div class="owner-section" id="owner-garages" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">
-      Gestisci i tuoi garage
-    </div>
+    <div class="section-label" style="margin-bottom:12px">Gestisci i tuoi garage</div>
     <div id="garages-container"></div>
   </div>
 
