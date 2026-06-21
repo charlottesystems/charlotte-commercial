@@ -25,7 +25,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     HEADER (nascosto su login/pin/onboarding)
+     HEADER
 ═══════════════════════════════════════════════════════ -->
 <div class="header" id="main-header" style="display:none">
   <div class="logo">
@@ -36,7 +36,7 @@
     <select id="garage-select"></select>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <span id="company-name-header" style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;"></span>
+    <a href="owner.html" style="background:rgba(124,58,237,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--accent3);font-family:'Share Tech Mono',monospace;text-decoration:none;">⚙ OWNER</a>
     <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;" title="Logout">⏻</button>
   </div>
 </div>
@@ -173,21 +173,13 @@
     </div>
 
     <div class="tipo-section">
-      <div class="manual-label">Tipo veicolo</div>
-      <div class="tipo-grid">
-        <div class="tipo-btn" onclick="selezionaTipo('Auto',this)"><span class="tipo-icon">🚗</span>Auto</div>
-        <div class="tipo-btn" onclick="selezionaTipo('Moto',this)"><span class="tipo-icon">🏍️</span>Moto</div>
-        <div class="tipo-btn" onclick="selezionaTipo('Furgone',this)"><span class="tipo-icon">🚐</span>Furgone</div>
-        <div class="tipo-btn" onclick="selezionaTipo('Camion',this)"><span class="tipo-icon">🚛</span>Camion</div>
-        <div class="tipo-btn" onclick="selezionaTipo('Elettrico',this)"><span class="tipo-icon">⚡</span>Elettrico</div>
-        <div class="tipo-btn" onclick="selezionaTipo('Abbonato',this)"><span class="tipo-icon">🅿️</span>Abbonato</div>
-      </div>
+      <div class="manual-label">Categoria veicolo</div>
+      <div class="tipo-grid" id="tipo-grid"></div>
     </div>
 
     <div class="conv-section" id="conv-section" style="display:none">
       <div class="manual-label">Convenzione</div>
       <div class="conv-grid" id="conv-grid"></div>
-      <div class="cat-row" id="cat-row" style="display:none"></div>
     </div>
 
     <button class="conferma-btn" id="conferma-ingresso-btn" onclick="confermaIngresso()">
@@ -230,7 +222,7 @@
     <div id="ricerca-risultati"></div>
   </div>
 
-</div><!-- /main -->
+</div>
 
 <!-- ═══════════════════════════════════════════════════════
      OVERLAY CONFERMA INGRESSO
@@ -240,6 +232,35 @@
   <div class="overlay-title">INGRESSO REGISTRATO</div>
   <div class="overlay-targa" id="overlay-targa"></div>
   <div class="overlay-sub" id="overlay-time"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     OVERLAY CONFERMA USCITA
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="overlay-uscita" style="gap:10px">
+  <div class="overlay-icon">🏁</div>
+  <div class="overlay-title">CONFERMA USCITA</div>
+  <div class="overlay-targa" id="uscita-targa"></div>
+  <div style="text-align:center">
+    <div id="uscita-categoria" style="font-size:14px;color:var(--muted);margin-bottom:4px"></div>
+    <div id="uscita-conv" style="font-size:12px;color:var(--accent3);margin-bottom:8px"></div>
+    <div id="uscita-durata" style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--text)"></div>
+  </div>
+  <div style="background:rgba(16,185,129,0.1);border:1px solid var(--green);border-radius:16px;padding:16px 32px;text-align:center">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">IMPORTO</div>
+    <div id="uscita-importo" style="font-family:'Share Tech Mono',monospace;font-size:42px;color:var(--green);font-weight:bold"></div>
+    <div id="uscita-dettaglio" style="font-size:11px;color:var(--muted);margin-top:6px"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:340px">
+    <button onclick="annullaUscita()"
+            style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--muted);font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;cursor:pointer">
+      ✕ ANNULLA
+    </button>
+    <button onclick="confermaUscita()"
+            style="padding:16px;border:none;border-radius:12px;background:var(--green);color:white;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;cursor:pointer">
+      ✓ CONFERMA
+    </button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -258,25 +279,21 @@
 <!-- ═══════════════════════════════════════════════════════
      SCRIPTS
 ═══════════════════════════════════════════════════════ -->
-<!-- Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- App files -->
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/tariffe.js"></script>
 <script src="js/app.js"></script>
 
 <script>
   // ── INIT ────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
-    // Splash
     setTimeout(() => {
       const splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('fadeout');
       setTimeout(() => { if (splash) splash.remove(); }, 1200);
     }, 1800);
 
-    // Init Supabase e controlla sessione
     initSupabase();
     await controllaSessione();
   });
@@ -331,7 +348,7 @@
       <div class="wz-step" style="text-align:center;padding:20px 0">
         <div style="font-size:72px;margin-bottom:16px">🎉</div>
         <div class="pin-logo-text" style="margin-bottom:8px">Tutto pronto!</div>
-        <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Il tuo account Charlotte è configurato. Hai 14 giorni di prova gratuita.</p>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Il tuo account Charlotte è configurato. Configura le tariffe dal pannello Owner prima di iniziare.</p>
         <button class="wz-btn-primary" onclick="wzComplete()">INIZIA AD USARE CHARLOTTE</button>
       </div>` }
   ];
@@ -399,12 +416,10 @@
       if (!val) { if (errEl) errEl.textContent = 'Inserisci il nome azienda'; return; }
       localStorage.setItem('wz_company', val);
     }
-
     if (wzStep === 1) {
       const valid = wzGarages.every(g => g.name.trim());
       if (!valid) { if (errEl) errEl.textContent = 'Inserisci almeno il nome per ogni garage'; return; }
     }
-
     if (wzStep === 2) {
       const p1 = document.getElementById('wz-pin')?.value;
       const p2 = document.getElementById('wz-pin2')?.value;
@@ -412,7 +427,6 @@
       if (p1 !== p2) { if (errEl) errEl.textContent = 'I PIN non coincidono'; return; }
       localStorage.setItem('charlotte_pin', p1);
     }
-
     if (wzStep === 3) {
       if (!wzPlanSelected) { if (errEl) errEl.textContent = 'Seleziona un piano'; return; }
     }
@@ -427,7 +441,6 @@
   async function wzComplete() {
     const company = localStorage.getItem('wz_company') || 'La mia azienda';
 
-    // Salva account su Supabase
     const { data: acc, error: accErr } = await sbClient.from('accounts').insert({
       owner_id: currentUser.id,
       company_name: company,
@@ -438,7 +451,6 @@
 
     if (accErr) { alert('Errore nel salvare l\'account. Riprova.'); return; }
 
-    // Salva garages
     for (const g of wzGarages) {
       if (g.name.trim()) {
         await sbClient.from('garages').insert({
