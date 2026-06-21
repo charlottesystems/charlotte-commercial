@@ -6,9 +6,10 @@
 let garageCorrente = null;
 let garageList = [];
 let targaCorrente = '';
-let tipoVeicoloCorrente = '';
+let categoriaCorrente = '';
 let convenzionCorrente = null;
-let categoriaCorrente = null;
+let tariffeGarage = [];
+let convenzioniGarage = [];
 
 // ── INIT APP ─────────────────────────────────────────────────
 
@@ -27,8 +28,8 @@ function aggiornaOrologio() {
   const el = document.getElementById('clock');
   if (el) el.textContent = `${hh}:${mm}:${ss}`;
 
-  const giorni = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
-  const mesi = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
+  const giorni = ['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
+  const mesi = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC'];
   const elData = document.getElementById('clock-date');
   if (elData) elData.textContent = `${giorni[ora.getDay()]} ${ora.getDate()} ${mesi[ora.getMonth()]} ${ora.getFullYear()}`;
 }
@@ -56,9 +57,18 @@ async function caricaGarages() {
     sel.innerHTML = data.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
     sel.addEventListener('change', async () => {
       garageCorrente = garageList.find(g => g.id === sel.value);
+      await caricaTariffeEConvenzioni();
       await aggiornaStatistiche();
     });
   }
+
+  await caricaTariffeEConvenzioni();
+}
+
+async function caricaTariffeEConvenzioni() {
+  if (!garageCorrente) return;
+  tariffeGarage = await caricaTariffeGarage(garageCorrente.id);
+  convenzioniGarage = await caricaConvenzioniGarage(garageCorrente.id);
 }
 
 // ── STATISTICHE ───────────────────────────────────────────────
@@ -67,36 +77,41 @@ async function aggiornaStatistiche() {
   if (!garageCorrente) return;
 
   const oggi = new Date().toISOString().split('T')[0];
+  const meseInizio = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
 
   const { data: attive } = await sbClient
-    .from('soste')
-    .select('id')
+    .from('soste').select('id')
     .eq('garage_id', garageCorrente.id)
     .is('uscita_at', null);
 
-  const { data: oggi_soste } = await sbClient
-    .from('soste')
-    .select('id')
+  const { data: oggiSoste } = await sbClient
+    .from('soste').select('id')
     .eq('garage_id', garageCorrente.id)
     .gte('ingresso_at', `${oggi}T00:00:00`);
 
+  const { data: meseSoste } = await sbClient
+    .from('soste').select('id')
+    .eq('garage_id', garageCorrente.id)
+    .gte('ingresso_at', meseInizio);
+
   const elAttive = document.getElementById('stat-attive');
   const elOggi = document.getElementById('stat-oggi');
+  const elMese = document.getElementById('stat-mese');
   if (elAttive) elAttive.textContent = attive?.length || 0;
-  if (elOggi) elOggi.textContent = oggi_soste?.length || 0;
+  if (elOggi) elOggi.textContent = oggiSoste?.length || 0;
+  if (elMese) elMese.textContent = meseSoste?.length || 0;
 }
 
-// ── NAVIGAZIONE SCHERMATE ─────────────────────────────────────
+// ── NAVIGAZIONE ───────────────────────────────────────────────
 
 function mostraSchermata(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
 
-  // Mostra/nascondi header
   const header = document.getElementById('main-header');
   if (header) {
-    const senzaHeader = ['login-screen', 'pin-screen', 'onboarding-screen'];
+    const senzaHeader = ['login-screen','pin-screen','onboarding-screen'];
     header.style.display = senzaHeader.includes(id) ? 'none' : 'flex';
   }
 }
@@ -108,16 +123,18 @@ function tornaHome() {
 
 // ── INGRESSO ─────────────────────────────────────────────────
 
-function apriIngresso() {
+async function apriIngresso() {
   resetIngresso();
   mostraSchermata('ingresso-screen');
+  await caricaTariffeEConvenzioni();
+  renderCategorie();
+  renderConvenzioniIngresso();
 }
 
 function resetIngresso() {
   targaCorrente = '';
-  tipoVeicoloCorrente = '';
+  categoriaCorrente = '';
   convenzionCorrente = null;
-  categoriaCorrente = null;
 
   const display = document.getElementById('targa-display');
   const val = document.getElementById('targa-value');
@@ -128,12 +145,49 @@ function resetIngresso() {
 
   document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selected'));
   document.querySelectorAll('.conv-btn').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
-
-  const convSection = document.getElementById('conv-cat-section');
-  if (convSection) convSection.style.display = 'none';
 
   aggiornaBottoneConferma();
+}
+
+function renderCategorie() {
+  const grid = document.getElementById('tipo-grid');
+  if (!grid) return;
+
+  const categorieAttive = tariffeGarage.length > 0
+    ? CATEGORIE.filter(cat => tariffeGarage.some(t => t.categoria === cat.id))
+    : CATEGORIE;
+
+  if (categorieAttive.length === 0) {
+    grid.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:12px;text-align:center;grid-column:1/-1">
+      Nessuna tariffa configurata.<br>
+      <a href="owner.html" style="color:var(--accent3)">Vai al pannello Owner →</a>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = categorieAttive.map(cat => `
+    <div class="tipo-btn" onclick="selezionaTipo('${cat.id}', this)">
+      <span class="tipo-icon">${cat.icon}</span>
+      ${cat.label}
+    </div>`).join('');
+}
+
+function renderConvenzioniIngresso() {
+  const section = document.getElementById('conv-section');
+  const grid = document.getElementById('conv-grid');
+  if (!grid) return;
+
+  if (convenzioniGarage.length === 0) {
+    if (section) section.style.display = 'none';
+    return;
+  }
+
+  if (section) section.style.display = 'block';
+  grid.innerHTML = convenzioniGarage.map(c => `
+    <div class="conv-btn" onclick="selezionaConvenzione('${c.id}', this)">
+      <span class="conv-icon">🤝</span>
+      ${c.nome}
+    </div>`).join('');
 }
 
 function impostaTarga(targa) {
@@ -163,90 +217,53 @@ function confermaTArgaManuale() {
 }
 
 function selezionaTipo(tipo, el) {
-  tipoVeicoloCorrente = tipo;
+  categoriaCorrente = tipo;
   document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   aggiornaBottoneConferma();
 }
 
-function selezionaConvenzione(convId, nome, el) {
-  if (convenzionCorrente === convId) {
+function selezionaConvenzione(convId, el) {
+  if (convenzionCorrente?.id === convId) {
     convenzionCorrente = null;
-    categoriaCorrente = null;
     el.classList.remove('selected');
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
-    const catRow = document.getElementById('cat-row');
-    if (catRow) catRow.style.display = 'none';
   } else {
-    convenzionCorrente = convId;
+    convenzionCorrente = convenzioniGarage.find(c => c.id === convId);
     document.querySelectorAll('.conv-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
-    // mostra categorie se esistono
-    caricaCategorie(convId);
   }
-  aggiornaBottoneConferma();
-}
-
-async function caricaCategorie(convId) {
-  const { data } = await sbClient
-    .from('tariffe_convenzioni')
-    .select('categoria')
-    .eq('convenzione_id', convId);
-
-  const catRow = document.getElementById('cat-row');
-  if (!catRow) return;
-
-  if (data && data.length > 1) {
-    const cats = [...new Set(data.map(r => r.categoria).filter(Boolean))];
-    catRow.innerHTML = cats.map(c =>
-      `<button class="cat-btn" onclick="selezionaCategoria('${c}', this)">${c}</button>`
-    ).join('');
-    catRow.style.display = 'grid';
-  } else {
-    catRow.style.display = 'none';
-    categoriaCorrente = data?.[0]?.categoria || null;
-  }
-}
-
-function selezionaCategoria(cat, el) {
-  categoriaCorrente = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
   aggiornaBottoneConferma();
 }
 
 function aggiornaBottoneConferma() {
   const btn = document.getElementById('conferma-ingresso-btn');
   if (!btn) return;
-  const pronto = targaCorrente && tipoVeicoloCorrente;
-  btn.classList.toggle('enabled', !!pronto);
+  btn.classList.toggle('enabled', !!(targaCorrente && categoriaCorrente));
 }
 
 async function confermaIngresso() {
-  if (!targaCorrente || !tipoVeicoloCorrente || !garageCorrente) return;
-
-  const ora = new Date().toISOString();
+  if (!targaCorrente || !categoriaCorrente || !garageCorrente) return;
 
   const { error } = await sbClient.from('soste').insert({
     garage_id: garageCorrente.id,
     targa: targaCorrente,
-    tipo_veicolo: tipoVeicoloCorrente,
-    convenzione_id: convenzionCorrente || null,
-    categoria: categoriaCorrente || null,
-    ingresso_at: ora,
+    tipo_veicolo: categoriaCorrente,
+    convenzione_id: convenzionCorrente?.id || null,
+    ingresso_at: new Date().toISOString(),
     uscita_at: null
   });
 
-  if (error) {
-    alert('Errore nel registrare l\'ingresso. Riprova.');
-    return;
-  }
+  if (error) { alert('Errore nel registrare l\'ingresso. Riprova.'); return; }
 
-  // Mostra overlay conferma
   const ol = document.getElementById('overlay-ingresso');
   const olTarga = document.getElementById('overlay-targa');
+  const olTime = document.getElementById('overlay-time');
   if (ol) ol.classList.add('show');
   if (olTarga) olTarga.textContent = targaCorrente;
+  if (olTime) {
+    const cat = CATEGORIE.find(c => c.id === categoriaCorrente);
+    olTime.textContent = `${cat?.icon || ''} ${cat?.label || categoriaCorrente}${convenzionCorrente ? ' · Conv. ' + convenzionCorrente.nome : ''}`;
+  }
 
   await aggiornaStatistiche();
   setTimeout(() => {
@@ -267,7 +284,7 @@ async function caricaSosteAttive() {
 
   const { data } = await sbClient
     .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, convenzione_id, categoria')
+    .select('id, targa, tipo_veicolo, ingresso_at, convenzione_id')
     .eq('garage_id', garageCorrente.id)
     .is('uscita_at', null)
     .order('ingresso_at', { ascending: true });
@@ -283,36 +300,76 @@ async function caricaSosteAttive() {
   container.innerHTML = data.map(s => {
     const durata = calcolaDurata(s.ingresso_at);
     const oraIngresso = new Date(s.ingresso_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const cat = CATEGORIE.find(c => c.id === s.tipo_veicolo);
+    const conv = convenzioniGarage.find(c => c.id === s.convenzione_id);
     return `
       <div class="sosta-card attiva">
         <div class="sosta-info">
           <div class="sosta-targa">${s.targa}</div>
-          <div class="sosta-tipo">${s.tipo_veicolo}${s.convenzione_id ? ' · CONV.' : ''}</div>
+          <div class="sosta-tipo">${cat?.icon || ''} ${cat?.label || s.tipo_veicolo}${conv ? ' · ' + conv.nome : ''}</div>
         </div>
         <div>
           <div class="sosta-time">⏱ ${oraIngresso}</div>
           <div class="sosta-duration">${durata}</div>
         </div>
-        <button class="uscita-quick-btn" onclick="confermaUscita('${s.id}','${s.targa}','${s.ingresso_at}')">USCITA</button>
+        <button class="uscita-quick-btn"
+                onclick="apriConfermaUscita('${s.id}','${s.targa}','${s.ingresso_at}','${s.tipo_veicolo}','${s.convenzione_id || ''}')">
+          USCITA
+        </button>
       </div>`;
   }).join('');
 }
 
-async function confermaUscita(sostaId, targa, ingressoAt) {
-  const ora = new Date().toISOString();
+function apriConfermaUscita(sostaId, targa, ingressoAt, tipoVeicolo, convId) {
+  const uscitaAt = new Date();
+  const ingressoDate = new Date(ingressoAt);
+
+  const tariffa = tariffeGarage.find(t => t.categoria === tipoVeicolo);
+  const conv = convId ? convenzioniGarage.find(c => c.id === convId) : null;
+  const { importo, dettaglio } = calcolaImporto(ingressoDate, uscitaAt, tipoVeicolo, conv, tariffa);
+
+  const cat = CATEGORIE.find(c => c.id === tipoVeicolo);
+  const durata = calcolaDurata(ingressoAt);
+
+  const ol = document.getElementById('overlay-uscita');
+  if (ol) {
+    document.getElementById('uscita-targa').textContent = targa;
+    document.getElementById('uscita-categoria').textContent = `${cat?.icon || ''} ${cat?.label || tipoVeicolo}`;
+    document.getElementById('uscita-durata').textContent = durata;
+    document.getElementById('uscita-importo').textContent = formatEuro(importo);
+    document.getElementById('uscita-dettaglio').textContent = dettaglio;
+    document.getElementById('uscita-conv').textContent = conv ? `Conv. ${conv.nome}` : '';
+    ol.classList.add('show');
+    ol.dataset.sostaId = sostaId;
+    ol.dataset.importo = importo;
+  } else {
+    if (confirm(`${targa} — ${durata}\nImporto: ${formatEuro(importo)}\n\nConfermi l'uscita?`)) {
+      confermaUscita(sostaId, importo);
+    }
+  }
+}
+
+async function confermaUscita(sostaId, importo) {
+  const ol = document.getElementById('overlay-uscita');
+  const id = sostaId || ol?.dataset?.sostaId;
+  const imp = importo ?? parseFloat(ol?.dataset?.importo || 0);
+
+  if (ol) ol.classList.remove('show');
 
   const { error } = await sbClient
     .from('soste')
-    .update({ uscita_at: ora })
-    .eq('id', sostaId);
+    .update({ uscita_at: new Date().toISOString(), importo: imp })
+    .eq('id', id);
 
-  if (error) {
-    alert('Errore nel registrare l\'uscita. Riprova.');
-    return;
-  }
+  if (error) { alert('Errore nel registrare l\'uscita. Riprova.'); return; }
 
   await aggiornaStatistiche();
   await caricaSosteAttive();
+}
+
+function annullaUscita() {
+  const ol = document.getElementById('overlay-uscita');
+  if (ol) ol.classList.remove('show');
 }
 
 // ── LISTA SOSTE ───────────────────────────────────────────────
@@ -325,31 +382,32 @@ async function apriLista() {
 async function caricaListaSoste() {
   if (!garageCorrente) return;
 
+  const oggi = new Date().toISOString().split('T')[0];
   const { data } = await sbClient
     .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo')
     .eq('garage_id', garageCorrente.id)
-    .order('ingresso_at', { ascending: false })
-    .limit(50);
+    .gte('ingresso_at', `${oggi}T00:00:00`)
+    .order('ingresso_at', { ascending: false });
 
   const container = document.getElementById('lista-soste-container');
   if (!container) return;
 
   if (!data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nessuna sosta registrata</div></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nessuna sosta oggi</div></div>';
     return;
   }
 
   const attive = data.filter(s => !s.uscita_at);
   const chiuse = data.filter(s => s.uscita_at);
-
   let html = '';
+
   if (attive.length > 0) {
     html += `<div class="section-label">In sosta ora (${attive.length})</div>`;
     html += attive.map(s => cardSosta(s, true)).join('');
   }
   if (chiuse.length > 0) {
-    html += `<div class="section-label" style="margin-top:16px">Uscite oggi</div>`;
+    html += `<div class="section-label" style="margin-top:16px">Uscite oggi (${chiuse.length})</div>`;
     html += chiuse.map(s => cardSosta(s, false)).join('');
   }
 
@@ -358,18 +416,23 @@ async function caricaListaSoste() {
 
 function cardSosta(s, attiva) {
   const oraIngresso = new Date(s.ingresso_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-  const durata = attiva ? calcolaDurata(s.ingresso_at) : calcolaDurata(s.ingresso_at, s.uscita_at);
+  const durata = calcolaDurata(s.ingresso_at, s.uscita_at);
+  const cat = CATEGORIE.find(c => c.id === s.tipo_veicolo);
+  const conv = convenzioniGarage.find(c => c.id === s.convenzione_id);
   return `
     <div class="sosta-card ${attiva ? 'attiva' : 'chiusa'}">
       <div class="sosta-info">
         <div class="sosta-targa">${s.targa}</div>
-        <div class="sosta-tipo">${s.tipo_veicolo}${s.convenzione_id ? ' · CONV.' : ''}</div>
+        <div class="sosta-tipo">${cat?.icon || ''} ${cat?.label || s.tipo_veicolo}${conv ? ' · ' + conv.nome : ''}</div>
       </div>
       <div>
         <div class="sosta-time">${attiva ? '⏱' : '✓'} ${oraIngresso}</div>
         <div class="sosta-duration">${durata}</div>
+        ${!attiva && s.importo ? `<div class="sosta-time" style="color:var(--green)">${formatEuro(s.importo)}</div>` : ''}
       </div>
-      ${attiva ? `<button class="uscita-quick-btn" onclick="confermaUscita('${s.id}','${s.targa}','${s.ingresso_at}')">USCITA</button>` : ''}
+      ${attiva ? `<button class="uscita-quick-btn"
+        onclick="apriConfermaUscita('${s.id}','${s.targa}','${s.ingresso_at}','${s.tipo_veicolo}','${s.convenzione_id || ''}')">
+        USCITA</button>` : ''}
     </div>`;
 }
 
@@ -391,7 +454,7 @@ async function eseguiRicerca() {
 
   const { data } = await sbClient
     .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo')
     .eq('garage_id', garageCorrente.id)
     .ilike('targa', `%${query}%`)
     .order('ingresso_at', { ascending: false })
@@ -407,17 +470,11 @@ async function eseguiRicerca() {
 
 // ── OCR TARGA ─────────────────────────────────────────────────
 
-function apriCamera() {
-  document.getElementById('camera-input')?.click();
-}
-
-function apriGalleria() {
-  document.getElementById('gallery-input')?.click();
-}
+function apriCamera() { document.getElementById('camera-input')?.click(); }
+function apriGalleria() { document.getElementById('gallery-input')?.click(); }
 
 async function gestisciImmagineOCR(file) {
   if (!file) return;
-
   const formData = new FormData();
   formData.append('upload', file);
   formData.append('regions', 'it');
@@ -430,11 +487,8 @@ async function gestisciImmagineOCR(file) {
     });
     const json = await res.json();
     const results = json.results || [];
-
     if (results.length > 0) {
-      const targa = results[0].plate.toUpperCase();
-      const confidence = Math.round((results[0].score || 0) * 100);
-      mostraOverlayOCR(targa, confidence);
+      mostraOverlayOCR(results[0].plate.toUpperCase(), Math.round((results[0].score || 0) * 100));
     } else {
       alert('Targa non rilevata. Inseriscila manualmente.');
     }
@@ -459,8 +513,7 @@ function confermaOCR() {
 }
 
 function chiudiOverlayOCR() {
-  const overlay = document.getElementById('ocr-overlay');
-  if (overlay) overlay.classList.remove('show');
+  document.getElementById('ocr-overlay')?.classList.remove('show');
 }
 
 // ── UTILITY ───────────────────────────────────────────────────
