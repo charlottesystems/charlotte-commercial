@@ -330,6 +330,32 @@ async function renderGarages() {
             <input class="wz-input" id="g-addr-${g.id}" value="${g.address || ''}">
           </div>
         </div>
+        <div class="tariffa-row">
+          <div class="tariffa-field">
+            <label>Latitudine GPS</label>
+            <input class="wz-input" id="g-lat-${g.id}" type="number" step="0.0000001"
+                   placeholder="Es. 43.7696" value="${g.lat || ''}">
+          </div>
+          <div class="tariffa-field">
+            <label>Longitudine GPS</label>
+            <input class="wz-input" id="g-lng-${g.id}" type="number" step="0.0000001"
+                   placeholder="Es. 11.2558" value="${g.lng || ''}">
+          </div>
+        </div>
+        <div class="tariffa-row">
+          <div class="tariffa-field">
+            <label>Raggio badge (metri)</label>
+            <input class="wz-input" id="g-raggio-${g.id}" type="number" min="10" max="500"
+                   value="${g.raggio_metri || 100}">
+          </div>
+          <div class="tariffa-field" style="justify-content:flex-end">
+            <label>&nbsp;</label>
+            <button onclick="rilevaPosizioneGarage('${g.id}')"
+                    style="background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:10px;color:var(--accent3);cursor:pointer;font-size:12px">
+              📍 Usa posizione attuale
+            </button>
+          </div>
+        </div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="wz-btn-primary" style="flex:1"
                   onclick="salvaGarage('${g.id}')">💾 Salva</button>
@@ -349,16 +375,39 @@ async function renderGarages() {
 async function salvaGarage(garageId) {
   const nome = document.getElementById(`g-nome-${garageId}`)?.value?.trim();
   const addr = document.getElementById(`g-addr-${garageId}`)?.value?.trim();
+  const lat = parseFloat(document.getElementById(`g-lat-${garageId}`)?.value) || null;
+  const lng = parseFloat(document.getElementById(`g-lng-${garageId}`)?.value) || null;
+  const raggio = parseInt(document.getElementById(`g-raggio-${garageId}`)?.value) || 100;
   const msg = document.getElementById(`msg-g-${garageId}`);
 
   const { error } = await sbClient.from('garages')
-    .update({ name: nome, address: addr })
+    .update({ name: nome, address: addr, lat, lng, raggio_metri: raggio })
     .eq('id', garageId);
 
   if (msg) {
     msg.style.color = error ? 'var(--red)' : 'var(--green)';
     msg.textContent = error ? 'Errore.' : '✓ Salvato!';
     setTimeout(() => { msg.textContent = ''; caricaGaragesOwner(); }, 1500);
+  }
+}
+
+async function rilevaPosizioneGarage(garageId) {
+  const msg = document.getElementById(`msg-g-${garageId}`);
+  if (msg) { msg.style.color = 'var(--muted)'; msg.textContent = '📡 Rilevamento GPS...'; }
+
+  try {
+    const pos = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true, timeout: 10000, maximumAge: 0
+      });
+    });
+    const latEl = document.getElementById(`g-lat-${garageId}`);
+    const lngEl = document.getElementById(`g-lng-${garageId}`);
+    if (latEl) latEl.value = pos.coords.latitude.toFixed(7);
+    if (lngEl) lngEl.value = pos.coords.longitude.toFixed(7);
+    if (msg) { msg.style.color = 'var(--green)'; msg.textContent = `✓ Posizione rilevata (±${Math.round(pos.coords.accuracy)}m). Salva per confermare.`; }
+  } catch (e) {
+    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '❌ GPS non disponibile. Inserisci le coordinate manualmente.'; }
   }
 }
 
