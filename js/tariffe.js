@@ -52,15 +52,13 @@ function calcolaImporto(ingresso, uscita, categoria, convenzione, tariffa) {
   if (convenzione) {
     const tc = convenzione.tariffe_convenzioni?.find(t => t.categoria === categoria);
     if (tc) {
-      // Quanti giorni interi + eventuale extra
+      const tolleranzaGiorn = tariffa?.tolleranza_minuti || 30;
       const giorniInteri = Math.floor(durataOre / 24);
       const oreExtra = durataOre - (giorniInteri * 24);
-      const tolleranza = tariffa?.tolleranza_minuti || 30;
 
       let importo = (giorniInteri || 1) * tc.prezzo_giornaliero;
 
-      // Se supera la tolleranza del giornaliero, aggiunge un altro giorno
-      if (giorniInteri >= 1 && oreExtra > (tolleranza / 60)) {
+      if (giorniInteri >= 1 && oreExtra > (tolleranzaGiorn / 60)) {
         importo += tc.prezzo_giornaliero;
       }
 
@@ -77,12 +75,12 @@ function calcolaImporto(ingresso, uscita, categoria, convenzione, tariffa) {
   }
 
   const soglia = tariffa.soglia_giornaliero_ore || 4;
-  const tolleranzaMin = tariffa.tolleranza_minuti || 30;
+  const tolleranzaGiornMin = tariffa.tolleranza_minuti || 30;
+  const tolleranzaOraMin = tariffa.tolleranza_ora_minuti ?? 10;
   const prezzoGiornaliero = tariffa.prezzo_giornaliero || 0;
   const prezzoPrimaOra = tariffa.prezzo_prima_ora || 0;
   const prezzoOraSucc = tariffa.prezzo_ora_successiva || 0;
 
-  // Calcola per ogni blocco di 24h
   let importoTotale = 0;
   let minutiRimanenti = durataMinuti;
   let dettaglioParti = [];
@@ -94,30 +92,39 @@ function calcolaImporto(ingresso, uscita, categoria, convenzione, tariffa) {
       // Scatta tariffa giornaliera
       importoTotale += prezzoGiornaliero;
       dettaglioParti.push(`1 giornaliero €${prezzoGiornaliero.toFixed(2)}`);
-      minutiRimanenti -= 24 * 60; // consuma 24h
+      minutiRimanenti -= 24 * 60;
 
-      // Controlla tolleranza per i minuti extra
-      if (minutiRimanenti > 0 && minutiRimanenti <= tolleranzaMin) {
-        // Dentro tolleranza — non addebita
+      // Controlla tolleranza fine giornaliero
+      if (minutiRimanenti > 0 && minutiRimanenti <= tolleranzaGiornMin) {
         minutiRimanenti = 0;
       }
     } else {
-      // Tariffa oraria
-      const oreIntere = Math.ceil(oreBloccco);
+      // Tariffa oraria con tolleranza per ora
+      // Prima ora: sempre piena
       let importoOrario = 0;
+      let oreConteggiate = 0;
 
-      if (oreIntere >= 1) {
-        importoOrario += prezzoPrimaOra;
-        if (oreIntere > 1) {
-          importoOrario += (oreIntere - 1) * prezzoOraSucc;
+      if (minutiRimanenti <= 0) break;
+
+      // Prima ora
+      importoOrario += prezzoPrimaOra;
+      oreConteggiate = 1;
+      minutiRimanenti -= 60;
+
+      // Ore successive con tolleranza
+      while (minutiRimanenti > 0) {
+        if (minutiRimanenti <= tolleranzaOraMin) {
+          // Dentro tolleranza — non addebita altra ora
+          minutiRimanenti = 0;
+          break;
         }
-      } else if (minutiRimanenti > 0) {
-        // Meno di un'ora — addebita prima ora
-        importoOrario = prezzoPrimaOra;
+        importoOrario += prezzoOraSucc;
+        oreConteggiate++;
+        minutiRimanenti -= 60;
       }
 
       importoTotale += importoOrario;
-      dettaglioParti.push(`${oreIntere}h orario €${importoOrario.toFixed(2)}`);
+      dettaglioParti.push(`${oreConteggiate}h orario €${importoOrario.toFixed(2)}`);
       minutiRimanenti = 0;
     }
   }
