@@ -129,6 +129,10 @@ async function apriIngresso() {
   await caricaTariffeEConvenzioni();
   renderCategorie();
   renderConvenzioniIngresso();
+  setTimeout(() => {
+    renderCategorie();
+    renderConvenzioniIngresso();
+  }, 500);
 }
 
 function resetIngresso() {
