@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>Charlotte — Pannello Owner</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .owner-header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .owner-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+    }
+    .owner-tab {
+      flex: 1;
+      padding: 10px 8px;
+      text-align: center;
+      border-radius: 9px;
+      cursor: pointer;
+      font-family: Rajdhani, sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: all 0.2s;
+      border: none;
+      background: none;
+    }
+    .owner-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+    .tariffa-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .tariffa-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: Rajdhani, sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .tariffa-badge {
+      font-size: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .tariffa-badge.configured {
+      background: rgba(16,185,129,0.15);
+      color: var(--green);
+      border: 1px solid var(--green);
+    }
+    .tariffa-badge.missing {
+      background: rgba(239,68,68,0.15);
+      color: var(--red);
+      border: 1px solid var(--red);
+    }
+    .tariffa-fields {
+      padding: 14px 16px;
+    }
+    .tariffa-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .tariffa-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .tariffa-field label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .tariffa-field .wz-input {
+      padding: 10px 12px;
+      font-size: 15px;
+    }
+    .tariffa-msg {
+      font-size: 13px;
+      margin-top: 6px;
+      min-height: 18px;
+      text-align: center;
+    }
+    .garage-select-bar {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .garage-select-bar label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .garage-select-bar select {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-family: Rajdhani, sans-serif;
+      font-size: 15px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="owner-header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="index.html" style="width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:16px">←</a>
+    <div class="logo-text" style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;letter-spacing:1px;background:linear-gradient(90deg,var(--accent3),var(--white));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+      Pannello Owner
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace" id="owner-company-name"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Selezione garage -->
+  <div class="garage-select-bar">
+    <label>Garage</label>
+    <select id="owner-garage-select"></select>
+  </div>
+
+  <!-- Tab -->
+  <div class="owner-tabs">
+    <button class="owner-tab active" data-tab="tariffe" onclick="mostraSezioneOwner('tariffe')">
+      💰 Tariffe
+    </button>
+    <button class="owner-tab" data-tab="convenzioni" onclick="mostraSezioneOwner('convenzioni')">
+      🤝 Convenzioni
+    </button>
+    <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">
+      🏢 Garages
+    </button>
+  </div>
+
+  <!-- Sezione Tariffe -->
+  <div class="owner-section" id="owner-tariffe">
+    <div class="section-label" style="margin-bottom:12px">
+      Configura le tariffe per ogni categoria di veicolo
+    </div>
+    <div id="tariffe-container"></div>
+  </div>
+
+  <!-- Sezione Convenzioni -->
+  <div class="owner-section" id="owner-convenzioni" style="display:none">
+    <div class="section-label" style="margin-bottom:12px">
+      Gestisci le convenzioni con hotel e aziende
+    </div>
+    <div id="convenzioni-container"></div>
+  </div>
+
+  <!-- Sezione Garages -->
+  <div class="owner-section" id="owner-garages" style="display:none">
+    <div class="section-label" style="margin-bottom:12px">
+      Gestisci i tuoi garage
+    </div>
+    <div id="garages-container"></div>
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/tariffe.js"></script>
+<script src="js/owner.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    initSupabase();
+
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (!session) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    currentUser = session.user;
+
+    const company = localStorage.getItem('charlotte_company');
+    const el = document.getElementById('owner-company-name');
+    if (el && company) el.textContent = company;
+
+    await inizializzaOwner();
+  });
+</script>
+
+</body>
+</html>
