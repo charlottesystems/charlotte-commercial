@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charlotte Parking — Pagamento completato</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .success-card { max-width: 480px; width: 100%; background: var(--panel); border: 1px solid var(--green); border-radius: 24px; padding: 40px; text-align: center; }
+    .success-icon { font-size: 72px; margin-bottom: 16px; animation: pop 0.5s ease; }
+    @keyframes pop { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    .success-title { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 28px; color: var(--white); margin-bottom: 8px; }
+    .success-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+    .steps { text-align: left; margin-bottom: 32px; }
+    .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .step-num { width: 28px; height: 28px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 14px; color: white; flex-shrink: 0; }
+    .step-text { font-size: 14px; color: var(--text); padding-top: 4px; }
+    .step-text strong { color: var(--accent3); }
+    .cta-btn { display: block; width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; padding: 16px; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 1px; color: white; cursor: pointer; text-decoration: none; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="success-card">
+  <div class="success-icon">🎉</div>
+  <div class="success-title">Pagamento completato!</div>
+  <div class="success-sub">Benvenuto in Charlotte Parking. La tua prova gratuita di 30 giorni è iniziata. Segui i passi qui sotto per iniziare.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Clicca <strong>"Crea account owner"</strong> nell'app e registrati con la tua email</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Segui il wizard di configurazione: <strong>nome azienda, garage, PIN e password</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Dal <strong>Pannello Owner</strong> configura le tariffe e aggiungi i tuoi operatori</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Comunica il <strong>PIN a 6 cifre</strong> a ciascun dipendente — accedono premendo "Sono un operatore"</div>
+    </div>
+  </div>
+  <a class="cta-btn" href="index.html">Inizia ora →</a>
+</div>
+</body>
+</html>
