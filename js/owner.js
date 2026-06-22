@@ -59,6 +59,7 @@ function mostraSezioneOwner(sezione) {
   if (sezione === 'convenzioni') return renderConvenzioni();
   if (sezione === 'garages') return renderGarages();
   if (sezione === 'storico') return renderStorico();
+  if (sezione === 'operatori') return renderOperatori();
 }
 
 // ── TARIFFE ──────────────────────────────────────────────────
@@ -581,4 +582,126 @@ function calcolaDurataStorico(ingressoAt, uscitaAt) {
   const m = Math.floor((diff % 3600) / 60);
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
+}
+
+
+// ── OPERATORI ─────────────────────────────────────────────────
+
+async function renderOperatori() {
+  const container = document.getElementById('operatori-container');
+  if (!container) return;
+
+  const accountId = localStorage.getItem('charlotte_account_id');
+  const { data } = await sbClient
+    .from('operatori')
+    .select('*')
+    .eq('account_id', accountId)
+    .order('nome');
+
+  const lista = data || [];
+
+  container.innerHTML = `
+    <div class="tariffa-card" style="margin-bottom:16px">
+      <div class="tariffa-card-header">
+        <span>✉️ Invita operatore</span>
+      </div>
+      <div class="tariffa-fields">
+        <div class="tariffa-row">
+          <div class="tariffa-field">
+            <label>Nome</label>
+            <input class="wz-input" id="inv-nome" placeholder="Es. Mario Rossi">
+          </div>
+          <div class="tariffa-field">
+            <label>Email</label>
+            <input class="wz-input" id="inv-email" type="email" placeholder="mario@email.com">
+          </div>
+        </div>
+        <button class="wz-btn-primary" style="margin-top:8px" onclick="invitaOperatore()">
+          📨 Invia invito
+        </button>
+        <div class="tariffa-msg" id="msg-invito"></div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:12px">Operatori (${lista.length})</div>
+    ${lista.length === 0
+      ? '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Nessun operatore ancora</div></div>'
+      : lista.map(op => `
+        <div class="tariffa-card" style="margin-bottom:8px">
+          <div class="tariffa-card-header" style="padding:10px 16px">
+            <div>
+              <div style="font-size:15px">${op.nome}</div>
+              <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace">${op.email}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="tariffa-badge ${op.user_id ? 'configured' : 'missing'}">
+                ${op.user_id ? 'Attivo' : 'In attesa'}
+              </span>
+              <button onclick="toggleOperatore('${op.id}', ${op.attivo})"
+                      style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);cursor:pointer;font-size:11px">
+                ${op.attivo ? 'Disattiva' : 'Riattiva'}
+              </button>
+              <button onclick="eliminaOperatore('${op.id}')"
+                      style="background:none;border:1px solid var(--red);border-radius:6px;padding:4px 8px;color:var(--red);cursor:pointer;font-size:11px">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>`).join('')
+    }`;
+}
+
+async function invitaOperatore() {
+  const nome = document.getElementById('inv-nome')?.value?.trim();
+  const email = document.getElementById('inv-email')?.value?.trim();
+  const msg = document.getElementById('msg-invito');
+  const accountId = localStorage.getItem('charlotte_account_id');
+
+  if (!nome || !email) {
+    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Inserisci nome e email.'; }
+    return;
+  }
+
+  // Crea operatore nel DB (senza user_id — verrà collegato alla registrazione)
+  const { error } = await sbClient.from('operatori').insert({
+    account_id: accountId,
+    nome: nome,
+    email: email,
+    attivo: true
+  });
+
+  if (error) {
+    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = error.code === '23505' ? 'Email già presente.' : 'Errore nell'invito.'; }
+    return;
+  }
+
+  // Manda email di invito tramite Supabase Auth
+  const company = localStorage.getItem('charlotte_company') || 'Charlotte';
+  const { error: invErr } = await sbClient.auth.admin?.inviteUserByEmail
+    ? sbClient.auth.admin.inviteUserByEmail(email)
+    : { error: null };
+
+  // Fallback: usa resetPasswordForEmail come invito (funziona senza admin key)
+  await sbClient.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/charlotte-commercial/`
+  });
+
+  if (msg) {
+    msg.style.color = 'var(--green)';
+    msg.textContent = `✓ Invito inviato a ${email}. Riceverà un link per registrarsi.`;
+    document.getElementById('inv-nome').value = '';
+    document.getElementById('inv-email').value = '';
+    setTimeout(() => { msg.textContent = ''; renderOperatori(); }, 3000);
+  }
+}
+
+async function toggleOperatore(opId, attivoCorrente) {
+  await sbClient.from('operatori').update({ attivo: !attivoCorrente }).eq('id', opId);
+  await renderOperatori();
+}
+
+async function eliminaOperatore(opId) {
+  if (!confirm('Eliminare questo operatore?')) return;
+  await sbClient.from('operatori').delete().eq('id', opId);
+  await renderOperatori();
 }
