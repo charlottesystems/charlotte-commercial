@@ -426,25 +426,41 @@
   (function() {
     var v = Date.now();
     var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js'];
+    var loaded = 0;
     files.forEach(function(f) {
       var s = document.createElement('script');
       s.src = f + '?v=' + v;
+      s.onload = function() {
+        loaded++;
+        if (loaded === files.length) {
+          appReady = true;
+        }
+      };
       document.head.appendChild(s);
     });
   })();
+  var appReady = false;
 </script>
 
 <script>
   // ── INIT ────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('fadeout');
       setTimeout(() => { if (splash) splash.remove(); }, 1200);
     }, 1800);
 
-    initSupabase();
-    await controllaSessione();
+    // Aspetta che tutti i file JS siano caricati
+    function waitReady() {
+      if (appReady) {
+        initSupabase();
+        controllaSessione();
+      } else {
+        setTimeout(waitReady, 50);
+      }
+    }
+    waitReady();
   });
 
   // ── BADGE SCREEN ────────────────────────────────────────
