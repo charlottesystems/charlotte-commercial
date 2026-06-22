@@ -698,12 +698,15 @@
   async function wzComplete() {
     const company = localStorage.getItem('wz_company') || 'La mia azienda';
 
+    const pinApp = localStorage.getItem('charlotte_pin') || '';
+
     const { data: acc, error: accErr } = await sbClient.from('accounts').insert({
       owner_id: currentUser.id,
       company_name: company,
       plan: wzPlanSelected || 'base',
       onboarding_complete: true,
       owner_password: wzOwnerPwd,
+      pin_app: pinApp,
       trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
     }).select().single();
 
