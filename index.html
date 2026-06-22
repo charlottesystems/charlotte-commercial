@@ -162,7 +162,11 @@
              onkeydown="if(event.key==='Enter') doLogin()">
       <div id="login-error" class="wz-error"></div>
       <button class="wz-btn-primary" onclick="doLogin()">ACCEDI</button>
-      <button class="wz-btn-secondary" onclick="mostraRegistrazione()">Crea account →</button>
+      <button class="wz-btn-secondary" onclick="mostraRegistrazione()">Crea account owner →</button>
+      <button onclick="mostraLoginOperatore()"
+              style="background:rgba(16,185,129,0.1);border:1px solid var(--green);border-radius:12px;padding:14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--green);cursor:pointer;width:100%">
+        👤 Sono un operatore
+      </button>
       <button onclick="doResetPassword()"
               style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px">
         Password dimenticata?
@@ -172,8 +176,7 @@
     <!-- Form Registrazione -->
     <div id="register-form" style="display:none;flex-direction:column;gap:12px">
       <div style="text-align:center;margin-bottom:8px">
-        <div style="font-size:14px;color:var(--muted)">Crea un nuovo account</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">Owner: registrati per configurare il tuo garage<br>Operatore: usa il link ricevuto via email</div>
+        <div style="font-size:14px;color:var(--muted)">Crea un nuovo account owner</div>
       </div>
       <input id="reg-email" type="email" placeholder="Email" class="wz-input" autocomplete="email">
       <input id="reg-password" type="password" placeholder="Password (min. 6 caratteri)" class="wz-input">
@@ -182,6 +185,36 @@
       <div id="register-error" class="wz-error"></div>
       <button class="wz-btn-primary" onclick="doRegister()">REGISTRATI</button>
       <button class="wz-btn-secondary" onclick="mostraLogin()">← Torna al login</button>
+    </div>
+
+    <!-- PIN Operatore -->
+    <div id="operatore-pin-form" style="display:none;flex-direction:column;align-items:center;gap:16px;padding:20px 0">
+      <div class="pin-logo-icon" style="margin:0 auto">👤</div>
+      <div class="pin-logo-text">Accesso Operatore</div>
+      <div class="pin-subtitle">Inserisci il tuo PIN a 6 cifre</div>
+      <div style="display:flex;gap:10px;margin:8px 0">
+        <div class="pin-dot op-pin-dot"></div>
+        <div class="pin-dot op-pin-dot"></div>
+        <div class="pin-dot op-pin-dot"></div>
+        <div class="pin-dot op-pin-dot"></div>
+        <div class="pin-dot op-pin-dot"></div>
+        <div class="pin-dot op-pin-dot"></div>
+      </div>
+      <div class="pin-error" id="op-pin-error"></div>
+      <div class="pin-grid" style="max-width:280px;width:100%">
+        <button class="pin-btn" onclick="premiCifraOperatore('1')">1</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('2')">2</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('3')">3</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('4')">4</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('5')">5</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('6')">6</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('7')">7</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('8')">8</button>
+        <button class="pin-btn" onclick="premiCifraOperatore('9')">9</button>
+        <button class="pin-btn canc" onclick="cancellaCifraOperatore()">⌫</button>
+        <button class="pin-btn zero" onclick="premiCifraOperatore('0')">0</button>
+        <button class="pin-btn canc" onclick="mostraLoginDaOperatore()">←</button>
+      </div>
     </div>
   </div>
 
