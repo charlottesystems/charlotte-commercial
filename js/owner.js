@@ -1,6 +1,6 @@
 // ============================================================
 // CHARLOTTE COMMERCIAL — owner.js
-// Pannello owner: gestione tariffe, convenzioni, storico
+// Pannello owner: gestione tariffe, convenzioni, storico, operatori
 // ============================================================
 
 let ownerGarageId = null;
@@ -124,7 +124,7 @@ async function renderTariffe() {
           </div>
           <button class="wz-btn-primary" style="margin-top:8px"
                   onclick="salvaTariffa('${cat.id}', '${t.id || ''}')">
-            💾 Salva ${cat.label}
+            Salva ${cat.label}
           </button>
           <div class="tariffa-msg" id="msg-${cat.id}"></div>
         </div>
@@ -133,13 +133,13 @@ async function renderTariffe() {
 }
 
 async function salvaTariffa(categoriaId, esistenteId) {
-  const prima = parseFloat(document.getElementById(`t-${categoriaId}-prima`)?.value || 0);
-  const succ = parseFloat(document.getElementById(`t-${categoriaId}-succ`)?.value || 0);
-  const giorn = parseFloat(document.getElementById(`t-${categoriaId}-giorn`)?.value || 0);
-  const soglia = parseInt(document.getElementById(`t-${categoriaId}-soglia`)?.value || 4);
-  const toll = parseInt(document.getElementById(`t-${categoriaId}-toll`)?.value || 30);
-  const tollOra = parseInt(document.getElementById(`t-${categoriaId}-tollora`)?.value || 10);
-  const msg = document.getElementById(`msg-${categoriaId}`);
+  const prima = parseFloat(document.getElementById('t-' + categoriaId + '-prima')?.value || 0);
+  const succ = parseFloat(document.getElementById('t-' + categoriaId + '-succ')?.value || 0);
+  const giorn = parseFloat(document.getElementById('t-' + categoriaId + '-giorn')?.value || 0);
+  const soglia = parseInt(document.getElementById('t-' + categoriaId + '-soglia')?.value || 4);
+  const toll = parseInt(document.getElementById('t-' + categoriaId + '-toll')?.value || 30);
+  const tollOra = parseInt(document.getElementById('t-' + categoriaId + '-tollora')?.value || 10);
+  const msg = document.getElementById('msg-' + categoriaId);
 
   const payload = {
     garage_id: ownerGarageId,
@@ -166,7 +166,7 @@ async function salvaTariffa(categoriaId, esistenteId) {
       msg.textContent = 'Errore nel salvataggio.';
     } else {
       msg.style.color = 'var(--green)';
-      msg.textContent = '✓ Salvato!';
+      msg.textContent = 'Salvato!';
       setTimeout(() => { msg.textContent = ''; renderTariffe(); }, 1500);
     }
   }
@@ -241,7 +241,7 @@ function cardConvenzione(conv) {
         }).join('')}
         <button class="wz-btn-primary" style="margin-top:8px"
                 onclick="salvaConvenzione('${conv.id}')">
-          💾 Salva tariffe convenzione
+          Salva tariffe convenzione
         </button>
         <div class="tariffa-msg" id="msg-conv-${conv.id}"></div>
       </div>
@@ -263,10 +263,11 @@ async function apriFormConvenzione() {
 }
 
 async function salvaConvenzione(convId) {
-  const msg = document.getElementById(`msg-conv-${convId}`);
+  const msg = document.getElementById('msg-conv-' + convId);
 
   for (const cat of CATEGORIE) {
-    const val = parseFloat(document.getElementById(`tc-${convId}-${cat.id}`)?.value || 0);
+    const el = document.getElementById('tc-' + convId + '-' + cat.id);
+    const val = parseFloat(el?.value || 0);
     if (val <= 0) continue;
 
     await sbClient.from('tariffe_convenzioni').upsert({
@@ -278,7 +279,7 @@ async function salvaConvenzione(convId) {
 
   if (msg) {
     msg.style.color = 'var(--green)';
-    msg.textContent = '✓ Salvato!';
+    msg.textContent = 'Salvato!';
     setTimeout(() => { msg.textContent = ''; }, 1500);
   }
 }
@@ -353,13 +354,13 @@ async function renderGarages() {
             <label>&nbsp;</label>
             <button onclick="rilevaPosizioneGarage('${g.id}')"
                     style="background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:10px;color:var(--accent3);cursor:pointer;font-size:12px">
-              📍 Usa posizione attuale
+              Usa posizione attuale
             </button>
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="wz-btn-primary" style="flex:1"
-                  onclick="salvaGarage('${g.id}')">💾 Salva</button>
+                  onclick="salvaGarage('${g.id}')">Salva</button>
           <button class="wz-btn-secondary" style="flex:1"
                   onclick="toggleGarage('${g.id}', ${g.active})">
             ${g.active ? 'Disattiva' : 'Attiva'}
@@ -374,27 +375,27 @@ async function renderGarages() {
 }
 
 async function salvaGarage(garageId) {
-  const nome = document.getElementById(`g-nome-${garageId}`)?.value?.trim();
-  const addr = document.getElementById(`g-addr-${garageId}`)?.value?.trim();
-  const lat = parseFloat(document.getElementById(`g-lat-${garageId}`)?.value) || null;
-  const lng = parseFloat(document.getElementById(`g-lng-${garageId}`)?.value) || null;
-  const raggio = parseInt(document.getElementById(`g-raggio-${garageId}`)?.value) || 100;
-  const msg = document.getElementById(`msg-g-${garageId}`);
+  const nome = document.getElementById('g-nome-' + garageId)?.value?.trim();
+  const addr = document.getElementById('g-addr-' + garageId)?.value?.trim();
+  const lat = parseFloat(document.getElementById('g-lat-' + garageId)?.value) || null;
+  const lng = parseFloat(document.getElementById('g-lng-' + garageId)?.value) || null;
+  const raggio = parseInt(document.getElementById('g-raggio-' + garageId)?.value) || 100;
+  const msg = document.getElementById('msg-g-' + garageId);
 
   const { error } = await sbClient.from('garages')
-    .update({ name: nome, address: addr, lat, lng, raggio_metri: raggio })
+    .update({ name: nome, address: addr, lat: lat, lng: lng, raggio_metri: raggio })
     .eq('id', garageId);
 
   if (msg) {
     msg.style.color = error ? 'var(--red)' : 'var(--green)';
-    msg.textContent = error ? 'Errore.' : '✓ Salvato!';
+    msg.textContent = error ? 'Errore.' : 'Salvato!';
     setTimeout(() => { msg.textContent = ''; caricaGaragesOwner(); }, 1500);
   }
 }
 
 async function rilevaPosizioneGarage(garageId) {
-  const msg = document.getElementById(`msg-g-${garageId}`);
-  if (msg) { msg.style.color = 'var(--muted)'; msg.textContent = '📡 Rilevamento GPS...'; }
+  const msg = document.getElementById('msg-g-' + garageId);
+  if (msg) { msg.style.color = 'var(--muted)'; msg.textContent = 'Rilevamento GPS...'; }
 
   try {
     const pos = await new Promise((resolve, reject) => {
@@ -402,13 +403,11 @@ async function rilevaPosizioneGarage(garageId) {
         enableHighAccuracy: true, timeout: 10000, maximumAge: 0
       });
     });
-    const latEl = document.getElementById(`g-lat-${garageId}`);
-    const lngEl = document.getElementById(`g-lng-${garageId}`);
-    if (latEl) latEl.value = pos.coords.latitude.toFixed(7);
-    if (lngEl) lngEl.value = pos.coords.longitude.toFixed(7);
-    if (msg) { msg.style.color = 'var(--green)'; msg.textContent = `✓ Posizione rilevata (±${Math.round(pos.coords.accuracy)}m). Salva per confermare.`; }
+    document.getElementById('g-lat-' + garageId).value = pos.coords.latitude.toFixed(7);
+    document.getElementById('g-lng-' + garageId).value = pos.coords.longitude.toFixed(7);
+    if (msg) { msg.style.color = 'var(--green)'; msg.textContent = 'Posizione rilevata. Salva per confermare.'; }
   } catch (e) {
-    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = '❌ GPS non disponibile. Inserisci le coordinate manualmente.'; }
+    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'GPS non disponibile.'; }
   }
 }
 
@@ -441,7 +440,6 @@ function renderStorico() {
   const container = document.getElementById('storico-container');
   if (!container) return;
 
-  // Data default: oggi
   const oggi = new Date().toISOString().split('T')[0];
 
   container.innerHTML = `
@@ -459,21 +457,21 @@ function renderStorico() {
             <input class="wz-input" id="storico-data" type="date" value="${oggi}">
           </div>
         </div>
-        <div class="tariffa-row" style="align-items:center;margin-bottom:4px">
+        <div class="tariffa-row">
           <div class="tariffa-field">
-            <label>Range giorni (±)</label>
+            <label>Range giorni (+-)</label>
             <input class="wz-input" id="storico-range" type="number" min="1" max="365" value="10">
           </div>
           <div class="tariffa-field">
             <label>Garage</label>
             <select class="wz-input" id="storico-garage">
               <option value="">Tutti i garage</option>
-              ${ownerGarageList.map(g => `<option value="${g.id}">${g.name}</option>`).join('')}
+              ${ownerGarageList.map(g => '<option value="' + g.id + '">' + g.name + '</option>').join('')}
             </select>
           </div>
         </div>
         <button class="wz-btn-primary" style="margin-top:8px" onclick="cercaStorico()">
-          🔍 Cerca
+          Cerca
         </button>
       </div>
     </div>
@@ -490,28 +488,25 @@ async function cercaStorico() {
   if (!container) return;
   container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Ricerca in corso...</div>';
 
-  // Calcola date
   const dataCentrale = new Date(dataInput);
   const dataInizio = new Date(dataCentrale);
   dataInizio.setDate(dataInizio.getDate() - range);
   const dataFine = new Date(dataCentrale);
   dataFine.setDate(dataFine.getDate() + range);
 
-  // Costruisci query
   let query = sbClient
     .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, importo, convenzione_id, garage_id')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, importo, convenzione_id, garage_id, operatore_ingresso_nome, operatore_uscita_nome')
     .gte('ingresso_at', dataInizio.toISOString())
     .lte('ingresso_at', dataFine.toISOString())
     .order('ingresso_at', { ascending: false })
     .limit(100);
 
-  if (targa) query = query.ilike('targa', `%${targa}%`);
+  if (targa) query = query.ilike('targa', '%' + targa + '%');
 
   if (garageId) {
     query = query.eq('garage_id', garageId);
   } else {
-    // Tutti i garage dell'account
     const garageIds = ownerGarageList.map(g => g.id);
     query = query.in('garage_id', garageIds);
   }
@@ -519,15 +514,10 @@ async function cercaStorico() {
   const { data, error } = await query;
 
   if (error || !data || data.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <div class="empty-text">Nessuna sosta trovata nel periodo selezionato</div>
-      </div>`;
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Nessuna sosta trovata nel periodo selezionato</div></div>';
     return;
   }
 
-  // Raggruppa per data
   const perData = {};
   data.forEach(s => {
     const giorno = new Date(s.ingresso_at).toLocaleDateString('it-IT', {
@@ -537,39 +527,37 @@ async function cercaStorico() {
     perData[giorno].push(s);
   });
 
-  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:12px">
-    ${data.length} soste trovate · dal ${dataInizio.toLocaleDateString('it-IT')} al ${dataFine.toLocaleDateString('it-IT')}
-  </div>`;
+  let html = '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">' +
+    data.length + ' soste trovate · dal ' + dataInizio.toLocaleDateString('it-IT') +
+    ' al ' + dataFine.toLocaleDateString('it-IT') + '</div>';
 
-  for (const [giorno, soste] of Object.entries(perData)) {
+  for (const giorno in perData) {
+    const soste = perData[giorno];
     const totaleGiorno = soste.reduce((sum, s) => sum + (s.importo || 0), 0);
-    html += `
-      <div style="margin-bottom:4px;padding:8px 12px;background:rgba(124,58,237,0.1);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3);text-transform:capitalize">${giorno}</span>
-        <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green)">${soste.length} soste · ${formatEuro(totaleGiorno)}</span>
-      </div>`;
+    html += '<div style="margin-bottom:4px;padding:8px 12px;background:rgba(124,58,237,0.1);border-radius:8px;display:flex;justify-content:space-between;align-items:center">' +
+      '<span style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3);text-transform:capitalize">' + giorno + '</span>' +
+      '<span style="font-family:Share Tech Mono,monospace;font-size:12px;color:var(--green)">' + soste.length + ' soste · ' + formatEuro(totaleGiorno) + '</span>' +
+      '</div>';
 
     soste.forEach(s => {
       const garage = ownerGarageList.find(g => g.id === s.garage_id);
       const cat = CATEGORIE.find(c => c.id === s.tipo_veicolo);
       const oraIngresso = new Date(s.ingresso_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-      const oraUscita = s.uscita_at
-        ? new Date(s.uscita_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
-        : '—';
+      const oraUscita = s.uscita_at ? new Date(s.uscita_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
       const durata = s.uscita_at ? calcolaDurataStorico(s.ingresso_at, s.uscita_at) : 'In sosta';
+      const opInfo = s.operatore_ingresso_nome ? ' · ' + s.operatore_ingresso_nome : '';
 
-      html += `
-        <div class="sosta-card ${s.uscita_at ? 'chiusa' : 'attiva'}" style="margin-bottom:6px">
-          <div class="sosta-info">
-            <div class="sosta-targa">${s.targa}</div>
-            <div class="sosta-tipo">${cat?.icon || '🚗'} ${cat?.label || s.tipo_veicolo}${garage ? ' · ' + garage.name : ''}</div>
-          </div>
-          <div>
-            <div class="sosta-time">${oraIngresso} → ${oraUscita}</div>
-            <div class="sosta-duration">${durata}</div>
-            ${s.importo ? `<div class="sosta-time" style="color:var(--green)">${formatEuro(s.importo)}</div>` : ''}
-          </div>
-        </div>`;
+      html += '<div class="sosta-card ' + (s.uscita_at ? 'chiusa' : 'attiva') + '" style="margin-bottom:6px">' +
+        '<div class="sosta-info">' +
+        '<div class="sosta-targa">' + s.targa + '</div>' +
+        '<div class="sosta-tipo">' + (cat ? cat.icon + ' ' + cat.label : s.tipo_veicolo) + (garage ? ' · ' + garage.name : '') + opInfo + '</div>' +
+        '</div>' +
+        '<div>' +
+        '<div class="sosta-time">' + oraIngresso + ' → ' + oraUscita + '</div>' +
+        '<div class="sosta-duration">' + durata + '</div>' +
+        (s.importo ? '<div class="sosta-time" style="color:var(--green)">' + formatEuro(s.importo) + '</div>' : '') +
+        '</div>' +
+        '</div>';
     });
   }
 
@@ -580,10 +568,9 @@ function calcolaDurataStorico(ingressoAt, uscitaAt) {
   const diff = Math.floor((new Date(uscitaAt) - new Date(ingressoAt)) / 1000);
   const h = Math.floor(diff / 3600);
   const m = Math.floor((diff % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  if (h > 0) return h + 'h ' + m + 'm';
+  return m + 'm';
 }
-
 
 // ── OPERATORI ─────────────────────────────────────────────────
 
@@ -600,55 +587,48 @@ async function renderOperatori() {
 
   const lista = data || [];
 
-  container.innerHTML = `
-    <div class="tariffa-card" style="margin-bottom:16px">
-      <div class="tariffa-card-header">
-        <span>✉️ Invita operatore</span>
-      </div>
-      <div class="tariffa-fields">
-        <div class="tariffa-row">
-          <div class="tariffa-field">
-            <label>Nome</label>
-            <input class="wz-input" id="inv-nome" placeholder="Es. Mario Rossi">
-          </div>
-          <div class="tariffa-field">
-            <label>Email</label>
-            <input class="wz-input" id="inv-email" type="email" placeholder="mario@email.com">
-          </div>
-        </div>
-        <button class="wz-btn-primary" style="margin-top:8px" onclick="invitaOperatore()">
-          📨 Invia invito
-        </button>
-        <div class="tariffa-msg" id="msg-invito"></div>
-      </div>
-    </div>
+  let listaHtml = '';
+  if (lista.length === 0) {
+    listaHtml = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Nessun operatore ancora</div></div>';
+  } else {
+    lista.forEach(op => {
+      listaHtml += '<div class="tariffa-card" style="margin-bottom:8px">' +
+        '<div class="tariffa-card-header" style="padding:10px 16px">' +
+        '<div>' +
+        '<div style="font-size:15px">' + op.nome + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);font-family:Share Tech Mono,monospace">' + op.email + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center">' +
+        '<span class="tariffa-badge ' + (op.user_id ? 'configured' : 'missing') + '">' +
+        (op.user_id ? 'Attivo' : 'In attesa') +
+        '</span>' +
+        '<button onclick="toggleOperatore(\'' + op.id + '\', ' + op.attivo + ')" ' +
+        'style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);cursor:pointer;font-size:11px">' +
+        (op.attivo ? 'Disattiva' : 'Riattiva') +
+        '</button>' +
+        '<button onclick="eliminaOperatore(\'' + op.id + '\')" ' +
+        'style="background:none;border:1px solid var(--red);border-radius:6px;padding:4px 8px;color:var(--red);cursor:pointer;font-size:11px">' +
+        'Elimina</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+    });
+  }
 
-    <div class="section-label" style="margin-bottom:12px">Operatori (${lista.length})</div>
-    ${lista.length === 0
-      ? '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">Nessun operatore ancora</div></div>'
-      : lista.map(op => `
-        <div class="tariffa-card" style="margin-bottom:8px">
-          <div class="tariffa-card-header" style="padding:10px 16px">
-            <div>
-              <div style="font-size:15px">${op.nome}</div>
-              <div style="font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace">${op.email}</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <span class="tariffa-badge ${op.user_id ? 'configured' : 'missing'}">
-                ${op.user_id ? 'Attivo' : 'In attesa'}
-              </span>
-              <button onclick="toggleOperatore('${op.id}', ${op.attivo})"
-                      style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);cursor:pointer;font-size:11px">
-                ${op.attivo ? 'Disattiva' : 'Riattiva'}
-              </button>
-              <button onclick="eliminaOperatore('${op.id}')"
-                      style="background:none;border:1px solid var(--red);border-radius:6px;padding:4px 8px;color:var(--red);cursor:pointer;font-size:11px">
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>`).join('')
-    }`;
+  container.innerHTML = '<div class="tariffa-card" style="margin-bottom:16px">' +
+    '<div class="tariffa-card-header"><span>Invita operatore</span></div>' +
+    '<div class="tariffa-fields">' +
+    '<div class="tariffa-row">' +
+    '<div class="tariffa-field"><label>Nome</label>' +
+    '<input class="wz-input" id="inv-nome" placeholder="Es. Mario Rossi"></div>' +
+    '<div class="tariffa-field"><label>Email</label>' +
+    '<input class="wz-input" id="inv-email" type="email" placeholder="mario@email.com"></div>' +
+    '</div>' +
+    '<button class="wz-btn-primary" style="margin-top:8px" onclick="invitaOperatore()">Invia invito</button>' +
+    '<div class="tariffa-msg" id="msg-invito"></div>' +
+    '</div></div>' +
+    '<div class="section-label" style="margin-bottom:12px">Operatori (' + lista.length + ')</div>' +
+    listaHtml;
 }
 
 async function invitaOperatore() {
@@ -662,7 +642,6 @@ async function invitaOperatore() {
     return;
   }
 
-  // Crea operatore nel DB (senza user_id — verrà collegato alla registrazione)
   const { error } = await sbClient.from('operatori').insert({
     account_id: accountId,
     nome: nome,
@@ -671,24 +650,20 @@ async function invitaOperatore() {
   });
 
   if (error) {
-    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = error.code === '23505' ? 'Email già presente.' : 'Errore nell'invito.'; }
+    if (msg) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = error.code === '23505' ? 'Email gia presente.' : 'Errore nell invito.';
+    }
     return;
   }
 
-  // Manda email di invito tramite Supabase Auth
-  const company = localStorage.getItem('charlotte_company') || 'Charlotte';
-  const { error: invErr } = await sbClient.auth.admin?.inviteUserByEmail
-    ? sbClient.auth.admin.inviteUserByEmail(email)
-    : { error: null };
-
-  // Fallback: usa resetPasswordForEmail come invito (funziona senza admin key)
   await sbClient.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/charlotte-commercial/`
+    redirectTo: window.location.origin + '/charlotte-commercial/'
   });
 
   if (msg) {
     msg.style.color = 'var(--green)';
-    msg.textContent = `✓ Invito inviato a ${email}. Riceverà un link per registrarsi.`;
+    msg.textContent = 'Invito inviato a ' + email + '. Ricevera un link per registrarsi.';
     document.getElementById('inv-nome').value = '';
     document.getElementById('inv-email').value = '';
     setTimeout(() => { msg.textContent = ''; renderOperatori(); }, 3000);
