@@ -141,6 +141,9 @@
     <button class="owner-tab" data-tab="storico" onclick="mostraSezioneOwner('storico')">
       📊 Storico
     </button>
+    <button class="owner-tab" data-tab="operatori" onclick="mostraSezioneOwner('operatori')">
+      👥 Operatori
+    </button>
     <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">
       🏢 Garages
     </button>
@@ -162,6 +165,12 @@
   <div class="owner-section" id="owner-storico" style="display:none">
     <div class="section-label" style="margin-bottom:12px">Ricerca soste per targa e periodo</div>
     <div id="storico-container"></div>
+  </div>
+
+  <!-- Sezione Operatori -->
+  <div class="owner-section" id="owner-operatori" style="display:none">
+    <div class="section-label" style="margin-bottom:12px">Gestisci e invita operatori</div>
+    <div id="operatori-container"></div>
   </div>
 
   <!-- Sezione Garages -->
