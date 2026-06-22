@@ -215,12 +215,13 @@ let pinCorrente = '';
 const PIN_LUNGHEZZA = 4;
 
 function aggiornaDotsPin(hasError = false) {
-  const dots = document.querySelectorAll('.pin-dot');
-  dots.forEach((dot, i) => {
+  for (let i = 0; i < PIN_LUNGHEZZA; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
     dot.classList.remove('filled', 'error');
     if (hasError) dot.classList.add('error');
     else if (i < pinCorrente.length) dot.classList.add('filled');
-  });
+  }
 }
 
 function premicifraPIN(cifra) {
