@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#0a0a0f">
   <title>Charlotte</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <style>
     .badge-screen { padding: 16px; }
@@ -163,6 +164,11 @@
       <div id="login-error" class="wz-error"></div>
       <button class="wz-btn-primary" onclick="doLogin()">ACCEDI</button>
       <button class="wz-btn-secondary" onclick="mostraRegistrazione()">Crea account owner →</button>
+      <div style="text-align:center;margin-top:4px">
+        <a href="checkout.html" style="font-size:12px;color:var(--accent3);text-decoration:none">
+          Non hai ancora un piano? Acquista qui →
+        </a>
+      </div>
       <button onclick="mostraLoginOperatore()"
               style="background:rgba(16,185,129,0.1);border:1px solid var(--green);border-radius:12px;padding:14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--green);cursor:pointer;width:100%">
         👤 Sono un operatore
@@ -292,6 +298,11 @@
         <div class="btn-label" style="color:var(--green)">Badge</div>
         <div class="btn-sub">Timbra turno</div>
       </div>
+      <div class="action-btn" style="border-top:2px solid var(--amber);grid-column:1/-1" onclick="apriCassa()">
+        <span class="btn-icon">💰</span>
+        <div class="btn-label" style="color:var(--amber)">Cassa</div>
+        <div class="btn-sub">Registro giornaliero</div>
+      </div>
     </div>
   </div>
 
@@ -397,7 +408,16 @@
     </div>
   </div>
 
-</div>
+  <!-- ── CASSA ── -->
+  <div class="screen" id="cassa-screen">
+    <div class="screen-header">
+      <div class="back-btn" onclick="tornaHome()">←</div>
+      <div class="screen-title">💰 Cassa del giorno</div>
+    </div>
+    <div id="cassa-container"></div>
+  </div>
+
+</div><!-- /main chiuso qui -->
 
 <!-- ═══════════════════════════════════════════════════════
      OVERLAY CONFERMA INGRESSO
@@ -458,7 +478,7 @@
 <script>
   (function() {
     var v = Date.now();
-    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js'];
+    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js'];
     var loaded = 0;
     files.forEach(function(f) {
       var s = document.createElement('script');
