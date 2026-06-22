@@ -154,13 +154,34 @@
       <div class="pin-logo-text">CHARLOTTE</div>
       <div class="pin-subtitle">Parking Management</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
+
+    <!-- Form Login -->
+    <div id="login-form" style="display:flex;flex-direction:column;gap:12px">
       <input id="login-email" type="email" placeholder="Email" class="wz-input" autocomplete="email">
       <input id="login-password" type="password" placeholder="Password" class="wz-input" autocomplete="current-password"
              onkeydown="if(event.key==='Enter') doLogin()">
       <div id="login-error" class="wz-error"></div>
       <button class="wz-btn-primary" onclick="doLogin()">ACCEDI</button>
-      <button class="wz-btn-secondary" onclick="doResetPassword()">Password dimenticata?</button>
+      <button class="wz-btn-secondary" onclick="mostraRegistrazione()">Crea account →</button>
+      <button onclick="doResetPassword()"
+              style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px">
+        Password dimenticata?
+      </button>
+    </div>
+
+    <!-- Form Registrazione -->
+    <div id="register-form" style="display:none;flex-direction:column;gap:12px">
+      <div style="text-align:center;margin-bottom:8px">
+        <div style="font-size:14px;color:var(--muted)">Crea un nuovo account</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Owner: registrati per configurare il tuo garage<br>Operatore: usa il link ricevuto via email</div>
+      </div>
+      <input id="reg-email" type="email" placeholder="Email" class="wz-input" autocomplete="email">
+      <input id="reg-password" type="password" placeholder="Password (min. 6 caratteri)" class="wz-input">
+      <input id="reg-password2" type="password" placeholder="Conferma password" class="wz-input"
+             onkeydown="if(event.key==='Enter') doRegister()">
+      <div id="register-error" class="wz-error"></div>
+      <button class="wz-btn-primary" onclick="doRegister()">REGISTRATI</button>
+      <button class="wz-btn-secondary" onclick="mostraLogin()">← Torna al login</button>
     </div>
   </div>
 
