@@ -248,13 +248,18 @@ function aggiornaBottoneConferma() {
 async function confermaIngresso() {
   if (!targaCorrente || !categoriaCorrente || !garageCorrente) return;
 
+  const opId = currentUser?.id || null;
+  const opNome = localStorage.getItem('charlotte_operatore_nome') || localStorage.getItem('charlotte_company') || 'Owner';
+
   const { error } = await sbClient.from('soste').insert({
     garage_id: garageCorrente.id,
     targa: targaCorrente,
     tipo_veicolo: categoriaCorrente,
     convenzione_id: convenzionCorrente?.id || null,
     ingresso_at: new Date().toISOString(),
-    uscita_at: null
+    uscita_at: null,
+    operatore_ingresso_id: opId,
+    operatore_ingresso_nome: opNome
   });
 
   if (error) { alert('Errore nel registrare l\'ingresso. Riprova.'); return; }
@@ -360,9 +365,16 @@ async function confermaUscita(sostaId, importo) {
 
   if (ol) ol.classList.remove('show');
 
+  const opNomeUscita = localStorage.getItem('charlotte_operatore_nome') || localStorage.getItem('charlotte_company') || 'Owner';
+
   const { error } = await sbClient
     .from('soste')
-    .update({ uscita_at: new Date().toISOString(), importo: imp })
+    .update({
+      uscita_at: new Date().toISOString(),
+      importo: imp,
+      operatore_uscita_id: currentUser?.id || null,
+      operatore_uscita_nome: opNomeUscita
+    })
     .eq('id', id);
 
   if (error) { alert('Errore nel registrare l\'uscita. Riprova.'); return; }
@@ -389,7 +401,7 @@ async function caricaListaSoste() {
   const oggi = new Date().toISOString().split('T')[0];
   const { data } = await sbClient
     .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo, operatore_ingresso_nome, operatore_uscita_nome')
     .eq('garage_id', garageCorrente.id)
     .gte('ingresso_at', `${oggi}T00:00:00`)
     .order('ingresso_at', { ascending: false });
@@ -423,11 +435,14 @@ function cardSosta(s, attiva) {
   const durata = calcolaDurata(s.ingresso_at, s.uscita_at);
   const cat = CATEGORIE.find(c => c.id === s.tipo_veicolo);
   const conv = convenzioniGarage.find(c => c.id === s.convenzione_id);
+  const opIngresso = s.operatore_ingresso_nome ? `👤 ${s.operatore_ingresso_nome}` : '';
+  const opUscita = s.operatore_uscita_nome ? ` → ${s.operatore_uscita_nome}` : '';
   return `
     <div class="sosta-card ${attiva ? 'attiva' : 'chiusa'}">
       <div class="sosta-info">
         <div class="sosta-targa">${s.targa}</div>
         <div class="sosta-tipo">${cat?.icon || ''} ${cat?.label || s.tipo_veicolo}${conv ? ' · ' + conv.nome : ''}</div>
+        ${opIngresso ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${opIngresso}${opUscita}</div>` : ''}
       </div>
       <div>
         <div class="sosta-time">${attiva ? '⏱' : '✓'} ${oraIngresso}</div>
@@ -458,7 +473,7 @@ async function eseguiRicerca() {
 
   const { data } = await sbClient
     .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo, operatore_ingresso_nome, operatore_uscita_nome')
     .eq('garage_id', garageCorrente.id)
     .ilike('targa', `%${query}%`)
     .order('ingresso_at', { ascending: false })
