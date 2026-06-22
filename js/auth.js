@@ -132,8 +132,10 @@ async function doRegister() {
     errEl.textContent = `✓ Account creato! Sei stato collegato a ${operatore.accounts?.company_name}. Accedi ora.`;
     setTimeout(() => mostraLogin(), 2000);
   } else {
-    // Nuovo owner — vai all'onboarding
-    await dopoLogin();
+    // Nuovo owner — vai direttamente all'onboarding senza passare per dopoLogin
+    currentUser = data.user;
+    mostraSchermata('onboarding-screen');
+    avviaWizard();
   }
 }
 
