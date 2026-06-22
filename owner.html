@@ -187,16 +187,21 @@
   (function() {
     var v = Date.now();
     var files = ['js/config.js','js/auth.js','js/tariffe.js','js/owner.js'];
+    var loaded = 0;
     files.forEach(function(f) {
       var s = document.createElement('script');
       s.src = f + '?v=' + v;
+      s.onload = function() {
+        loaded++;
+        if (loaded === files.length) {
+          initApp();
+        }
+      };
       document.head.appendChild(s);
     });
   })();
-</script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
+  async function initApp() {
     initSupabase();
 
     const { data: { session } } = await sbClient.auth.getSession();
@@ -212,7 +217,7 @@
     if (el && company) el.textContent = company;
 
     await inizializzaOwner();
-  });
+  }
 </script>
 
 </body>
