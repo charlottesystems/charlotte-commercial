@@ -37,7 +37,7 @@ async function doLogin() {
 async function dopoLoginOwner() {
   const { data: account } = await sbClient
     .from('accounts')
-    .select('id, company_name, onboarding_complete')
+    .select('id, company_name, onboarding_complete, pin_app')
     .eq('owner_id', currentUser.id)
     .maybeSingle();
 
@@ -59,6 +59,12 @@ async function dopoLoginOwner() {
   localStorage.setItem('charlotte_ruolo', 'owner');
   localStorage.removeItem('charlotte_operatore_id');
   localStorage.removeItem('charlotte_operatore_nome');
+
+  // Carica PIN dal DB se non è in localStorage
+  if (account.pin_app && !localStorage.getItem('charlotte_pin')) {
+    localStorage.setItem('charlotte_pin', account.pin_app);
+  }
+
   mostraSchermata('pin-screen');
   aggiornaNomeSocietà(account.company_name);
 }
