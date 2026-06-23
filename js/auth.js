@@ -60,13 +60,10 @@ async function dopoLoginOwner() {
   localStorage.removeItem('charlotte_operatore_id');
   localStorage.removeItem('charlotte_operatore_nome');
 
-  // Carica PIN dal DB se non è in localStorage
-  if (account.pin_app && !localStorage.getItem('charlotte_pin')) {
-    localStorage.setItem('charlotte_pin', account.pin_app);
-  }
-
-  mostraSchermata('pin-screen');
+  mostraSchermata('main-screen');
   aggiornaNomeSocietà(account.company_name);
+  inizializzaApp();
+  aggiornaHeaderRuolo();
 }
 
 // ── REGISTRAZIONE OWNER ───────────────────────────────────────
@@ -215,67 +212,7 @@ async function doLogout() {
   }
 }
 
-// ── PIN OWNER ────────────────────────────────────────────────
-
-let pinCorrente = '';
-const PIN_LUNGHEZZA = 4;
-
-function aggiornaDotsPin(hasError = false) {
-  for (let i = 0; i < PIN_LUNGHEZZA; i++) {
-    const dot = document.getElementById('dot-' + i);
-    if (!dot) continue;
-    dot.classList.remove('filled', 'error');
-    if (hasError) dot.classList.add('error');
-    else if (i < pinCorrente.length) dot.classList.add('filled');
-  }
-}
-
-function premicifraPIN(cifra) {
-  if (pinCorrente.length >= PIN_LUNGHEZZA) return;
-  pinCorrente += cifra;
-  aggiornaDotsPin();
-  if (pinCorrente.length === PIN_LUNGHEZZA) setTimeout(verificaPin, 150);
-}
-
-function cancellaCifraPIN() {
-  pinCorrente = pinCorrente.slice(0, -1);
-  aggiornaDotsPin();
-}
-
-function verificaPin() {
-  const bloccatoFino = localStorage.getItem('charlotte_pin_bloccato');
-  if (bloccatoFino && Date.now() < parseInt(bloccatoFino)) {
-    const minuti = Math.ceil((parseInt(bloccatoFino) - Date.now()) / 60000);
-    document.getElementById('pin-error').textContent = 'Troppi tentativi. Riprova tra ' + minuti + ' min.';
-    pinCorrente = '';
-    aggiornaDotsPin();
-    return;
-  }
-
-  const pinSalvato = localStorage.getItem('charlotte_pin');
-  if (pinCorrente === pinSalvato) {
-    localStorage.removeItem('charlotte_pin_tentativi');
-    localStorage.removeItem('charlotte_pin_bloccato');
-    pinCorrente = '';
-    aggiornaDotsPin();
-    document.getElementById('pin-error').textContent = '';
-    mostraSchermata('main-screen');
-    inizializzaApp();
-    aggiornaHeaderRuolo();
-  } else {
-    aggiornaDotsPin(true);
-    let tentativi = parseInt(localStorage.getItem('charlotte_pin_tentativi') || '0') + 1;
-    localStorage.setItem('charlotte_pin_tentativi', tentativi);
-    if (tentativi >= PIN_MAX_TENTATIVI) {
-      localStorage.setItem('charlotte_pin_bloccato', Date.now() + PIN_BLOCCO_MINUTI * 60 * 1000);
-      localStorage.removeItem('charlotte_pin_tentativi');
-      document.getElementById('pin-error').textContent = 'Bloccato per ' + PIN_BLOCCO_MINUTI + ' minuti.';
-    } else {
-      document.getElementById('pin-error').textContent = 'PIN errato. Tentativi rimasti: ' + (PIN_MAX_TENTATIVI - tentativi);
-    }
-    setTimeout(() => { pinCorrente = ''; aggiornaDotsPin(); }, 600);
-  }
-}
+// PIN owner rimosso — login diretto alla home
 
 // ── SESSIONE ALL'AVVIO ───────────────────────────────────────
 
