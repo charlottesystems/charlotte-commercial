@@ -127,23 +127,28 @@
      HEADER
 ═══════════════════════════════════════════════════════ -->
 <div class="header" id="main-header" style="display:none">
-  <div class="logo">
-    <div class="logo-icon">C</div>
+  <div class="logo" style="position:relative">
+    <div class="logo-icon" onclick="toggleMenuLogo()" style="cursor:pointer">C</div>
     <div class="logo-text">CHARLOTTE</div>
+    <!-- Menu tendina sotto logo -->
+    <div id="logo-menu" style="display:none;position:absolute;top:44px;left:0;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:200;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+      <button id="owner-btn-header" onclick="chiudiMenuLogo(); apriOwnerLock()"
+              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--accent3);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        🔑 Pannello Owner
+      </button>
+      <button id="bt-btn" onclick="chiudiMenuLogo(); gestisciConnessioneBT()"
+              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        🖨 <span id="bt-label">Connetti stampante</span>
+      </button>
+      <div style="border-top:1px solid var(--border);margin:4px 0"></div>
+      <button onclick="chiudiMenuLogo(); doLogout()"
+              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--red);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        ⏻ Esci
+      </button>
+    </div>
   </div>
   <div class="garage-badge">
     <select id="garage-select"></select>
-  </div>
-  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-    <button id="owner-btn-header" onclick="apriOwnerLock()"
-            style="background:rgba(124,58,237,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 8px;font-size:16px;color:var(--accent3);cursor:pointer;white-space:nowrap">
-      🔑
-    </button>
-    <button id="bt-btn" onclick="gestisciConnessioneBT()"
-            style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);cursor:pointer;font-size:16px">
-      🖨
-    </button>
-    <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px" title="Logout">⏻</button>
   </div>
 </div>
 
@@ -278,7 +283,7 @@
         <div class="btn-sub">Timbra turno</div>
       </div>
       <div class="action-btn" style="border-top:2px solid var(--amber);grid-column:1/-1" onclick="apriCassa()">
-        <span class="btn-icon">💰</span>
+        <span class="btn-icon">📊</span>
         <div class="btn-label" style="color:var(--amber)">Cassa</div>
         <div class="btn-sub">Registro giornaliero</div>
       </div>
@@ -493,6 +498,26 @@
       }
     }
     waitReady();
+  });
+
+  // ── MENU LOGO ───────────────────────────────────────────
+  function toggleMenuLogo() {
+    const menu = document.getElementById('logo-menu');
+    if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function chiudiMenuLogo() {
+    const menu = document.getElementById('logo-menu');
+    if (menu) menu.style.display = 'none';
+  }
+
+  // Chiudi menu cliccando fuori
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('logo-menu');
+    const logo = document.querySelector('.logo-icon');
+    if (menu && !menu.contains(e.target) && e.target !== logo) {
+      menu.style.display = 'none';
+    }
   });
 
   // ── BADGE SCREEN ────────────────────────────────────────
