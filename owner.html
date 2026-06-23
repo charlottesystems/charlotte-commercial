@@ -107,33 +107,34 @@
     .garage-select-bar label { font-size: 11px; color: #8a7a5a; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
     .garage-select-bar select { flex: 1; background: #f5f0e8; border: 1px solid #d4b896; border-radius: 8px; padding: 8px 10px; color: #2a2010; font-family: Rajdhani, sans-serif; font-size: 15px; outline: none; }
 
-    /* TEMA BLU NAVY / ORO OWNER */
-    body { background: #0d1b2a !important; }
-    .owner-header { background: #1a2f4a; border-bottom: 2px solid #d4a843; }
-    .main { background: #0d1b2a; }
-    .owner-tabs { background: #1a2f4a; border: 1px solid #2a4060; }
-    .owner-tab { color: #7a9ab8; }
-    .owner-tab.active { background: #d4a843; color: #0d1b2a; }
-    .tariffa-card { background: #1a2f4a; border: 1px solid #2a4060; }
-    .tariffa-card-header { background: #162640; border-bottom: 1px solid #2a4060; color: #e8f0f8; }
-    .tariffa-badge.configured { background: rgba(212,168,67,0.2); color: #d4a843; border: 1px solid #d4a843; }
-    .tariffa-badge.missing { background: rgba(220,60,60,0.15); color: #e06060; border: 1px solid #c04040; }
-    .tariffa-field label { color: #7a9ab8; }
-    .wz-input { background: #0d1b2a; border: 1px solid #2a4060; color: #e8f0f8; }
-    .wz-input:focus { border-color: #d4a843; }
-    .wz-btn-primary { background: linear-gradient(135deg, #d4a843, #a07820); color: #0d1b2a; }
-    .wz-btn-secondary { background: #1a2f4a; border: 1px solid #2a4060; color: #7a9ab8; }
-    .section-label { color: #7a9ab8; }
-    .empty-state .empty-icon { filter: none; }
-    .empty-state .empty-text { color: #7a9ab8; }
-    .garage-select-bar { background: #1a2f4a; border: 1px solid #2a4060; }
-    .garage-select-bar label { color: #7a9ab8; }
-    .garage-select-bar select { background: #0d1b2a; border: 1px solid #2a4060; color: #e8f0f8; }
-    .tariffa-msg { color: #e8f0f8; }
-    select option { background: #0d1b2a; color: #e8f0f8; }
-    .sosta-card { background: #1a2f4a; border-color: #2a4060; }
-    .sosta-targa { color: #e8f0f8; }
-    .sosta-tipo { color: #7a9ab8; }
+    /* TEMA BIANCO / VERDE OWNER */
+    body { background: #f0f7f0 !important; }
+    .owner-header { background: #ffffff; border-bottom: 2px solid #2e7d32; }
+    .main { background: #f0f7f0; }
+    .owner-tabs { background: #ffffff; border: 1px solid #c8e6c9; }
+    .owner-tab { color: #558b57; }
+    .owner-tab.active { background: #2e7d32; color: #ffffff; }
+    .tariffa-card { background: #ffffff; border: 1px solid #c8e6c9; }
+    .tariffa-card-header { background: #f1f8f1; border-bottom: 1px solid #c8e6c9; color: #1b5e20; }
+    .tariffa-badge.configured { background: rgba(46,125,50,0.12); color: #2e7d32; border: 1px solid #2e7d32; }
+    .tariffa-badge.missing { background: rgba(198,40,40,0.1); color: #c62828; border: 1px solid #e53935; }
+    .tariffa-field label { color: #558b57; }
+    .wz-input { background: #f1f8f1; border: 1px solid #a5d6a7; color: #1b5e20; }
+    .wz-input:focus { border-color: #2e7d32; }
+    .wz-btn-primary { background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #ffffff; }
+    .wz-btn-secondary { background: #ffffff; border: 1px solid #a5d6a7; color: #2e7d32; }
+    .section-label { color: #558b57; }
+    .empty-state .empty-text { color: #558b57; }
+    .garage-select-bar { background: #ffffff; border: 1px solid #c8e6c9; }
+    .garage-select-bar label { color: #558b57; }
+    .garage-select-bar select { background: #f1f8f1; border: 1px solid #a5d6a7; color: #1b5e20; }
+    .tariffa-msg { color: #1b5e20; }
+    select option { background: #f1f8f1; color: #1b5e20; }
+    .sosta-card { background: #ffffff; border-color: #c8e6c9; }
+    .sosta-targa { color: #1b5e20; }
+    .sosta-tipo { color: #558b57; }
+    .sosta-time { color: #2e7d32; }
+    .sosta-duration { color: #558b57; }
   </style>
 </head>
 <body>
@@ -173,7 +174,7 @@
       👥 Operatori
     </button>
     <button class="owner-tab" data-tab="turni" onclick="mostraSezioneOwner('turni')">
-      🕐 Turni
+      🕐 Ing/Usc
     </button>
     <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">
       🏢 Garages
@@ -206,7 +207,7 @@
 
   <!-- Sezione Turni -->
   <div class="owner-section" id="owner-turni" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Registro timbrature operatori</div>
+    <div class="section-label" style="margin-bottom:12px">Controllo ingressi e uscite operatori</div>
     <div id="turni-container"></div>
   </div>
 
