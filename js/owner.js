@@ -60,6 +60,7 @@ function mostraSezioneOwner(sezione) {
   if (sezione === 'garages') return renderGarages();
   if (sezione === 'storico') return renderStorico();
   if (sezione === 'operatori') return renderOperatori();
+  if (sezione === 'turni') return renderTurni();
 }
 
 // ── TARIFFE ──────────────────────────────────────────────────
@@ -473,4 +474,103 @@ async function eliminaOperatore(opId) {
   if (!confirm('Eliminare questo operatore?')) return;
   await sbClient.from('operatori').delete().eq('id', opId);
   await renderOperatori();
+}
+
+
+// ── TURNI ─────────────────────────────────────────────────────
+
+function renderTurni() {
+  const container = document.getElementById('turni-container');
+  if (!container) return;
+
+  const oggi = new Date().toISOString().split('T')[0];
+
+  container.innerHTML = '<div class="tariffa-card" style="margin-bottom:16px"><div class="tariffa-fields">' +
+    '<div class="tariffa-row">' +
+    '<div class="tariffa-field"><label>Nome operatore</label>' +
+    '<input class="wz-input" id="turni-nome" placeholder="Es. Mario"></div>' +
+    '<div class="tariffa-field"><label>Data</label>' +
+    '<input class="wz-input" id="turni-data" type="date" value="' + oggi + '"></div>' +
+    '</div>' +
+    '<button class="wz-btn-primary" style="margin-top:8px" onclick="cercaTurni()">Cerca</button>' +
+    '</div></div>' +
+    '<div id="turni-risultati"></div>';
+}
+
+async function cercaTurni() {
+  const nome = document.getElementById('turni-nome')?.value?.trim() || '';
+  const data = document.getElementById('turni-data')?.value;
+  const container = document.getElementById('turni-risultati');
+  if (!container) return;
+
+  container.innerHTML = '<div style="color:#7a9ab8;text-align:center;padding:20px">Ricerca in corso...</div>';
+
+  const dataInizio = data + 'T00:00:00';
+  const dataFine = data + 'T23:59:59';
+  const garageIds = ownerGarageList.map(g => g.id);
+
+  let query = sbClient
+    .from('turni')
+    .select('id, operatore_nome, tipo, timbrato_at, distanza_metri, garage_id')
+    .in('garage_id', garageIds)
+    .gte('timbrato_at', dataInizio)
+    .lte('timbrato_at', dataFine)
+    .order('timbrato_at', { ascending: true });
+
+  if (nome) query = query.ilike('operatore_nome', '%' + nome + '%');
+
+  const { data: turni, error } = await query;
+
+  if (error || !turni || turni.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">Nessuna timbratura trovata</div></div>';
+    return;
+  }
+
+  // Raggruppa per operatore
+  const perOperatore = {};
+  turni.forEach(t => {
+    if (!perOperatore[t.operatore_nome]) perOperatore[t.operatore_nome] = [];
+    perOperatore[t.operatore_nome].push(t);
+  });
+
+  let html = '<div style="font-size:12px;color:#7a9ab8;margin-bottom:12px">' + turni.length + ' timbrature trovate</div>';
+
+  for (const nomeOp in perOperatore) {
+    const timbrature = perOperatore[nomeOp];
+    html += '<div class="tariffa-card" style="margin-bottom:12px">' +
+      '<div class="tariffa-card-header"><span>👤 ' + nomeOp + '</span>' +
+      '<span style="font-size:12px;color:#7a9ab8">' + timbrature.length + ' timbrature</span></div>' +
+      '<div class="tariffa-fields">';
+
+    timbrature.forEach(t => {
+      const garage = ownerGarageList.find(g => g.id === t.garage_id);
+      const ora = new Date(t.timbrato_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      const tipoColore = t.tipo === 'entrata' ? '#4caf80' : '#e06060';
+      const tipoLabel = t.tipo === 'entrata' ? '🟢 ENTRATA' : '🔴 USCITA';
+
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a4060">' +
+        '<div>' +
+        '<span style="font-weight:700;color:' + tipoColore + '">' + tipoLabel + '</span>' +
+        '<div style="font-size:11px;color:#7a9ab8;margin-top:2px">' + (garage?.name || 'Garage') + (t.distanza_metri ? ' · ' + t.distanza_metri + 'm dal garage' : '') + '</div>' +
+        '</div>' +
+        '<span style="font-family:Share Tech Mono,monospace;font-size:16px;color:#e8f0f8">' + ora + '</span>' +
+        '</div>';
+    });
+
+    // Calcola ore lavorate
+    const entrate = timbrature.filter(t => t.tipo === 'entrata');
+    const uscite = timbrature.filter(t => t.tipo === 'uscita');
+    if (entrate.length > 0 && uscite.length > 0) {
+      const primaEntrata = new Date(entrate[0].timbrato_at);
+      const ultimaUscita = new Date(uscite[uscite.length - 1].timbrato_at);
+      const minuti = Math.floor((ultimaUscita - primaEntrata) / 60000);
+      const h = Math.floor(minuti / 60);
+      const m = minuti % 60;
+      html += '<div style="padding:8px 0;text-align:right;color:#d4a843;font-weight:700">Totale: ' + h + 'h ' + m + 'm</div>';
+    }
+
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
 }
