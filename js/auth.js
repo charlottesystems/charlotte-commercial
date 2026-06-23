@@ -263,7 +263,12 @@ function aggiornaNomeSocietà(nome) {
 function aggiornaHeaderRuolo() {
   const ruolo = localStorage.getItem('charlotte_ruolo');
   const ownerBtn = document.getElementById('owner-btn-header');
-  if (ownerBtn) ownerBtn.style.display = ruolo === 'owner' ? 'inline-block' : 'none';
+  if (ownerBtn) ownerBtn.style.display = ruolo === 'owner' ? 'inline-flex' : 'none';
+
+  // Nascondi badge per owner — usa inserimento manuale nel pannello Owner
+  const badgeBtnHome = document.getElementById('badge-btn-home');
+  if (badgeBtnHome) badgeBtnHome.style.display = ruolo === 'owner' ? 'none' : '';
+
   if (ruolo === 'operatore') {
     const nomeOp = localStorage.getItem('charlotte_operatore_nome');
     const el = document.getElementById('company-name-header');
