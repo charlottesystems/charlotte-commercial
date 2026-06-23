@@ -75,16 +75,16 @@ function esportaCassaCSV() {
     .then(({ data }) => {
       if (!data || data.length === 0) { alert('Nessun dato da esportare.'); return; }
 
-      const header = 'Targa,Categoria,Ingresso,Uscita,Durata,Importo,Op.Ingresso,Op.Uscita';
+      const header = 'Targa;Categoria;Ingresso;Uscita;Durata;Importo;Op.Ingresso;Op.Uscita';
       const rows = data.map(s => {
         const oraI = new Date(s.ingresso_at).toLocaleString('it-IT');
         const oraU = new Date(s.uscita_at).toLocaleString('it-IT');
         const durata = calcolaDurata(s.ingresso_at, s.uscita_at);
-        return [s.targa, s.tipo_veicolo, oraI, oraU, durata, (s.importo || 0).toFixed(2), s.operatore_ingresso_nome || '', s.operatore_uscita_nome || ''].join(',');
+        return [s.targa, s.tipo_veicolo, oraI, oraU, durata, (s.importo || 0).toFixed(2), s.operatore_ingresso_nome || '', s.operatore_uscita_nome || ''].join(';');
       });
 
       const csv = [header, ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
