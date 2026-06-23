@@ -273,8 +273,16 @@ function aggiornaHeaderRuolo() {
     const nomeOp = localStorage.getItem('charlotte_operatore_nome');
     const el = document.getElementById('company-name-header');
     if (el && nomeOp) el.textContent = nomeOp;
+    // Mostra benvenuto
+    const benv = document.getElementById('benvenuto-operatore');
+    if (benv && nomeOp) {
+      benv.textContent = '👋 Benvenuto, ' + nomeOp;
+      benv.style.display = 'block';
+    }
   } else {
     aggiornaNomeSocietà(localStorage.getItem('charlotte_company'));
+    const benv = document.getElementById('benvenuto-operatore');
+    if (benv) benv.style.display = 'none';
   }
 }
 
