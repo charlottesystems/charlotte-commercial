@@ -276,12 +276,14 @@ async function confermaIngresso() {
 
   await aggiornaStatistiche();
 
-  // Stampa ticket ingresso
+  // Stampa ticket ingresso - chiede conferma
   try {
     const { data: sostaStampata } = await sbClient.from('soste')
       .select('*').eq('garage_id', garageCorrente.id).eq('targa', targaCorrente)
       .is('uscita_at', null).order('ingresso_at', { ascending: false }).limit(1).single();
-    if (sostaStampata) await stampaTicketIngresso(sostaStampata);
+    if (sostaStampata && confirm('Stampare il ticket di ingresso?')) {
+      await stampaTicketIngresso(sostaStampata);
+    }
   } catch(e) {}
 
   setTimeout(() => {
