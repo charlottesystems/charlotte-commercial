@@ -3,7 +3,7 @@
 // Timbratura turni via GPS
 // ============================================================
 
-const RAGGIO_DEFAULT_METRI = 100; // raggio default garage
+const RAGGIO_DEFAULT_METRI = 50; // raggio default garage
 
 // ── TIMBRATURA GPS ───────────────────────────────────────────
 
@@ -51,7 +51,9 @@ async function timbra(tipo) {
     if (distanza > raggio) {
       if (stato) {
         stato.style.color = 'var(--red)';
-        stato.textContent = `❌ Sei a ${Math.round(distanza)}m dal garage. Devi essere entro ${raggio}m.`;
+        stato.textContent = distanza === 99999
+          ? '❌ Coordinate GPS garage non configurate. Contatta il responsabile.'
+          : `❌ Sei a ${Math.round(distanza)}m dal garage. Devi essere entro ${raggio}m per timbrare.`;
       }
       if (btn) btn.disabled = false;
       return;
@@ -121,7 +123,7 @@ function aggiornaUIBadge() {
 // ── CALCOLO DISTANZA GPS (formula Haversine) ─────────────────
 
 function calcolaDistanza(lat1, lng1, lat2, lng2) {
-  if (!lat2 || !lng2) return 0; // garage senza coordinate → sempre ok
+  if (!lat2 || !lng2) return 99999; // garage senza coordinate GPS → timbratura bloccata
   const R = 6371000; // raggio terra in metri
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
