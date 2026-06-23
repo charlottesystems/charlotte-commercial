@@ -172,6 +172,9 @@
     <button class="owner-tab" data-tab="operatori" onclick="mostraSezioneOwner('operatori')">
       👥 Operatori
     </button>
+    <button class="owner-tab" data-tab="turni" onclick="mostraSezioneOwner('turni')">
+      🕐 Turni
+    </button>
     <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">
       🏢 Garages
     </button>
@@ -199,6 +202,12 @@
   <div class="owner-section" id="owner-operatori" style="display:none">
     <div class="section-label" style="margin-bottom:12px">Gestisci e invita operatori</div>
     <div id="operatori-container"></div>
+  </div>
+
+  <!-- Sezione Turni -->
+  <div class="owner-section" id="owner-turni" style="display:none">
+    <div class="section-label" style="margin-bottom:12px">Registro timbrature operatori</div>
+    <div id="turni-container"></div>
   </div>
 
   <!-- Sezione Garages -->
