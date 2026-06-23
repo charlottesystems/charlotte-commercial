@@ -265,15 +265,26 @@ function aggiornaHeaderRuolo() {
   const ownerBtn = document.getElementById('owner-btn-header');
   if (ownerBtn) ownerBtn.style.display = ruolo === 'owner' ? 'inline-flex' : 'none';
 
-  // Nascondi badge per owner — usa inserimento manuale nel pannello Owner
-  const badgeBtnHome = document.getElementById('badge-btn-home');
-  if (badgeBtnHome) badgeBtnHome.style.display = ruolo === 'owner' ? 'none' : '';
+  // Griglia corretta per ruolo
+  const gridOwner = document.getElementById('grid-owner');
+  const gridOperatore = document.getElementById('grid-operatore');
+  if (gridOwner) gridOwner.style.display = ruolo === 'owner' ? 'grid' : 'none';
+  if (gridOperatore) gridOperatore.style.display = ruolo === 'operatore' ? 'grid' : 'none';
+
+  // Tema dorato owner
+  const ownerBadge = document.getElementById('owner-badge');
+  if (ruolo === 'owner') {
+    document.body.classList.add('is-owner');
+    if (ownerBadge) ownerBadge.style.display = 'flex';
+  } else {
+    document.body.classList.remove('is-owner');
+    if (ownerBadge) ownerBadge.style.display = 'none';
+  }
 
   if (ruolo === 'operatore') {
     const nomeOp = localStorage.getItem('charlotte_operatore_nome');
     const el = document.getElementById('company-name-header');
     if (el && nomeOp) el.textContent = nomeOp;
-    // Mostra benvenuto
     const benv = document.getElementById('benvenuto-operatore');
     if (benv && nomeOp) {
       benv.textContent = '👋 Benvenuto, ' + nomeOp;
