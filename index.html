@@ -90,6 +90,27 @@
       padding: 32px;
     }
     .owner-lock.hidden { display: none; }
+    /* TEMA OWNER - contorni dorati */
+    body.is-owner .header {
+      border-bottom: 2px solid #d4a843;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1508 100%);
+    }
+    body.is-owner .logo-icon {
+      background: linear-gradient(135deg, #d4a843, #a07820);
+      box-shadow: 0 0 20px rgba(212,168,67,0.5);
+    }
+    body.is-owner .action-btn {
+      border: 1px solid #3a3010;
+    }
+    body.is-owner .action-btn:hover {
+      border-color: #d4a843;
+    }
+    body.is-owner .stat {
+      border: 1px solid #3a3010;
+    }
+    body.is-owner #owner-badge {
+      display: flex !important;
+    }
   </style>
 </head>
 <body>
@@ -130,6 +151,7 @@
   <div class="logo" style="position:relative">
     <div class="logo-icon" onclick="toggleMenuLogo()" style="cursor:pointer">C</div>
     <div class="logo-text">CHARLOTTE</div>
+    <div id="owner-badge" style="display:none;position:absolute;top:-6px;right:-8px;background:#d4a843;border-radius:50%;width:16px;height:16px;font-size:10px;align-items:center;justify-content:center">👑</div>
     <!-- Menu tendina sotto logo -->
     <div id="logo-menu" style="display:none;position:absolute;top:44px;left:0;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:200;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
       <button id="owner-btn-header" onclick="chiudiMenuLogo(); apriOwnerLock()"
@@ -262,7 +284,8 @@
       <div class="stat"><div class="val" id="stat-oggi">0</div><div class="lbl">Oggi</div></div>
       <div class="stat"><div class="val" id="stat-mese">0</div><div class="lbl">Mese</div></div>
     </div>
-    <div class="action-grid">
+    <!-- Griglia operatore (con badge) -->
+    <div class="action-grid" id="grid-operatore" style="display:none">
       <div class="action-btn ingresso" onclick="apriIngresso()">
         <span class="btn-icon">🚗</span>
         <div class="btn-label">Ingresso</div>
@@ -283,7 +306,26 @@
         <div class="btn-label" style="color:var(--green)">Badge</div>
         <div class="btn-sub">Timbra turno</div>
       </div>
-      <div class="action-btn" style="border-top:2px solid var(--amber);grid-column:1/-1" onclick="apriCassa()">
+    </div>
+
+    <!-- Griglia owner (senza badge, con cassa) -->
+    <div class="action-grid" id="grid-owner" style="display:none">
+      <div class="action-btn ingresso" onclick="apriIngresso()">
+        <span class="btn-icon">🚗</span>
+        <div class="btn-label">Ingresso</div>
+        <div class="btn-sub">Registra entrata</div>
+      </div>
+      <div class="action-btn uscita" onclick="apriUscita()">
+        <span class="btn-icon">🏁</span>
+        <div class="btn-label">Uscita</div>
+        <div class="btn-sub">Registra uscita</div>
+      </div>
+      <div class="action-btn lista" onclick="apriLista()">
+        <span class="btn-icon">📋</span>
+        <div class="btn-label">Lista</div>
+        <div class="btn-sub">Soste attive</div>
+      </div>
+      <div class="action-btn" style="border-top:2px solid var(--amber)" onclick="apriCassa()">
         <span class="btn-icon">📊</span>
         <div class="btn-label" style="color:var(--amber)">Cassa</div>
         <div class="btn-sub">Registro giornaliero</div>
