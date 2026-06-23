@@ -479,22 +479,106 @@ async function eliminaOperatore(opId) {
 
 // ── TURNI ─────────────────────────────────────────────────────
 
-function renderTurni() {
+async function renderTurni() {
   const container = document.getElementById('turni-container');
   if (!container) return;
 
   const oggi = new Date().toISOString().split('T')[0];
+  const accountId = localStorage.getItem('charlotte_account_id');
 
-  container.innerHTML = '<div class="tariffa-card" style="margin-bottom:16px"><div class="tariffa-fields">' +
+  // Carica operatori per select
+  const { data: operatori } = await sbClient
+    .from('operatori')
+    .select('id, nome')
+    .eq('account_id', accountId)
+    .eq('attivo', true)
+    .order('nome');
+
+  const opzioniOperatori = (operatori || []).map(o =>
+    '<option value="' + o.nome + '">' + o.nome + '</option>'
+  ).join('');
+
+  const opzioniGarage = ownerGarageList.map(g =>
+    '<option value="' + g.id + '">' + g.name + '</option>'
+  ).join('');
+
+  // Ora e data corrente per default
+  const now = new Date();
+  const dataOra = now.toISOString().slice(0, 16);
+
+  container.innerHTML =
+    // SEZIONE INSERIMENTO MANUALE
+    '<div class="tariffa-card" style="margin-bottom:16px">' +
+    '<div class="tariffa-card-header"><span>➕ Inserimento manuale timbratura</span></div>' +
+    '<div class="tariffa-fields">' +
+    '<div class="tariffa-row">' +
+    '<div class="tariffa-field"><label>Operatore</label>' +
+    '<select class="wz-input" id="ins-operatore"><option value="">Seleziona...</option>' + opzioniOperatori + '</select></div>' +
+    '<div class="tariffa-field"><label>Garage</label>' +
+    '<select class="wz-input" id="ins-garage"><option value="">Seleziona...</option>' + opzioniGarage + '</select></div>' +
+    '</div>' +
+    '<div class="tariffa-row">' +
+    '<div class="tariffa-field"><label>Tipo</label>' +
+    '<select class="wz-input" id="ins-tipo">' +
+    '<option value="entrata">🟢 Entrata</option>' +
+    '<option value="uscita">🔴 Uscita</option>' +
+    '</select></div>' +
+    '<div class="tariffa-field"><label>Data e ora</label>' +
+    '<input class="wz-input" id="ins-dataora" type="datetime-local" value="' + dataOra + '"></div>' +
+    '</div>' +
+    '<button class="wz-btn-primary" style="margin-top:8px" onclick="inserisciTimbraturaManuale()">Inserisci timbratura</button>' +
+    '<div class="tariffa-msg" id="msg-ins-turno"></div>' +
+    '</div></div>' +
+
+    // SEZIONE RICERCA
+    '<div class="tariffa-card" style="margin-bottom:16px">' +
+    '<div class="tariffa-card-header"><span>🔍 Cerca timbrature</span></div>' +
+    '<div class="tariffa-fields">' +
     '<div class="tariffa-row">' +
     '<div class="tariffa-field"><label>Nome operatore</label>' +
-    '<input class="wz-input" id="turni-nome" placeholder="Es. Mario"></div>' +
+    '<input class="wz-input" id="turni-nome" placeholder="Anche parziale"></div>' +
     '<div class="tariffa-field"><label>Data</label>' +
     '<input class="wz-input" id="turni-data" type="date" value="' + oggi + '"></div>' +
     '</div>' +
     '<button class="wz-btn-primary" style="margin-top:8px" onclick="cercaTurni()">Cerca</button>' +
     '</div></div>' +
     '<div id="turni-risultati"></div>';
+}
+
+async function inserisciTimbraturaManuale() {
+  const nomeOp = document.getElementById('ins-operatore')?.value;
+  const garageId = document.getElementById('ins-garage')?.value;
+  const tipo = document.getElementById('ins-tipo')?.value;
+  const dataOra = document.getElementById('ins-dataora')?.value;
+  const msg = document.getElementById('msg-ins-turno');
+  const accountId = localStorage.getItem('charlotte_account_id');
+
+  if (!nomeOp || !garageId || !tipo || !dataOra) {
+    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Compila tutti i campi.'; }
+    return;
+  }
+
+  const { error } = await sbClient.from('turni').insert({
+    garage_id: garageId,
+    account_id: accountId,
+    operatore_nome: nomeOp,
+    tipo: tipo,
+    lat: null,
+    lng: null,
+    distanza_metri: null,
+    timbrato_at: new Date(dataOra).toISOString()
+  });
+
+  if (error) {
+    if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Errore: ' + error.message; }
+    return;
+  }
+
+  if (msg) {
+    msg.style.color = 'var(--green)';
+    msg.textContent = '✓ Timbratura inserita per ' + nomeOp + '.';
+    setTimeout(() => { msg.textContent = ''; }, 3000);
+  }
 }
 
 async function cercaTurni() {
