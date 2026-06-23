@@ -42,7 +42,7 @@ async function caricaGarages() {
 
   const { data, error } = await sbClient
     .from('garages')
-    .select('id, name, address')
+    .select('id, name, address, lat, lng, raggio_metri')
     .eq('account_id', accountId)
     .eq('active', true)
     .order('name');
