@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.charlotteparking.charlotte",
+    "sha256_cert_fingerprints": [
+      "78:92:CE:16:D9:19:F3:1A:62:CC:0E:C6:C4:BD:4F:50:46:26:21:38:7E:7E:C1:5F:F7:C7:C2:C7:A5:2E:E2:C4"
+    ]
+  }
+}]
