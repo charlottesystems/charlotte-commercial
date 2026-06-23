@@ -134,16 +134,16 @@
   <div class="garage-badge">
     <select id="garage-select"></select>
   </div>
-  <div style="display:flex;align-items:center;gap:8px">
+  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
     <button id="owner-btn-header" onclick="apriOwnerLock()"
-            style="background:rgba(124,58,237,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--accent3);font-family:'Share Tech Mono',monospace;cursor:pointer;">
-      ⚙ OWNER
+            style="background:rgba(124,58,237,0.2);border:1px solid var(--accent);border-radius:8px;padding:4px 8px;font-size:16px;color:var(--accent3);cursor:pointer;white-space:nowrap">
+      🔑
     </button>
     <button id="bt-btn" onclick="gestisciConnessioneBT()"
-            style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--muted);cursor:pointer;font-size:11px;font-family:'Share Tech Mono',monospace">
-      ⚪ Stampante
+            style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);cursor:pointer;font-size:16px">
+      🖨
     </button>
-    <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;" title="Logout">⏻</button>
+    <button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px" title="Logout">⏻</button>
   </div>
 </div>
 
@@ -239,37 +239,7 @@
     <div id="wz-content"></div>
   </div>
 
-  <!-- ── PIN ── -->
-  <div class="screen" id="pin-screen">
-    <div class="pin-screen">
-      <div class="pin-logo">
-        <div class="pin-logo-icon">C</div>
-        <div class="pin-logo-text">CHARLOTTE</div>
-        <div class="pin-subtitle">Inserisci PIN</div>
-      </div>
-      <div class="pin-dots">
-        <div class="pin-dot" id="dot-0"></div>
-        <div class="pin-dot" id="dot-1"></div>
-        <div class="pin-dot" id="dot-2"></div>
-        <div class="pin-dot" id="dot-3"></div>
-      </div>
-      <div class="pin-error" id="pin-error"></div>
-      <div class="pin-grid">
-        <button class="pin-btn" onclick="premicifraPIN('1')">1</button>
-        <button class="pin-btn" onclick="premicifraPIN('2')">2</button>
-        <button class="pin-btn" onclick="premicifraPIN('3')">3</button>
-        <button class="pin-btn" onclick="premicifraPIN('4')">4</button>
-        <button class="pin-btn" onclick="premicifraPIN('5')">5</button>
-        <button class="pin-btn" onclick="premicifraPIN('6')">6</button>
-        <button class="pin-btn" onclick="premicifraPIN('7')">7</button>
-        <button class="pin-btn" onclick="premicifraPIN('8')">8</button>
-        <button class="pin-btn" onclick="premicifraPIN('9')">9</button>
-        <button class="pin-btn canc" onclick="cancellaCifraPIN()">⌫</button>
-        <button class="pin-btn zero" onclick="premicifraPIN('0')">0</button>
-        <button class="pin-btn canc" onclick="pinCorrente=''; aggiornaDotsPin()">✕</button>
-      </div>
-    </div>
-  </div>
+<!-- PIN owner rimosso -->
 
   <!-- ── HOME ── -->
   <div class="screen" id="main-screen">
@@ -591,14 +561,7 @@
         <div class="wz-error" id="wz-err"></div>
         <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
       </div>` },
-    { title: 'PIN', html: `
-      <div class="wz-step">
-        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Scegli un PIN a 4 cifre per l'accesso rapido</p>
-        <input id="wz-pin" class="wz-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="margin-bottom:8px;letter-spacing:8px;text-align:center;font-size:28px">
-        <input id="wz-pin2" class="wz-input" type="password" inputmode="numeric" maxlength="4" placeholder="Conferma PIN" style="margin-bottom:12px;letter-spacing:8px;text-align:center;font-size:28px">
-        <div class="wz-error" id="wz-err"></div>
-        <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
-      </div>` },
+
     { title: 'Password Owner', html: `
       <div class="wz-step">
         <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Imposta una password per proteggere il pannello Owner</p>
@@ -699,20 +662,13 @@
       if (!valid) { if (errEl) errEl.textContent = 'Inserisci almeno il nome per ogni garage'; return; }
     }
     if (wzStep === 2) {
-      const p1 = document.getElementById('wz-pin')?.value;
-      const p2 = document.getElementById('wz-pin2')?.value;
-      if (!p1 || p1.length !== 4) { if (errEl) errEl.textContent = 'Il PIN deve essere di 4 cifre'; return; }
-      if (p1 !== p2) { if (errEl) errEl.textContent = 'I PIN non coincidono'; return; }
-      localStorage.setItem('charlotte_pin', p1);
-    }
-    if (wzStep === 3) {
       const p1 = document.getElementById('wz-owner-pwd')?.value;
       const p2 = document.getElementById('wz-owner-pwd2')?.value;
       if (!p1 || p1.length < 4) { if (errEl) errEl.textContent = 'Password minimo 4 caratteri'; return; }
       if (p1 !== p2) { if (errEl) errEl.textContent = 'Le password non coincidono'; return; }
       wzOwnerPwd = p1;
     }
-    if (wzStep === 4) {
+    if (wzStep === 3) {
       if (!wzPlanSelected) { if (errEl) errEl.textContent = 'Seleziona un piano'; return; }
     }
 
@@ -723,15 +679,12 @@
   async function wzComplete() {
     const company = localStorage.getItem('wz_company') || 'La mia azienda';
 
-    const pinApp = localStorage.getItem('charlotte_pin') || '';
-
     const { data: acc, error: accErr } = await sbClient.from('accounts').insert({
       owner_id: currentUser.id,
       company_name: company,
       plan: wzPlanSelected || 'base',
       onboarding_complete: true,
       owner_password: wzOwnerPwd,
-      pin_app: pinApp,
       trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
     }).select().single();
 
@@ -752,8 +705,10 @@
     localStorage.setItem('charlotte_company', company);
     localStorage.removeItem('wz_company');
 
-    mostraSchermata('pin-screen');
+    mostraSchermata('main-screen');
     aggiornaNomeSocietà(company);
+    inizializzaApp();
+    aggiornaHeaderRuolo();
   }
 </script>
 
