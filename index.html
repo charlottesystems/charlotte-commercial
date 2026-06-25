@@ -163,7 +163,7 @@
               style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         🖨 <span id="bt-label">Connetti stampante</span>
       </button>
-      <button onclick="(function(){ var l=localStorage.getItem('charlotte_lang')||'it'; var nl=l==='it'?'en':'it'; localStorage.setItem('charlotte_lang',nl); if(typeof applicaTraduzioni==='function') applicaTraduzioni(); var b=document.getElementById('lang-btn-label'); if(b) b.textContent=nl==='it'?'🇬🇧 English':'🇮🇹 Italiano'; var m=document.getElementById('logo-menu'); if(m) m.style.display='none'; })()"
+      <button onclick="cambiaLingua()"
               style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         🌐 <span id="lang-btn-label">English</span>
       </button>
@@ -215,7 +215,7 @@
         Password dimenticata?
       </button>
       <div style="text-align:center;margin-top:8px">
-        <button onclick="(function(){ var l=localStorage.getItem('charlotte_lang')||'it'; var nl=l==='it'?'en':'it'; localStorage.setItem('charlotte_lang',nl); if(typeof applicaTraduzioni==='function') applicaTraduzioni(); var b=document.getElementById('lang-login-btn'); if(b) b.textContent=nl==='it'?'🇬🇧 English':'🇮🇹 Italiano'; })()"
+        <button onclick="toggleLangLogin()"
                 style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--muted);cursor:pointer;font-size:13px"
                 id="lang-login-btn">🇬🇧 English</button>
       </div>
@@ -566,9 +566,28 @@
     }
   }
 
-  // Override toggleLang per aggiornare bottone
-  const _origToggleLang = window.toggleLang;
-  window.toggleLang = cambiaLingua;
+
+
+  // ── LINGUA ── (funzioni globali)
+  function cambiaLingua() {
+    var lang = localStorage.getItem('charlotte_lang') || 'it';
+    var nuovaLang = lang === 'it' ? 'en' : 'it';
+    localStorage.setItem('charlotte_lang', nuovaLang);
+    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
+    var b = document.getElementById('lang-btn-label');
+    if (b) b.textContent = nuovaLang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano';
+    var m = document.getElementById('logo-menu');
+    if (m) m.style.display = 'none';
+  }
+
+  function toggleLangLogin() {
+    var lang = localStorage.getItem('charlotte_lang') || 'it';
+    var nuovaLang = lang === 'it' ? 'en' : 'it';
+    localStorage.setItem('charlotte_lang', nuovaLang);
+    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
+    var b = document.getElementById('lang-login-btn');
+    if (b) b.textContent = nuovaLang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano';
+  }
 
   // ── MENU LOGO ───────────────────────────────────────────
   function toggleMenuLogo() {
