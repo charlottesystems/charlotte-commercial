@@ -366,7 +366,7 @@
       if (fuoriOrario || giornoChinuso) {
         let msg = '⚠️ ';
         if (giornoChinuso) msg += 'Il garage potrebbe essere chiuso nel giorno selezionato. ';
-        if (fuoriOrario) msg += 'L'orario selezionato è fuori dall'orario di apertura (' + orari.apertura + ' – ' + orari.chiusura + '). ';
+        if (fuoriOrario) msg += 'Orario fuori apertura (' + orari.apertura + ' - ' + orari.chiusura + '). ';
         msg += 'Contatta il garage per conferma.';
         avviso.textContent = msg;
         avviso.style.display = 'block';
