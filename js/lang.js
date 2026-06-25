@@ -349,6 +349,22 @@ function applicaTraduzioni() {
   const ownerLockCanc = document.querySelector('.owner-lock .wz-btn-secondary');
   if (ownerLockCanc) ownerLockCanc.textContent = en ? 'Cancel' : 'Annulla';
 
+  // Traduci bottone prenotazioni
+  document.querySelectorAll('.btn-label').forEach(el => {
+    if (el.textContent.trim() === 'Prenotazioni') el.textContent = en ? 'Bookings' : 'Prenotazioni';
+    if (el.textContent.trim() === 'Bookings') el.textContent = en ? 'Bookings' : 'Prenotazioni';
+  });
+  document.querySelectorAll('.btn-sub').forEach(el => {
+    if (el.textContent.trim() === 'Richieste ricevute') el.textContent = en ? 'Received requests' : 'Richieste ricevute';
+    if (el.textContent.trim() === 'Received requests') el.textContent = en ? 'Received requests' : 'Richieste ricevute';
+  });
+
+  // Traduci titolo schermata prenotazioni
+  document.querySelectorAll('.screen-title').forEach(el => {
+    if (el.textContent.includes('Prenotazioni')) el.textContent = en ? '📅 Bookings' : '📅 Prenotazioni';
+    if (el.textContent.includes('Bookings')) el.textContent = en ? '📅 Bookings' : '📅 Prenotazioni';
+  });
+
   // Traduci categorie veicolo
   const catMap = {
     'Moto': 'Motorcycle', 'Motorcycle': 'Motorcycle',
