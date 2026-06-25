@@ -20,6 +20,83 @@ async function inizializzaApp() {
   await aggiornaStatistiche();
 }
 
+async function apriPrenotazioni() {
+  mostraSchermata('prenotazioni-screen');
+  const container = document.getElementById('prenotazioni-app-container');
+  if (!container || !garageCorrente) return;
+
+  container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Caricamento...</div>';
+
+  const accountId = localStorage.getItem('charlotte_account_id');
+
+  const { data, error } = await sbClient
+    .from('prenotazioni')
+    .select('*')
+    .eq('garage_id', garageCorrente.id)
+    .order('data_ingresso', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4C5;</div><div class="empty-text">Nessuna prenotazione</div></div>';
+    return;
+  }
+
+  const inAttesa = data.filter(p => p.stato === 'in_attesa');
+  const confermate = data.filter(p => p.stato === 'confermata');
+  const ruolo = localStorage.getItem('charlotte_ruolo');
+
+  let html = '';
+
+  if (inAttesa.length > 0) {
+    html += '<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:0 4px">&#x23F3; In attesa (' + inAttesa.length + ')</div>';
+    inAttesa.forEach(p => { html += cardPrenotazioneApp(p, ruolo === 'owner'); });
+  }
+  if (confermate.length > 0) {
+    html += '<div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding:0 4px">&#x2713; Confermate (' + confermate.length + ')</div>';
+    confermate.forEach(p => { html += cardPrenotazioneApp(p, false); });
+  }
+
+  container.innerHTML = html || '<div class="empty-state"><div class="empty-icon">&#x1F4C5;</div><div class="empty-text">Nessuna prenotazione attiva</div></div>';
+}
+
+function cardPrenotazioneApp(p, canConfirm) {
+  const dataI = new Date(p.data_ingresso).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  const dataU = new Date(p.data_uscita).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  const statoColore = p.stato === 'in_attesa' ? 'var(--amber)' : 'var(--green)';
+
+  let html = '<div class="sosta-card" style="margin-bottom:8px;border-left:3px solid ' + statoColore + '">' +
+    '<div class="sosta-info">' +
+    '<div class="sosta-targa">' + p.nome_cliente + '</div>' +
+    '<div class="sosta-tipo">' + (p.targa || 'Targa n.d.') + (p.categoria ? ' · ' + p.categoria : '') + '</div>' +
+    '<div class="sosta-time">&#x1F4C5; ' + dataI + ' &#x2192; ' + dataU + '</div>' +
+    (p.importo_preventivo ? '<div style="color:var(--green);font-size:12px">Preventivo: &#x20AC;' + parseFloat(p.importo_preventivo).toFixed(2) + '</div>' : '') +
+    (p.note ? '<div style="font-size:11px;color:var(--muted);font-style:italic">' + p.note + '</div>' : '') +
+    '</div>' +
+    '<div style="text-align:right">' +
+    '<span style="font-size:10px;font-family:Share Tech Mono,monospace;color:' + statoColore + '">' + p.stato.toUpperCase() + '</span>' +
+    '</div></div>';
+
+  if (canConfirm && p.stato === 'in_attesa') {
+    html += '<div style="display:flex;gap:8px;margin:-4px 0 8px;padding:0 4px">' +
+      '<button onclick="confermaPren(this)" data-id="' + p.id + '" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:8px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">&#x2713; Conferma</button>' +
+      '<button onclick="rifiutaPren(this)" data-id="' + p.id + '" style="flex:1;background:none;border:1px solid var(--red);border-radius:8px;padding:8px;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">&#x2715; Rifiuta</button>' +
+      '</div>';
+  }
+
+  return html;
+}
+
+async function confermaPren(btn) {
+  const id = btn.getAttribute('data-id');
+  await sbClient.from('prenotazioni').update({ stato: 'confermata' }).eq('id', id);
+  apriPrenotazioni();
+}
+
+async function rifiutaPren(btn) {
+  const id = btn.getAttribute('data-id');
+  await sbClient.from('prenotazioni').update({ stato: 'rifiutata' }).eq('id', id);
+  apriPrenotazioni();
+}
+
 function getLang() {
   return localStorage.getItem('charlotte_lang') || 'it';
 }
