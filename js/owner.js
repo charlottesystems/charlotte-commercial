@@ -62,7 +62,7 @@ function mostraSezioneOwner(sezione) {
   if (sezione === 'operatori') return renderOperatori();
   if (sezione === 'turni') return renderTurni();
   if (sezione === 'prenotazioni') return renderPrenotazioni();
-  if (sezione === 'categorie') return renderCategorieCustom();
+
 }
 
 // ── TARIFFE ──────────────────────────────────────────────────
@@ -78,6 +78,7 @@ async function renderTariffe() {
 
   tariffeCorrente = data || [];
 
+  // Prima pulisce il container poi aggiunge tariffe standard + custom
   container.innerHTML = CATEGORIE.map(cat => {
     const t = tariffeCorrente.find(r => r.categoria === cat.id) || {};
     return '<div class="tariffa-card" id="card-' + cat.id + '">' +
@@ -109,6 +110,77 @@ async function renderTariffe() {
       '<div class="tariffa-msg" id="msg-' + cat.id + '"></div>' +
       '</div></div>';
   }).join('');
+  // Aggiunge sezione categorie custom in fondo
+  await renderCategorieCustomInTariffe();
+}
+
+async function renderCategorieCustomInTariffe() {
+  // Aggiunge sezione categorie custom in fondo al container tariffe
+  const container = document.getElementById('tariffe-container');
+  if (!container || !ownerGarageId) return;
+
+  const accountId = localStorage.getItem('charlotte_account_id');
+
+  const { data: cats } = await sbClient
+    .from('categorie_custom')
+    .select('*')
+    .eq('garage_id', ownerGarageId)
+    .order('nome');
+
+  const { data: tariffe } = await sbClient
+    .from('tariffe')
+    .select('*')
+    .eq('garage_id', ownerGarageId)
+    .not('categoria_custom', 'is', null);
+
+  const lista = cats || [];
+
+  let html = '<div style="margin-top:24px">' +
+    '<div class="section-label" style="margin-bottom:12px">Categorie personalizzate</div>' +
+    '<div class="tariffa-card" style="margin-bottom:12px">' +
+    '<div class="tariffa-card-header"><span>➕ Nuova categoria</span></div>' +
+    '<div class="tariffa-fields">' +
+    '<div class="tariffa-row">' +
+    '<div class="tariffa-field"><label>Nome categoria</label>' +
+    '<input class="wz-input" id="cc-nome" placeholder="Es. Bicicletta, Cargo..."></div>' +
+    '<div class="tariffa-field"><label>Icona (emoji)</label>' +
+    '<input class="wz-input" id="cc-icona" placeholder="🚲" maxlength="4" style="font-size:24px;text-align:center" value="🚗"></div>' +
+    '</div>' +
+    '<button class="wz-btn-primary" style="margin-top:8px" onclick="aggiungiCategoriaCustom()">+ Aggiungi categoria</button>' +
+    '<div class="tariffa-msg" id="msg-cc"></div>' +
+    '</div></div>';
+
+  if (lista.length > 0) {
+    lista.forEach(cat => {
+      const t = (tariffe || []).find(t => t.categoria_custom === cat.id) || {};
+      html += '<div class="tariffa-card" style="margin-bottom:12px">' +
+        '<div class="tariffa-card-header">' +
+        '<span>' + (cat.icona || '🚗') + ' ' + cat.nome + '</span>' +
+        '<div style="display:flex;gap:8px">' +
+        '<span class="tariffa-badge ' + (t.id ? 'configured' : 'missing') + '">' + (t.id ? 'Configurata' : 'Senza tariffa') + '</span>' +
+        '<button onclick="eliminaCatCustom(this)" data-id="' + cat.id + '" style="background:none;border:1px solid var(--red);border-radius:6px;padding:4px 8px;color:var(--red);cursor:pointer;font-size:11px">Elimina</button>' +
+        '</div></div>' +
+        '<div class="tariffa-fields">' +
+        '<div class="tariffa-row">' +
+        '<div class="tariffa-field"><label>Prima ora (€)</label>' +
+        '<input type="number" step="0.01" min="0" class="wz-input" id="cc-' + cat.id + '-prima" value="' + (t.prezzo_prima_ora || '') + '"></div>' +
+        '<div class="tariffa-field"><label>Ore successive (€)</label>' +
+        '<input type="number" step="0.01" min="0" class="wz-input" id="cc-' + cat.id + '-succ" value="' + (t.prezzo_ora_successiva || '') + '"></div>' +
+        '</div>' +
+        '<div class="tariffa-row">' +
+        '<div class="tariffa-field"><label>Tariffa giornaliera (€)</label>' +
+        '<input type="number" step="0.01" min="0" class="wz-input" id="cc-' + cat.id + '-giorn" value="' + (t.prezzo_giornaliero || '') + '"></div>' +
+        '<div class="tariffa-field"><label>Soglia giornaliero (ore)</label>' +
+        '<input type="number" step="1" min="1" class="wz-input" id="cc-' + cat.id + '-soglia" value="' + (t.soglia_giornaliero_ore || 4) + '"></div>' +
+        '</div>' +
+        '<button class="wz-btn-primary" style="margin-top:8px" onclick="salvaTariffaCustomBtn(this)" data-catid="' + cat.id + '" data-tarid="' + (t.id || '') + '">Salva tariffa</button>' +
+        '<div class="tariffa-msg" id="msg-cc-' + cat.id + '"></div>' +
+        '</div></div>';
+    });
+  }
+
+  html += '</div>';
+  container.insertAdjacentHTML('beforeend', html);
 }
 
 async function salvaTariffa(categoriaId, esistenteId) {
