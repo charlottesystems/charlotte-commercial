@@ -115,6 +115,12 @@ async function renderPrenotazioniApp() {
   }
 
   container.innerHTML = html;
+
+  // Carica convenzioni nei select di ogni prenotazione
+  const tuttePrenotazioni = [...arriviOggi, ...partenzeOggi, ...prossimiArrivi];
+  tuttePrenotazioni.forEach(p => {
+    if (p.garage_id) caricaConvenzioniPren(p.id, p.garage_id);
+  });
 }
 
 function toggleProssimiArrivi() {
@@ -143,11 +149,21 @@ function cardPrenotazioneApp(p, canConfirm) {
     '<div class="sosta-targa">' + p.nome_cliente + '</div>' +
     '<div class="sosta-tipo">' + (p.targa || 'Targa n.d.') + (p.categoria ? ' · ' + p.categoria : '') + '</div>' +
     '<div class="sosta-time">&#x1F4C5; ' + dataI + ' &#x2192; ' + dataU + '</div>' +
-    (p.importo_preventivo ? '<div style="color:var(--green);font-size:12px">Preventivo: &#x20AC;' + parseFloat(p.importo_preventivo).toFixed(2) + '</div>' : '') +
+    (p.importo_preventivo ? '<div style="color:var(--green);font-size:12px" id="prev-' + p.id + '">Preventivo: &#x20AC;' + parseFloat(p.importo_preventivo).toFixed(2) + '</div>' : '<div id="prev-' + p.id + '"></div>') +
     (p.note ? '<div style="font-size:11px;color:var(--muted);font-style:italic">' + p.note + '</div>' : '') +
     '</div>' +
     '<div style="text-align:right">' +
     '<span style="font-size:10px;font-family:Share Tech Mono,monospace;color:' + statoColore + '">' + p.stato.toUpperCase() + '</span>' +
+    '</div></div>';
+
+  // Sezione convenzione applicabile (solo per operatori e owner)
+  html += '<div style="padding:0 4px 8px">' +
+    '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">' +
+    '<select id="conv-sel-' + p.id + '" style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;outline:none">' +
+    '<option value="">Nessuna convenzione</option>' +
+    '</select>' +
+    '<button onclick="applicaConvenzione('' + p.id + '', '' + (p.garage_id) + '', '' + (p.categoria || '') + '', '' + p.data_ingresso + '', '' + p.data_uscita + '')" ' +
+    'style="background:var(--accent);border:none;border-radius:8px;padding:6px 12px;color:white;cursor:pointer;font-size:12px;font-family:Rajdhani,sans-serif;font-weight:700;white-space:nowrap">Ricalcola</button>' +
     '</div></div>';
 
   if (canConfirm && p.stato === 'in_attesa') {
@@ -158,6 +174,55 @@ function cardPrenotazioneApp(p, canConfirm) {
   }
 
   return html;
+}
+
+// Carica convenzioni nel select dopo render
+async function caricaConvenzioniPren(prenotazioneId, garageId) {
+  const sel = document.getElementById('conv-sel-' + prenotazioneId);
+  if (!sel || sel.loaded) return;
+  const { data } = await sbClient.from('convenzioni').select('id, nome').eq('garage_id', garageId).eq('attiva', true);
+  (data || []).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.nome;
+    sel.appendChild(opt);
+  });
+  sel.loaded = true;
+}
+
+async function applicaConvenzione(prenId, garageId, categoria, dataIngresso, dataUscita) {
+  const convId = document.getElementById('conv-sel-' + prenId)?.value || null;
+  const prevEl = document.getElementById('prev-' + prenId);
+
+  // Calcola durata
+  const durataOre = (new Date(dataUscita) - new Date(dataIngresso)) / 3600000;
+
+  let importo = null;
+
+  if (convId) {
+    // Cerca tariffa convenzione
+    const { data: tc } = await sbClient.from('tariffe_convenzioni').select('prezzo_giornaliero').eq('convenzione_id', convId).eq('categoria', categoria).single();
+    if (tc) {
+      const giorni = Math.max(1, Math.ceil(durataOre / 24));
+      importo = giorni * tc.prezzo_giornaliero;
+    }
+  } else {
+    // Tariffa standard
+    const { data: tar } = await sbClient.from('tariffe').select('*').eq('garage_id', garageId).eq('categoria', categoria).single();
+    if (tar) {
+      const soglia = tar.soglia_giornaliero_ore || 4;
+      if (durataOre >= soglia) {
+        importo = Math.max(1, Math.ceil(durataOre / 24)) * tar.prezzo_giornaliero;
+      } else {
+        importo = tar.prezzo_prima_ora + Math.max(0, Math.ceil(durataOre) - 1) * tar.prezzo_ora_successiva;
+      }
+    }
+  }
+
+  if (importo !== null) {
+    await sbClient.from('prenotazioni').update({ importo_preventivo: importo, convenzione_id: convId }).eq('id', prenId);
+    if (prevEl) prevEl.innerHTML = 'Preventivo: <strong style="color:var(--green)">&#x20AC;' + importo.toFixed(2) + '</strong>' + (convId ? ' (convenzione)' : '');
+  }
 }
 
 async function confermaPren(btn) {
