@@ -208,3 +208,78 @@ function cambioNomeOperatore() {
   }
   // Per owner non serve
 }
+
+
+// ── OVERLAY GPS NEGATO ───────────────────────────────────────
+
+function mostraOverlayGPSNegato() {
+  // Rimuovi overlay esistente se presente
+  const existing = document.getElementById('gps-overlay');
+  if (existing) existing.remove();
+
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
+
+  let istruzioni = '';
+  if (isAndroid) {
+    istruzioni = `
+      <div style="text-align:left;margin:16px 0">
+        <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:700">Su Android Chrome:</div>
+        <ol style="color:var(--muted);font-size:13px;padding-left:20px;line-height:2">
+          <li>Tocca l'icona 🔒 o ⓘ nella barra URL</li>
+          <li>Tocca <strong style="color:var(--text)">Autorizzazioni</strong></li>
+          <li>Tocca <strong style="color:var(--text)">Posizione</strong></li>
+          <li>Seleziona <strong style="color:var(--green)">Consenti</strong></li>
+          <li>Ricarica la pagina</li>
+        </ol>
+      </div>`;
+  } else if (isIOS) {
+    istruzioni = `
+      <div style="text-align:left;margin:16px 0">
+        <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:700">Su iPhone/iPad:</div>
+        <ol style="color:var(--muted);font-size:13px;padding-left:20px;line-height:2">
+          <li>Vai su <strong style="color:var(--text)">Impostazioni</strong> del telefono</li>
+          <li>Scorri fino a <strong style="color:var(--text)">Safari</strong> o <strong style="color:var(--text)">Chrome</strong></li>
+          <li>Tocca <strong style="color:var(--text)">Posizione</strong></li>
+          <li>Seleziona <strong style="color:var(--green)">Consenti</strong></li>
+          <li>Riapri l'app</li>
+        </ol>
+      </div>`;
+  } else {
+    istruzioni = `
+      <div style="text-align:left;margin:16px 0">
+        <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:700">Su Chrome desktop:</div>
+        <ol style="color:var(--muted);font-size:13px;padding-left:20px;line-height:2">
+          <li>Clicca l'icona 🔒 nella barra URL</li>
+          <li>Clicca <strong style="color:var(--text)">Posizione</strong></li>
+          <li>Seleziona <strong style="color:var(--green)">Consenti</strong></li>
+          <li>Ricarica la pagina</li>
+        </ol>
+      </div>`;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'gps-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML = `
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:360px;width:100%;text-align:center">
+      <div style="font-size:52px;margin-bottom:12px">📍</div>
+      <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:22px;color:var(--white);margin-bottom:8px">
+        GPS non autorizzato
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">
+        La timbratura richiede l'accesso alla posizione GPS per verificare che tu sia nel garage.
+      </div>
+      ${istruzioni}
+      <button onclick="location.reload()"
+              style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:12px;padding:14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:white;cursor:pointer;margin-bottom:10px">
+        ✓ Ho abilitato il GPS — Ricarica
+      </button>
+      <button onclick="document.getElementById('gps-overlay').remove()"
+              style="width:100%;background:none;border:1px solid var(--border);border-radius:12px;padding:12px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer">
+        Annulla
+      </button>
+    </div>`;
+
+  document.body.appendChild(overlay);
+}
