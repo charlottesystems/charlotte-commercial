@@ -86,12 +86,7 @@
         <option value="">Seleziona...</option>
       </select>
     </div>
-    <div class="field" id="conv-field" style="display:none">
-      <label>Convenzione (opzionale)</label>
-      <select id="f-convenzione" onchange="calcolaPreventivo()">
-        <option value="">Nessuna convenzione</option>
-      </select>
-    </div>
+
     <div class="field">
       <label>Data ingresso *</label>
       <input id="f-ingresso-data" type="date" onchange="calcolaPreventivo()">
@@ -159,7 +154,7 @@
 
   let garageData = null;
   let tariffeData = [];
-  let convenzioniData = [];
+
 
   async function init() {
     const params = new URLSearchParams(window.location.search);
@@ -185,13 +180,7 @@
       .eq('garage_id', garageId);
     tariffeData = tariffe || [];
 
-    // Carica convenzioni
-    const { data: convenzioni } = await sbClient
-      .from('convenzioni')
-      .select('*, tariffe_convenzioni(*)')
-      .eq('garage_id', garageId)
-      .eq('attiva', true);
-    convenzioniData = convenzioni || [];
+
 
     // Popola UI
     document.getElementById('garage-nome').textContent = garage.name;
@@ -258,17 +247,7 @@
     // Salva categorie custom per calcolo preventivo
     window._catsCustom = catsCustom || [];
 
-    // Convenzioni
-    if (convenzioniData.length > 0) {
-      const convSel = document.getElementById('f-convenzione');
-      convenzioniData.forEach(conv => {
-        const opt = document.createElement('option');
-        opt.value = conv.id;
-        opt.textContent = conv.nome;
-        convSel.appendChild(opt);
-      });
-      document.getElementById('conv-field').style.display = 'block';
-    }
+
 
     // Date default: domani
     const domani = new Date();
@@ -293,7 +272,7 @@
 
   function calcolaPreventivo() {
     const catId = document.getElementById('f-categoria').value;
-    const convId = document.getElementById('f-convenzione').value;
+    const convId = null;
     const ingressoData = document.getElementById('f-ingresso-data').value;
     const ingressoOra = document.getElementById('f-ingresso-ora').value || '09:00';
     const uscitaData = document.getElementById('f-uscita-data').value;
@@ -393,7 +372,7 @@
     const targa = document.getElementById('f-targa').value.trim();
     const tel = document.getElementById('f-tel').value.trim();
     const cat = document.getElementById('f-categoria').value;
-    const convId = document.getElementById('f-convenzione').value || null;
+    const convId = null;
     const ingressoData = document.getElementById('f-ingresso-data').value;
     const ingressoOra = document.getElementById('f-ingresso-ora').value || '09:00';
     const uscitaData = document.getElementById('f-uscita-data').value;
@@ -437,8 +416,7 @@
 
     // Mostra riepilogo
     const catLabel = document.getElementById('f-categoria').options[document.getElementById('f-categoria').selectedIndex]?.text || cat;
-    const convLabel = document.getElementById('f-convenzione').value ?
-      document.getElementById('f-convenzione').options[document.getElementById('f-convenzione').selectedIndex]?.text : null;
+    const convLabel = null;
     const riepilogo = document.getElementById('success-riepilogo');
     if (riepilogo) {
       riepilogo.innerHTML =
