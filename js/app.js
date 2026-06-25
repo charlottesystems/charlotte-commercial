@@ -75,7 +75,7 @@ async function renderPrenotazioniApp() {
   // Arrivi
   html += '<div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">&#x1F7E2; ' + (en ? 'Arrivals' : 'Arrivi') + ' (' + arriviOggi.length + ')</div>';
   if (arriviOggi.length === 0) {
-    html += '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;margin-bottom:16px">' + (en ? 'No arrivals' : 'Nessun arrivo') + '</div>';
+    html += '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;margin-bottom:16px">' + (en ? 'No arrivals today' : 'Nessun arrivo oggi') + '</div>';
   } else {
     arriviOggi.forEach(p => { html += cardPrenotazioneApp(p, ruolo === 'owner'); });
   }
@@ -83,14 +83,13 @@ async function renderPrenotazioniApp() {
   // Partenze
   html += '<div style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">&#x1F534; ' + (en ? 'Departures' : 'Partenze') + ' (' + partenzeOggi.length + ')</div>';
   if (partenzeOggi.length === 0) {
-    html += '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;margin-bottom:16px">' + (en ? 'No departures' : 'Nessuna partenza') + '</div>';
+    html += '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;margin-bottom:16px">' + (en ? 'No departures today' : 'Nessuna partenza oggi') + '</div>';
   } else {
     partenzeOggi.forEach(p => { html += cardPrenotazioneApp(p, false); });
   }
 
-  // Prossimi arrivi
+  // Prossimi arrivi - collassabile
   if (prossimiArrivi.length > 0) {
-    html += '<div style="font-size:11px;color:var(--accent3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">&#x1F4C5; ' + (en ? 'Upcoming arrivals' : 'Prossimi arrivi') + ' (' + prossimiArrivi.length + ')</div>';
     // Raggruppa per data
     const perData = {};
     prossimiArrivi.forEach(p => {
@@ -98,14 +97,33 @@ async function renderPrenotazioniApp() {
       if (!perData[d]) perData[d] = [];
       perData[d].push(p);
     });
+
+    let prossimiHtml = '';
     for (const data in perData) {
       const dataFmt = new Date(data + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: '2-digit' });
-      html += '<div style="font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:6px">' + dataFmt + '</div>';
-      perData[data].forEach(p => { html += cardPrenotazioneApp(p, false); });
+      prossimiHtml += '<div style="font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:6px">' + dataFmt + '</div>';
+      perData[data].forEach(p => { prossimiHtml += cardPrenotazioneApp(p, false); });
     }
+
+    html += '<div style="margin-top:16px">' +
+      '<button onclick="toggleProssimiArrivi()" id="btn-prossimi" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--accent3);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px">' +
+      '<span>&#x1F4C5; ' + (en ? 'Upcoming arrivals' : 'Prossimi arrivi') + ' (' + prossimiArrivi.length + ')</span>' +
+      '<span id="icon-prossimi" style="font-size:18px">&#x25BC;</span>' +
+      '</button>' +
+      '<div id="prossimi-arrivi-list" style="display:none;margin-top:8px">' + prossimiHtml + '</div>' +
+      '</div>';
   }
 
   container.innerHTML = html;
+}
+
+function toggleProssimiArrivi() {
+  const list = document.getElementById('prossimi-arrivi-list');
+  const icon = document.getElementById('icon-prossimi');
+  if (!list) return;
+  const aperto = list.style.display !== 'none';
+  list.style.display = aperto ? 'none' : 'block';
+  if (icon) icon.innerHTML = aperto ? '&#x25BC;' : '&#x25B2;';
 }
 
 function cambiaDataPrenotazioni(delta) {
