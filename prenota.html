@@ -53,6 +53,8 @@
     <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:28px;color:white;margin:0 auto 12px;box-shadow:0 0 24px rgba(124,58,237,0.5)">🅿</div>
     <div class="garage-nome" id="garage-nome">—</div>
     <div class="garage-addr" id="garage-addr"></div>
+    <div id="garage-orari" style="display:none;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:var(--muted)"></div>
+    <div id="garage-contatti" style="display:none;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:12px"></div>
   </div>
 
   <div class="form-card">
@@ -118,6 +120,8 @@
     <div class="preventivo-dettaglio" id="preventivo-dettaglio"></div>
   </div>
 
+  <div id="avviso-orari" style="display:none;background:rgba(251,191,36,0.1);border:1px solid #f59e0b;border-radius:10px;padding:12px 14px;font-size:13px;color:#f59e0b;margin-bottom:12px;text-align:left"></div>
+
   <div class="error-msg" id="form-error"></div>
 
   <button class="submit-btn" id="submit-btn" onclick="inviaPrenotazione()">
@@ -166,7 +170,7 @@
     // Carica garage
     const { data: garage } = await sbClient
       .from('garages')
-      .select('id, name, address, account_id, active')
+      .select('id, name, address, account_id, active, email, telefono, orario_apertura, orario_chiusura, giorni_apertura')
       .eq('id', garageId)
       .eq('active', true)
       .single();
@@ -193,6 +197,35 @@
     document.getElementById('garage-nome').textContent = garage.name;
     document.getElementById('garage-addr').textContent = garage.address || '';
     document.title = 'Prenota — ' + garage.name;
+
+    // Orari apertura
+    const orariEl = document.getElementById('garage-orari');
+    if (orariEl && (garage.orario_apertura || garage.giorni_apertura)) {
+      const nomiGiorni = ['', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+      const giorni = (garage.giorni_apertura || '1,2,3,4,5,6').split(',').map(g => nomiGiorni[parseInt(g)]).join(' · ');
+      const aperta = (garage.orario_apertura || '07:00').slice(0,5);
+      const chiude = (garage.orario_chiusura || '20:00').slice(0,5);
+      orariEl.innerHTML = '🕐 <strong>Orari:</strong> ' + aperta + ' – ' + chiude + ' &nbsp;|&nbsp; ' + giorni;
+      orariEl.style.display = 'block';
+    }
+
+    // Contatti
+    const contattiEl = document.getElementById('garage-contatti');
+    if (contattiEl && (garage.telefono || garage.email)) {
+      let html = '📞 <strong>Contatti:</strong>&nbsp;';
+      if (garage.telefono) html += '<a href="tel:' + garage.telefono + '" style="color:var(--accent3);text-decoration:none">' + garage.telefono + '</a>&nbsp;&nbsp;';
+      if (garage.email) html += '<a href="mailto:' + garage.email + '" style="color:var(--accent3);text-decoration:none">' + garage.email + '</a>';
+      html += '<div style="margin-top:4px;color:var(--muted)">Per assistenza contatta direttamente il garage.</div>';
+      contattiEl.innerHTML = html;
+      contattiEl.style.display = 'block';
+    }
+
+    // Salva orari per validazione
+    window._garageOrari = {
+      apertura: (garage.orario_apertura || '07:00').slice(0,5),
+      chiusura: (garage.orario_chiusura || '20:00').slice(0,5),
+      giorni: (garage.giorni_apertura || '1,2,3,4,5,6').split(',').map(Number)
+    };
 
     // Carica categorie custom
     const { data: catsCustom } = await sbClient
@@ -318,6 +351,29 @@
     document.getElementById('preventivo-importo').textContent = '€ ' + importo.toFixed(2);
     document.getElementById('preventivo-dettaglio').textContent = dettaglio + ' · ' + formatDurata(durataMinuti);
     box.style.display = 'block';
+
+    // Verifica orari garage
+    const avviso = document.getElementById('avviso-orari');
+    if (avviso && window._garageOrari) {
+      const orari = window._garageOrari;
+      const oraIngresso = ingressoVal.slice(11,16);
+      const oraUscita = uscitaVal.slice(11,16);
+      const giornoSettimana = ingresso.getDay() || 7; // 1=Lun, 7=Dom
+
+      const fuoriOrario = oraIngresso < orari.apertura || oraUscita > orari.chiusura;
+      const giornoChinuso = !orari.giorni.includes(giornoSettimana);
+
+      if (fuoriOrario || giornoChinuso) {
+        let msg = '⚠️ ';
+        if (giornoChinuso) msg += 'Il garage potrebbe essere chiuso nel giorno selezionato. ';
+        if (fuoriOrario) msg += 'L'orario selezionato è fuori dall'orario di apertura (' + orari.apertura + ' – ' + orari.chiusura + '). ';
+        msg += 'Contatta il garage per conferma.';
+        avviso.textContent = msg;
+        avviso.style.display = 'block';
+      } else {
+        avviso.style.display = 'none';
+      }
+    }
 
     return importo;
   }
