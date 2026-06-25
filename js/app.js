@@ -20,6 +20,10 @@ async function inizializzaApp() {
   await aggiornaStatistiche();
 }
 
+function getLang() {
+  return localStorage.getItem('charlotte_lang') || 'it';
+}
+
 function aggiornaOrologio() {
   const ora = new Date();
   const hh = String(ora.getHours()).padStart(2, '0');
