@@ -162,7 +162,7 @@ function cardPrenotazioneApp(p, canConfirm) {
     '<select id="conv-sel-' + p.id + '" style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;outline:none">' +
     '<option value="">Nessuna convenzione</option>' +
     '</select>' +
-    '<button onclick="applicaConvenzione('' + p.id + '', '' + (p.garage_id) + '', '' + (p.categoria || '') + '', '' + p.data_ingresso + '', '' + p.data_uscita + '')" ' +
+    '<button onclick="applicaConvenzioneBtn(this)" data-pren="' + p.id + '" data-garage="' + p.garage_id + '" data-cat="' + (p.categoria || '') + '" data-ing="' + p.data_ingresso + '" data-usc="' + p.data_uscita + '" ' +
     'style="background:var(--accent);border:none;border-radius:8px;padding:6px 12px;color:white;cursor:pointer;font-size:12px;font-family:Rajdhani,sans-serif;font-weight:700;white-space:nowrap">Ricalcola</button>' +
     '</div></div>';
 
@@ -177,6 +177,16 @@ function cardPrenotazioneApp(p, canConfirm) {
 }
 
 // Carica convenzioni nel select dopo render
+function applicaConvenzioneBtn(btn) {
+  applicaConvenzione(
+    btn.getAttribute('data-pren'),
+    btn.getAttribute('data-garage'),
+    btn.getAttribute('data-cat'),
+    btn.getAttribute('data-ing'),
+    btn.getAttribute('data-usc')
+  );
+}
+
 async function caricaConvenzioniPren(prenotazioneId, garageId) {
   const sel = document.getElementById('conv-sel-' + prenotazioneId);
   if (!sel || sel.loaded) return;
