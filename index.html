@@ -163,10 +163,14 @@
               style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         🖨 <span id="bt-label">Connetti stampante</span>
       </button>
+      <button onclick="chiudiMenuLogo(); toggleLang()"
+              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        🌐 <span id="lang-btn-label">English</span>
+      </button>
       <div style="border-top:1px solid var(--border);margin:4px 0"></div>
       <button onclick="chiudiMenuLogo(); doLogout()"
               style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--red);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
-        ⏻ Esci
+        ⏻ <span data-i18n="logout">Esci</span>
       </button>
     </div>
   </div>
@@ -210,6 +214,11 @@
               style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px">
         Password dimenticata?
       </button>
+      <div style="text-align:center;margin-top:8px">
+        <button onclick="toggleLangLogin()"
+                style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--muted);cursor:pointer;font-size:13px"
+                id="lang-login-btn">🇬🇧 English</button>
+      </div>
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">
         <a href="termini.html" style="color:var(--muted);text-decoration:none">Termini</a> ·
         <a href="privacy.html" style="color:var(--muted);text-decoration:none">Privacy</a>
@@ -506,7 +515,7 @@
 <script>
   (function() {
     var v = Date.now();
-    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js','js/stampa.js'];
+    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js','js/stampa.js','js/lang.js'];
     var loaded = 0;
     files.forEach(function(f) {
       var s = document.createElement('script');
@@ -537,12 +546,44 @@
       if (appReady) {
         initSupabase();
         controllaSessione();
+        setTimeout(() => {
+          if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
+          aggiornaLangBtn();
+        }, 100);
       } else {
         setTimeout(waitReady, 50);
       }
     }
     waitReady();
   });
+
+  // ── LINGUA ──────────────────────────────────────────────
+  function aggiornaLangBtn() {
+    const btn = document.getElementById('lang-btn-label');
+    if (btn) {
+      const lang = localStorage.getItem('charlotte_lang') || 'it';
+      btn.textContent = lang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano';
+    }
+  }
+
+  // Override toggleLang per aggiornare bottone
+  const _origToggleLang = window.toggleLang;
+  function toggleLangLogin() {
+    if (typeof setLang === 'function') {
+      const lang = localStorage.getItem('charlotte_lang') || 'it';
+      setLang(lang === 'it' ? 'en' : 'it');
+      const btn = document.getElementById('lang-login-btn');
+      if (btn) btn.textContent = lang === 'it' ? '🇮🇹 Italiano' : '🇬🇧 English';
+    }
+  }
+
+  window.toggleLang = function() {
+    if (typeof setLang === 'function') {
+      const lang = localStorage.getItem('charlotte_lang') || 'it';
+      setLang(lang === 'it' ? 'en' : 'it');
+      aggiornaLangBtn();
+    }
+  };
 
   // ── MENU LOGO ───────────────────────────────────────────
   function toggleMenuLogo() {
@@ -787,4 +828,3 @@
 
 </body>
 </html>
- 
