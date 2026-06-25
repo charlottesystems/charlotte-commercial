@@ -297,20 +297,14 @@
     var lang = localStorage.getItem('charlotte_lang') || 'it';
     var nl = lang === 'it' ? 'en' : 'it';
     localStorage.setItem('charlotte_lang', nl);
-    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
-    var b = document.getElementById('lang-btn-label');
-    if (b) b.textContent = nl === 'it' ? 'English' : 'Italiano';
-    var m = document.getElementById('logo-menu');
-    if (m) m.style.display = 'none';
+    location.reload();
   }
 
   function toggleLangLogin() {
     var lang = localStorage.getItem('charlotte_lang') || 'it';
     var nl = lang === 'it' ? 'en' : 'it';
     localStorage.setItem('charlotte_lang', nl);
-    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
-    var b = document.getElementById('lang-login-btn');
-    if (b) b.textContent = nl === 'it' ? 'English' : 'Italiano';
+    location.reload();
   }
 
   (function() {
