@@ -163,7 +163,7 @@
               style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         🖨 <span id="bt-label">Connetti stampante</span>
       </button>
-      <button onclick="chiudiMenuLogo(); toggleLang()"
+      <button onclick="cambiaLingua()"
               style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         🌐 <span id="lang-btn-label">English</span>
       </button>
@@ -568,22 +568,7 @@
 
   // Override toggleLang per aggiornare bottone
   const _origToggleLang = window.toggleLang;
-  function toggleLangLogin() {
-    if (typeof setLang === 'function') {
-      const lang = localStorage.getItem('charlotte_lang') || 'it';
-      setLang(lang === 'it' ? 'en' : 'it');
-      const btn = document.getElementById('lang-login-btn');
-      if (btn) btn.textContent = lang === 'it' ? '🇮🇹 Italiano' : '🇬🇧 English';
-    }
-  }
-
-  window.toggleLang = function() {
-    if (typeof setLang === 'function') {
-      const lang = localStorage.getItem('charlotte_lang') || 'it';
-      setLang(lang === 'it' ? 'en' : 'it');
-      aggiornaLangBtn();
-    }
-  };
+  window.toggleLang = cambiaLingua;
 
   // ── MENU LOGO ───────────────────────────────────────────
   function toggleMenuLogo() {
