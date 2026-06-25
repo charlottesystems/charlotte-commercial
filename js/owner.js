@@ -681,7 +681,7 @@ async function renderPrenotazioni() {
       '<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px">🏢 ' + g.name + '</div>' +
       '<div style="display:flex;gap:8px;align-items:center">' +
       '<input class="wz-input" value="' + link + '" readonly style="font-size:11px;font-family:Share Tech Mono,monospace;color:var(--muted);flex:1">' +
-      '<button onclick="copiaLink('' + link + '')" style="background:var(--accent);border:none;border-radius:8px;padding:8px 12px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;white-space:nowrap">Copia</button>' +
+      '<button onclick="copiaLink(&quot;' + link + '&quot;)" style="background:var(--accent);border:none;border-radius:8px;padding:8px 12px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;white-space:nowrap">Copia</button>' +
       '<a href="' + link + '" target="_blank" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--muted);text-decoration:none;font-size:13px">Anteprima</a>' +
       '</div></div>';
   });
@@ -747,8 +747,8 @@ function cardPrenotazione(p) {
     (p.note ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-style:italic">' + p.note + '</div>' : '') +
     (p.stato === 'in_attesa' ? 
       '<div style="display:flex;gap:8px">' +
-      '<button onclick="aggiornaPrenotazione('' + p.id + '', 'confermata')" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:8px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">✓ Conferma</button>' +
-      '<button onclick="aggiornaPrenotazione('' + p.id + '', 'rifiutata')" style="flex:1;background:none;border:1px solid var(--red);border-radius:8px;padding:8px;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">✕ Rifiuta</button>' +
+      '<button onclick="aggiornaPrenotazione(&quot;' + p.id + '&quot;, &quot;confermata&quot;)" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:8px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">✓ Conferma</button>' +
+      '<button onclick="aggiornaPrenotazione(&quot;' + p.id + '&quot;, &quot;rifiutata&quot;)" style="flex:1;background:none;border:1px solid var(--red);border-radius:8px;padding:8px;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">✕ Rifiuta</button>' +
       '</div>' : '') +
     '</div></div>';
 }
@@ -768,4 +768,11 @@ function copiaLink(link) {
   }).catch(() => {
     prompt('Copia questo link:', link);
   });
+}
+
+
+function cambiaStatoPren(btn) {
+  const id = btn.getAttribute('data-id');
+  const stato = btn.getAttribute('data-stato');
+  aggiornaPrenotazione(id, stato);
 }
