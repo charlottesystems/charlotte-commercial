@@ -307,6 +307,19 @@
     location.reload();
   }
 
+  // Imposta testo bottone lingua in base alla lingua CORRENTE (mostra cosa puoi cambiare)
+  (function() {
+    var lang = localStorage.getItem('charlotte_lang') || 'it';
+    // Mostra lingua alternativa (cosa succederà cliccando)
+    var label = lang === 'it' ? 'English' : 'Italiano';
+    document.addEventListener('DOMContentLoaded', function() {
+      var b1 = document.getElementById('lang-btn-label');
+      if (b1) b1.textContent = label;
+      var b2 = document.getElementById('lang-login-btn');
+      if (b2) b2.textContent = (lang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano');
+    });
+  })();
+
   (function() {
     var v = Date.now();
     var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js','js/stampa.js','js/lang.js'];
