@@ -20,42 +20,99 @@ async function inizializzaApp() {
   await aggiornaStatistiche();
 }
 
+let prenotazioniDataSelezionata = null;
+
 async function apriPrenotazioni() {
   mostraSchermata('prenotazioni-screen');
+  if (!prenotazioniDataSelezionata) {
+    prenotazioniDataSelezionata = new Date().toISOString().slice(0, 10);
+  }
+  await renderPrenotazioniApp();
+}
+
+async function renderPrenotazioniApp() {
   const container = document.getElementById('prenotazioni-app-container');
   if (!container || !garageCorrente) return;
 
+  const oggi = prenotazioniDataSelezionata;
+  const ruolo = localStorage.getItem('charlotte_ruolo');
+  const en = (localStorage.getItem('charlotte_lang') || 'it') === 'en';
+
   container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Caricamento...</div>';
 
-  const accountId = localStorage.getItem('charlotte_account_id');
+  // Selettore data
+  const selectorHtml = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px 14px">' +
+    '<button onclick="cambiaDataPrenotazioni(-1)" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">&#x2039;</button>' +
+    '<input type="date" id="pren-data-sel" value="' + oggi + '" onchange="prenotazioniDataSelezionata=this.value; renderPrenotazioniApp()" ' +
+    'style="background:none;border:none;color:var(--text);font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;text-align:center;flex:1;outline:none">' +
+    '<button onclick="cambiaDataPrenotazioni(1)" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">&#x203A;</button>' +
+    '</div>';
 
+  // Carica tutte le prenotazioni dal giorno selezionato in poi
   const { data, error } = await sbClient
     .from('prenotazioni')
     .select('*')
     .eq('garage_id', garageCorrente.id)
+    .neq('stato', 'rifiutata')
     .order('data_ingresso', { ascending: true });
 
-  if (error || !data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4C5;</div><div class="empty-text">Nessuna prenotazione</div></div>';
+  if (error) {
+    container.innerHTML = selectorHtml + '<div class="empty-state"><div class="empty-icon">&#x26A0;</div><div class="empty-text">Errore caricamento</div></div>';
     return;
   }
 
-  const inAttesa = data.filter(p => p.stato === 'in_attesa');
-  const confermate = data.filter(p => p.stato === 'confermata');
-  const ruolo = localStorage.getItem('charlotte_ruolo');
+  const lista = data || [];
 
-  let html = '';
+  // Filtra arrivi oggi
+  const arriviOggi = lista.filter(p => p.data_ingresso && p.data_ingresso.slice(0, 10) === oggi);
+  // Filtra partenze oggi
+  const partenzeOggi = lista.filter(p => p.data_uscita && p.data_uscita.slice(0, 10) === oggi);
+  // Prossimi arrivi (dopo oggi)
+  const prossimiArrivi = lista.filter(p => p.data_ingresso && p.data_ingresso.slice(0, 10) > oggi);
 
-  if (inAttesa.length > 0) {
-    html += '<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:0 4px">&#x23F3; In attesa (' + inAttesa.length + ')</div>';
-    inAttesa.forEach(p => { html += cardPrenotazioneApp(p, ruolo === 'owner'); });
+  let html = selectorHtml;
+
+  // Arrivi
+  html += '<div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">&#x1F7E2; ' + (en ? 'Arrivals' : 'Arrivi') + ' (' + arriviOggi.length + ')</div>';
+  if (arriviOggi.length === 0) {
+    html += '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;margin-bottom:16px">' + (en ? 'No arrivals' : 'Nessun arrivo') + '</div>';
+  } else {
+    arriviOggi.forEach(p => { html += cardPrenotazioneApp(p, ruolo === 'owner'); });
   }
-  if (confermate.length > 0) {
-    html += '<div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding:0 4px">&#x2713; Confermate (' + confermate.length + ')</div>';
-    confermate.forEach(p => { html += cardPrenotazioneApp(p, false); });
+
+  // Partenze
+  html += '<div style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">&#x1F534; ' + (en ? 'Departures' : 'Partenze') + ' (' + partenzeOggi.length + ')</div>';
+  if (partenzeOggi.length === 0) {
+    html += '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;margin-bottom:16px">' + (en ? 'No departures' : 'Nessuna partenza') + '</div>';
+  } else {
+    partenzeOggi.forEach(p => { html += cardPrenotazioneApp(p, false); });
   }
 
-  container.innerHTML = html || '<div class="empty-state"><div class="empty-icon">&#x1F4C5;</div><div class="empty-text">Nessuna prenotazione attiva</div></div>';
+  // Prossimi arrivi
+  if (prossimiArrivi.length > 0) {
+    html += '<div style="font-size:11px;color:var(--accent3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">&#x1F4C5; ' + (en ? 'Upcoming arrivals' : 'Prossimi arrivi') + ' (' + prossimiArrivi.length + ')</div>';
+    // Raggruppa per data
+    const perData = {};
+    prossimiArrivi.forEach(p => {
+      const d = p.data_ingresso.slice(0, 10);
+      if (!perData[d]) perData[d] = [];
+      perData[d].push(p);
+    });
+    for (const data in perData) {
+      const dataFmt = new Date(data + 'T12:00:00').toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: '2-digit' });
+      html += '<div style="font-size:12px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:6px">' + dataFmt + '</div>';
+      perData[data].forEach(p => { html += cardPrenotazioneApp(p, false); });
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+function cambiaDataPrenotazioni(delta) {
+  const d = new Date(prenotazioniDataSelezionata + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  prenotazioniDataSelezionata = d.toISOString().slice(0, 10);
+  renderPrenotazioniApp();
 }
 
 function cardPrenotazioneApp(p, canConfirm) {
