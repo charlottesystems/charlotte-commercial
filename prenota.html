@@ -404,7 +404,7 @@
       data_uscita: new Date(uscita).toISOString(),
       note: (note || '') + (email ? ' [email: ' + email + ']' : ''),
       importo_preventivo: importo || null,
-      stato: 'in_attesa'
+      stato: 'confermata'
     });
 
     if (error) {
