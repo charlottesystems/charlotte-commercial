@@ -61,6 +61,7 @@ function mostraSezioneOwner(sezione) {
   if (sezione === 'storico') return renderStorico();
   if (sezione === 'operatori') return renderOperatori();
   if (sezione === 'turni') return renderTurni();
+  if (sezione === 'prenotazioni') return renderPrenotazioni();
 }
 
 // ── TARIFFE ──────────────────────────────────────────────────
@@ -657,4 +658,114 @@ async function cercaTurni() {
   }
 
   container.innerHTML = html;
+}
+
+
+// ── PRENOTAZIONI ──────────────────────────────────────────────
+
+async function renderPrenotazioni() {
+  const container = document.getElementById('prenotazioni-container');
+  if (!container) return;
+
+  const accountId = localStorage.getItem('charlotte_account_id');
+  const baseUrl = window.location.origin + '/charlotte-commercial/prenota.html';
+
+  // Link pubblici per ogni garage
+  let linksHtml = '<div class="tariffa-card" style="margin-bottom:16px">' +
+    '<div class="tariffa-card-header"><span>🔗 Link prenotazione per garage</span></div>' +
+    '<div class="tariffa-fields">';
+
+  ownerGarageList.forEach(g => {
+    const link = baseUrl + '?garage=' + g.id;
+    linksHtml += '<div style="margin-bottom:12px">' +
+      '<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px">🏢 ' + g.name + '</div>' +
+      '<div style="display:flex;gap:8px;align-items:center">' +
+      '<input class="wz-input" value="' + link + '" readonly style="font-size:11px;font-family:Share Tech Mono,monospace;color:var(--muted);flex:1">' +
+      '<button onclick="copiaLink('' + link + '')" style="background:var(--accent);border:none;border-radius:8px;padding:8px 12px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;white-space:nowrap">Copia</button>' +
+      '<a href="' + link + '" target="_blank" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--muted);text-decoration:none;font-size:13px">Anteprima</a>' +
+      '</div></div>';
+  });
+
+  linksHtml += '</div></div>';
+
+  // Lista prenotazioni ricevute
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+
+  const garageIds = ownerGarageList.map(g => g.id);
+  const { data: prenotazioni } = await sbClient
+    .from('prenotazioni')
+    .select('*')
+    .in('garage_id', garageIds)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  const lista = prenotazioni || [];
+  const inAttesa = lista.filter(p => p.stato === 'in_attesa');
+  const confermate = lista.filter(p => p.stato === 'confermata');
+  const rifiutate = lista.filter(p => p.stato === 'rifiutata');
+
+  let prenotHtml = '<div class="section-label" style="margin-bottom:12px">Prenotazioni ricevute (' + lista.length + ')</div>';
+
+  if (lista.length === 0) {
+    prenotHtml += '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Nessuna prenotazione ancora.<br>Condividi il link del garage!</div></div>';
+  } else {
+    if (inAttesa.length > 0) {
+      prenotHtml += '<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⏳ In attesa (' + inAttesa.length + ')</div>';
+      inAttesa.forEach(p => { prenotHtml += cardPrenotazione(p); });
+    }
+    if (confermate.length > 0) {
+      prenotHtml += '<div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">✓ Confermate (' + confermate.length + ')</div>';
+      confermate.forEach(p => { prenotHtml += cardPrenotazione(p); });
+    }
+    if (rifiutate.length > 0) {
+      prenotHtml += '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">✕ Rifiutate (' + rifiutate.length + ')</div>';
+      rifiutate.forEach(p => { prenotHtml += cardPrenotazione(p); });
+    }
+  }
+
+  container.innerHTML = linksHtml + prenotHtml;
+}
+
+function cardPrenotazione(p) {
+  const garage = ownerGarageList.find(g => g.id === p.garage_id);
+  const dataI = new Date(p.data_ingresso).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  const dataU = new Date(p.data_uscita).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  const statoColore = p.stato === 'in_attesa' ? 'var(--amber)' : p.stato === 'confermata' ? 'var(--green)' : 'var(--muted)';
+
+  return '<div class="tariffa-card" style="margin-bottom:8px">' +
+    '<div class="tariffa-card-header" style="padding:10px 14px">' +
+    '<div>' +
+    '<div style="font-size:15px;font-weight:700;color:var(--text)">' + p.nome_cliente + '</div>' +
+    '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (garage?.name || '') + (p.targa ? ' · ' + p.targa : '') + (p.categoria ? ' · ' + p.categoria : '') + '</div>' +
+    '</div>' +
+    '<span style="font-size:11px;font-family:Share Tech Mono,monospace;color:' + statoColore + '">' + p.stato.toUpperCase() + '</span>' +
+    '</div>' +
+    '<div style="padding:10px 14px">' +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">📅 ' + dataI + ' → ' + dataU + '</div>' +
+    (p.importo_preventivo ? '<div style="font-size:13px;color:var(--green);margin-bottom:6px">Preventivo: €' + parseFloat(p.importo_preventivo).toFixed(2) + '</div>' : '') +
+    (p.note ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-style:italic">' + p.note + '</div>' : '') +
+    (p.stato === 'in_attesa' ? 
+      '<div style="display:flex;gap:8px">' +
+      '<button onclick="aggiornaPrenotazione('' + p.id + '', 'confermata')" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:8px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">✓ Conferma</button>' +
+      '<button onclick="aggiornaPrenotazione('' + p.id + '', 'rifiutata')" style="flex:1;background:none;border:1px solid var(--red);border-radius:8px;padding:8px;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">✕ Rifiuta</button>' +
+      '</div>' : '') +
+    '</div></div>';
+}
+
+async function aggiornaPrenotazione(prenotazioneId, nuovoStato) {
+  const { error } = await sbClient
+    .from('prenotazioni')
+    .update({ stato: nuovoStato })
+    .eq('id', prenotazioneId);
+
+  if (!error) await renderPrenotazioni();
+}
+
+function copiaLink(link) {
+  navigator.clipboard.writeText(link).then(() => {
+    alert('Link copiato!');
+  }).catch(() => {
+    prompt('Copia questo link:', link);
+  });
 }
