@@ -91,12 +91,20 @@
       </select>
     </div>
     <div class="field">
-      <label>Data e ora ingresso *</label>
-      <input id="f-ingresso" type="datetime-local" onchange="calcolaPreventivo()">
+      <label>Data ingresso *</label>
+      <input id="f-ingresso-data" type="date" onchange="calcolaPreventivo()">
     </div>
     <div class="field">
-      <label>Data e ora uscita prevista *</label>
-      <input id="f-uscita" type="datetime-local" onchange="calcolaPreventivo()">
+      <label>Ora ingresso prevista *</label>
+      <input id="f-ingresso-ora" type="time" onchange="calcolaPreventivo()" value="09:00">
+    </div>
+    <div class="field">
+      <label>Data uscita prevista *</label>
+      <input id="f-uscita-data" type="date" onchange="calcolaPreventivo()">
+    </div>
+    <div class="field">
+      <label>Ora uscita prevista *</label>
+      <input id="f-uscita-ora" type="time" onchange="calcolaPreventivo()" value="18:00">
     </div>
     <div class="field">
       <label>Note</label>
@@ -118,16 +126,18 @@
 
   <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">
     Prenotazione soggetta a conferma da parte del garage.<br>
-    Riceverai una email di conferma.
+    Il pagamento avviene direttamente in garage.
   </div>
 </div>
 
 <div class="success-screen" id="success-screen">
   <div class="icon">✅</div>
   <h2>Prenotazione inviata!</h2>
-  <p>La tua richiesta è stata ricevuta.<br>
-  Il garage ti contatterà per conferma.<br><br>
-  Controlla la tua email per il riepilogo.</p>
+  <div id="success-riepilogo" style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin:16px 0;text-align:left"></div>
+  <p style="background:rgba(16,185,129,0.1);border:1px solid var(--green);border-radius:12px;padding:14px;font-size:13px;color:var(--green);margin-top:8px">
+    💳 Il pagamento avviene direttamente in garage al momento del ritiro del veicolo.
+  </p>
+  <p style="font-size:12px;color:var(--muted);margin-top:8px">La prenotazione è soggetta a conferma da parte del garage.</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -214,8 +224,10 @@
     const dopodomani = new Date(domani);
     dopodomani.setHours(18, 0, 0, 0);
 
-    document.getElementById('f-ingresso').value = domani.toISOString().slice(0, 16);
-    document.getElementById('f-uscita').value = dopodomani.toISOString().slice(0, 16);
+    document.getElementById('f-ingresso-data').value = domani.toISOString().slice(0, 10);
+    document.getElementById('f-ingresso-ora').value = '09:00';
+    document.getElementById('f-uscita-data').value = dopodomani.toISOString().slice(0, 10);
+    document.getElementById('f-uscita-ora').value = '18:00';
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('form-screen').style.display = 'block';
@@ -231,8 +243,12 @@
   function calcolaPreventivo() {
     const catId = document.getElementById('f-categoria').value;
     const convId = document.getElementById('f-convenzione').value;
-    const ingressoVal = document.getElementById('f-ingresso').value;
-    const uscitaVal = document.getElementById('f-uscita').value;
+    const ingressoData = document.getElementById('f-ingresso-data').value;
+    const ingressoOra = document.getElementById('f-ingresso-ora').value || '09:00';
+    const uscitaData = document.getElementById('f-uscita-data').value;
+    const uscitaOra = document.getElementById('f-uscita-ora').value || '18:00';
+    const ingressoVal = ingressoData ? ingressoData + 'T' + ingressoOra : '';
+    const uscitaVal = uscitaData ? uscitaData + 'T' + uscitaOra : '';
 
     const box = document.getElementById('preventivo-box');
 
@@ -298,14 +314,18 @@
     const tel = document.getElementById('f-tel').value.trim();
     const cat = document.getElementById('f-categoria').value;
     const convId = document.getElementById('f-convenzione').value || null;
-    const ingresso = document.getElementById('f-ingresso').value;
-    const uscita = document.getElementById('f-uscita').value;
+    const ingressoData = document.getElementById('f-ingresso-data').value;
+    const ingressoOra = document.getElementById('f-ingresso-ora').value || '09:00';
+    const uscitaData = document.getElementById('f-uscita-data').value;
+    const uscitaOra = document.getElementById('f-uscita-ora').value || '18:00';
+    const ingresso = ingressoData ? ingressoData + 'T' + ingressoOra : '';
+    const uscita = uscitaData ? uscitaData + 'T' + uscitaOra : '';
     const note = document.getElementById('f-note').value.trim();
 
     if (!nome) { errEl.textContent = 'Inserisci il tuo nome.'; return; }
     if (!email) { errEl.textContent = 'Inserisci la tua email.'; return; }
     if (!cat) { errEl.textContent = 'Seleziona la categoria del veicolo.'; return; }
-    if (!ingresso || !uscita) { errEl.textContent = 'Inserisci le date di ingresso e uscita.'; return; }
+    if (!ingressoData || !uscitaData) { errEl.textContent = 'Inserisci le date di ingresso e uscita.'; return; }
     if (new Date(uscita) <= new Date(ingresso)) { errEl.textContent = 'La data di uscita deve essere dopo quella di ingresso.'; return; }
 
     const importo = calcolaPreventivo();
@@ -335,6 +355,25 @@
       return;
     }
 
+    // Mostra riepilogo
+    const catLabel = document.getElementById('f-categoria').options[document.getElementById('f-categoria').selectedIndex]?.text || cat;
+    const convLabel = document.getElementById('f-convenzione').value ?
+      document.getElementById('f-convenzione').options[document.getElementById('f-convenzione').selectedIndex]?.text : null;
+    const riepilogo = document.getElementById('success-riepilogo');
+    if (riepilogo) {
+      riepilogo.innerHTML =
+        '<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--accent3);margin-bottom:12px">Riepilogo prenotazione</div>' +
+        '<div style="font-size:13px;color:var(--text);line-height:2">' +
+        '<div>&#x1F4CD; <strong>' + garageData.name + '</strong></div>' +
+        '<div>&#x1F464; ' + nome + '</div>' +
+        (targa ? '<div>&#x1F697; ' + targa + '</div>' : '') +
+        '<div>&#x1F699; ' + catLabel + (convLabel ? ' — ' + convLabel : '') + '</div>' +
+        '<div>&#x1F4C5; Ingresso: <strong>' + ingressoData + ' alle ' + ingressoOra + '</strong></div>' +
+        '<div>&#x1F4C5; Uscita: <strong>' + uscitaData + ' alle ' + uscitaOra + '</strong></div>' +
+        (importo ? '<div style="color:var(--green);font-size:16px;font-weight:700;margin-top:8px">Preventivo: &euro;' + importo.toFixed(2) + '</div>' : '') +
+        (document.getElementById('f-note').value ? '<div style="margin-top:8px;font-style:italic;color:var(--muted)">Note: ' + document.getElementById('f-note').value + '</div>' : '') +
+        '</div>';
+    }
     document.getElementById('form-screen').style.display = 'none';
     document.getElementById('success-screen').style.display = 'block';
   }
