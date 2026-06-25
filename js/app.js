@@ -118,6 +118,8 @@ function mostraSchermata(id) {
     const senzaHeader = ['login-screen','pin-screen','onboarding-screen'];
     header.style.display = senzaHeader.includes(id) ? 'none' : 'flex';
   }
+  // Applica traduzioni dopo cambio schermata
+  setTimeout(() => { if (typeof applicaTraduzioni === 'function') applicaTraduzioni(); }, 50);
 }
 
 function tornaHome() {
