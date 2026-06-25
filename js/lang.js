@@ -287,6 +287,51 @@ function applicaTraduzioni() {
   const btnUscita = document.getElementById('badge-btn-uscita');
   if (btnUscita) btnUscita.innerHTML = (en ? '🔴<br>CLOCK OUT' : '🔴<br>USCITA');
 
+  // Elementi hardcoded nella schermata ingresso
+  const targaPlaceholder = document.getElementById('targa-placeholder');
+  if (targaPlaceholder) targaPlaceholder.textContent = en ? 'Scan or enter plate' : 'Scansiona o inserisci targa';
+
+  document.querySelectorAll('.btn-txt').forEach(el => {
+    if (el.textContent === 'FOTOCAMERA' || el.textContent === 'CAMERA') el.textContent = en ? 'CAMERA' : 'FOTOCAMERA';
+    if (el.textContent === 'GALLERIA' || el.textContent === 'GALLERY') el.textContent = en ? 'GALLERY' : 'GALLERIA';
+  });
+
+  document.querySelectorAll('.manual-label').forEach(el => {
+    if (el.textContent === 'Inserimento manuale' || el.textContent === 'Manual entry') el.textContent = en ? 'Manual entry' : 'Inserimento manuale';
+    if (el.textContent === 'Categoria veicolo' || el.textContent === 'Vehicle category') el.textContent = en ? 'Vehicle category' : 'Categoria veicolo';
+    if (el.textContent === 'Convenzione' || el.textContent === 'Convention') el.textContent = en ? 'Convention' : 'Convenzione';
+  });
+
+  const confBtn = document.getElementById('conferma-ingresso-btn');
+  if (confBtn) confBtn.textContent = en ? 'CONFIRM ENTRY' : 'CONFERMA INGRESSO';
+
+  const manualInput = document.getElementById('manual-targa-input');
+  if (manualInput) manualInput.placeholder = en ? 'AB123CD' : 'AB123CD';
+
+  // Overlay ingresso
+  const olIngresso = document.querySelector('#overlay-ingresso .overlay-title');
+  if (olIngresso) olIngresso.textContent = en ? 'ENTRY REGISTERED' : 'INGRESSO REGISTRATO';
+
+  // Uscita
+  const noSoste = document.querySelector('#soste-attive-list .empty-text');
+  if (noSoste) noSoste.textContent = en ? 'No vehicles parked' : 'Nessuna auto in sosta';
+
+  // Badge
+  const cambiaNome = document.querySelector('#badge-screen button[onclick="cambioNomeOperatore()"]');
+  if (cambiaNome) cambiaNome.textContent = en ? 'Change operator name' : 'Cambia nome operatore';
+
+  // Owner lock
+  const ownerLockTitle = document.querySelector('.owner-lock .pin-logo-text');
+  if (ownerLockTitle) ownerLockTitle.textContent = en ? 'Owner Panel' : 'Pannello Owner';
+  const ownerLockSub = document.querySelector('.owner-lock .pin-subtitle');
+  if (ownerLockSub) ownerLockSub.textContent = en ? 'Enter owner password to continue' : 'Inserisci la password owner per continuare';
+  const ownerLockPwd = document.getElementById('owner-lock-password');
+  if (ownerLockPwd) ownerLockPwd.placeholder = en ? 'Owner password' : 'Password owner';
+  const ownerLockBtn = document.querySelector('.owner-lock .wz-btn-primary');
+  if (ownerLockBtn) ownerLockBtn.textContent = en ? 'ACCESS' : 'ACCEDI';
+  const ownerLockCanc = document.querySelector('.owner-lock .wz-btn-secondary');
+  if (ownerLockCanc) ownerLockCanc.textContent = en ? 'Cancel' : 'Annulla';
+
   // Aggiorna data-i18n se presenti
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
