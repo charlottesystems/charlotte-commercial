@@ -13,112 +13,26 @@
   <link rel="apple-touch-icon" href="icon-512.png">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .badge-screen { padding: 16px; }
-    .badge-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .badge-nome {
-      font-family: Rajdhani, sans-serif;
-      font-weight: 700;
-      font-size: 22px;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .badge-ultimo {
-      font-size: 12px;
-      color: var(--muted);
-      font-family: 'Share Tech Mono', monospace;
-      margin-bottom: 20px;
-    }
-    .badge-btns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .badge-btn-entrata {
-      background: linear-gradient(135deg, var(--green), #059669);
-      border: none;
-      border-radius: 14px;
-      padding: 24px 16px;
-      font-family: Rajdhani, sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      letter-spacing: 1px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(16,185,129,0.3);
-      transition: all 0.2s;
-    }
-    .badge-btn-uscita {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      border-radius: 14px;
-      padding: 24px 16px;
-      font-family: Rajdhani, sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      letter-spacing: 1px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.3);
-      transition: all 0.2s;
-    }
-    .badge-btn-entrata:active, .badge-btn-uscita:active { transform: scale(0.96); }
-    .badge-stato {
-      font-size: 13px;
-      min-height: 20px;
-      text-align: center;
-      color: var(--muted);
-      font-family: 'Share Tech Mono', monospace;
-      padding: 8px;
-    }
-    .owner-lock {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.95);
-      z-index: 600;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 32px;
-    }
-    .owner-lock.hidden { display: none; }
-    /* TEMA OWNER - contorni dorati */
-    body.is-owner .header {
-      border-bottom: 2px solid #d4a843;
-      background: linear-gradient(135deg, #0a0a0f 0%, #1a1508 100%);
-    }
-    body.is-owner .logo-icon {
-      background: linear-gradient(135deg, #d4a843, #a07820);
-      box-shadow: 0 0 20px rgba(212,168,67,0.5);
-    }
-    body.is-owner .action-btn {
-      border: 1px solid #3a3010;
-    }
-    body.is-owner .action-btn:hover {
-      border-color: #d4a843;
-    }
-    body.is-owner .stat {
-      border: 1px solid #3a3010;
-    }
-    body.is-owner #owner-badge {
-      display: flex !important;
-    }
+    .badge-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:24px; text-align:center; margin-bottom:16px; }
+    .badge-nome { font-family:Rajdhani,sans-serif; font-weight:700; font-size:22px; color:var(--text); margin-bottom:4px; }
+    .badge-ultimo { font-size:12px; color:var(--muted); font-family:'Share Tech Mono',monospace; margin-bottom:20px; }
+    .badge-btns { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+    .badge-btn-entrata { background:linear-gradient(135deg,var(--green),#059669); border:none; border-radius:14px; padding:24px 16px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:20px; letter-spacing:1px; color:white; cursor:pointer; box-shadow:0 4px 20px rgba(16,185,129,0.3); transition:all 0.2s; }
+    .badge-btn-uscita { background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:14px; padding:24px 16px; font-family:Rajdhani,sans-serif; font-weight:700; font-size:20px; letter-spacing:1px; color:white; cursor:pointer; box-shadow:0 4px 20px rgba(124,58,237,0.3); transition:all 0.2s; }
+    .badge-btn-entrata:active,.badge-btn-uscita:active { transform:scale(0.96); }
+    .badge-stato { font-size:13px; min-height:20px; text-align:center; color:var(--muted); font-family:'Share Tech Mono',monospace; padding:8px; }
+    .owner-lock { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:600; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:32px; }
+    .owner-lock.hidden { display:none; }
+    body.is-owner .header { border-bottom:2px solid #d4a843; background:linear-gradient(135deg,#0a0a0f 0%,#1a1508 100%); }
+    body.is-owner .logo-icon { background:linear-gradient(135deg,#d4a843,#a07820); box-shadow:0 0 20px rgba(212,168,67,0.5); }
+    body.is-owner .action-btn { border:1px solid #3a3010; }
+    body.is-owner .action-btn:hover { border-color:#d4a843; }
+    body.is-owner .stat { border:1px solid #3a3010; }
+    body.is-owner #owner-badge { display:flex !important; }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════
-     SPLASH SCREEN
-═══════════════════════════════════════════════════════ -->
 <div id="splash-screen">
   <div id="splash-logo">
     <div id="splash-icon">C</div>
@@ -127,50 +41,34 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     OWNER LOCK (protezione pannello owner)
-═══════════════════════════════════════════════════════ -->
 <div class="owner-lock hidden" id="owner-lock">
   <div class="pin-logo-icon" style="margin:0 auto">🔐</div>
   <div class="pin-logo-text">Pannello Owner</div>
   <div class="pin-subtitle">Inserisci la password owner per continuare</div>
-  <input id="owner-lock-password" type="password" class="wz-input"
-         style="max-width:300px;width:100%;text-align:center"
-         placeholder="Password owner"
-         onkeydown="if(event.key==='Enter') verificaPasswordOwner()">
+  <input id="owner-lock-password" type="password" class="wz-input" style="max-width:300px;width:100%;text-align:center" placeholder="Password owner" onkeydown="if(event.key==='Enter') verificaPasswordOwner()">
   <div class="wz-error" id="owner-lock-error"></div>
-  <button class="wz-btn-primary" style="max-width:300px;width:100%"
-          onclick="verificaPasswordOwner()">ACCEDI</button>
-  <button class="wz-btn-secondary" style="max-width:300px;width:100%"
-          onclick="chiudiOwnerLock()">Annulla</button>
+  <button class="wz-btn-primary" style="max-width:300px;width:100%" onclick="verificaPasswordOwner()">ACCEDI</button>
+  <button class="wz-btn-secondary" style="max-width:300px;width:100%" onclick="chiudiOwnerLock()">Annulla</button>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     HEADER
-═══════════════════════════════════════════════════════ -->
 <div class="header" id="main-header" style="display:none">
   <div class="logo" style="position:relative">
     <div class="logo-icon" onclick="toggleMenuLogo()" style="cursor:pointer">C</div>
     <div class="logo-text">CHARLOTTE</div>
-    <div id="owner-badge" style="display:none;position:absolute;top:-6px;right:-8px;background:#d4a843;border-radius:50%;width:16px;height:16px;font-size:10px;align-items:center;justify-content:center">👑</div>
-    <!-- Menu tendina sotto logo -->
+    <div id="owner-badge" style="display:none;position:absolute;top:-6px;right:-8px;background:#d4a843;border-radius:50%;width:16px;height:16px;font-size:10px;align-items:center;justify-content:center">&#x1F451;</div>
     <div id="logo-menu" style="display:none;position:absolute;top:44px;left:0;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:200;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
-      <button id="owner-btn-header" onclick="chiudiMenuLogo(); apriOwnerLock()"
-              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--accent3);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
-        🔑 Pannello Owner
+      <button id="owner-btn-header" onclick="chiudiMenuLogo(); apriOwnerLock()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--accent3);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        &#x1F511; Pannello Owner
       </button>
-      <button id="bt-btn" onclick="chiudiMenuLogo(); gestisciConnessioneBT()"
-              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
-        🖨 <span id="bt-label">Connetti stampante</span>
+      <button id="bt-btn" onclick="chiudiMenuLogo(); gestisciConnessioneBT()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        &#x1F5A8; <span id="bt-label">Connetti stampante</span>
       </button>
-      <button onclick="cambiaLingua()"
-              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
-        🌐 <span id="lang-btn-label">English</span>
+      <button onclick="cambiaLingua()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        &#x1F310; <span id="lang-btn-label">English</span>
       </button>
       <div style="border-top:1px solid var(--border);margin:4px 0"></div>
-      <button onclick="chiudiMenuLogo(); doLogout()"
-              style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--red);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
-        ⏻ <span data-i18n="logout">Esci</span>
+      <button onclick="chiudiMenuLogo(); doLogout()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--red);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        &#x23FB; Esci
       </button>
     </div>
   </div>
@@ -179,69 +77,48 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     MAIN CONTENT
-═══════════════════════════════════════════════════════ -->
 <div class="main">
   <div id="bt-stato" style="font-size:10px;color:var(--muted);text-align:center;padding:2px 0;font-family:Share Tech Mono,monospace;display:none"></div>
 
-  <!-- ── LOGIN ── -->
+  <!-- LOGIN -->
   <div class="screen active" id="login-screen">
     <div style="text-align:center;padding:40px 0 32px">
       <div class="pin-logo-icon" style="margin:0 auto 16px">C</div>
       <div class="pin-logo-text">CHARLOTTE</div>
       <div class="pin-subtitle">Parking Management</div>
     </div>
-
-    <!-- Form Login -->
     <div id="login-form" style="display:flex;flex-direction:column;gap:12px">
       <input id="login-email" type="email" placeholder="Email" class="wz-input" autocomplete="email">
-      <input id="login-password" type="password" placeholder="Password" class="wz-input" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter') doLogin()">
+      <input id="login-password" type="password" placeholder="Password" class="wz-input" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
       <div id="login-error" class="wz-error"></div>
       <button class="wz-btn-primary" onclick="doLogin()">ACCEDI</button>
-      <button class="wz-btn-secondary" onclick="mostraRegistrazione()">Crea account owner →</button>
+      <button class="wz-btn-secondary" onclick="mostraRegistrazione()">Crea account owner &#x2192;</button>
       <div style="text-align:center;margin-top:4px">
-        <a href="checkout.html" style="font-size:12px;color:var(--accent3);text-decoration:none">
-          Non hai ancora un piano? Acquista qui →
-        </a>
+        <a href="checkout.html" style="font-size:12px;color:var(--accent3);text-decoration:none">Non hai ancora un piano? Acquista qui &#x2192;</a>
       </div>
-      <button onclick="mostraLoginOperatore()"
-              style="background:rgba(16,185,129,0.1);border:1px solid var(--green);border-radius:12px;padding:14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--green);cursor:pointer;width:100%">
-        👤 Sono un operatore
+      <button onclick="mostraLoginOperatore()" style="background:rgba(16,185,129,0.1);border:1px solid var(--green);border-radius:12px;padding:14px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--green);cursor:pointer;width:100%">
+        &#x1F464; Sono un operatore
       </button>
-      <button onclick="doResetPassword()"
-              style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px">
-        Password dimenticata?
-      </button>
+      <button onclick="doResetPassword()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px">Password dimenticata?</button>
       <div style="text-align:center;margin-top:8px">
-        <button onclick="toggleLangLogin()"
-                style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--muted);cursor:pointer;font-size:13px"
-                id="lang-login-btn">🇬🇧 English</button>
+        <button onclick="toggleLangLogin()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--muted);cursor:pointer;font-size:13px" id="lang-login-btn">&#x1F1EC;&#x1F1E7; English</button>
       </div>
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">
         <a href="termini.html" style="color:var(--muted);text-decoration:none">Termini</a> ·
         <a href="privacy.html" style="color:var(--muted);text-decoration:none">Privacy</a>
       </div>
     </div>
-
-    <!-- Form Registrazione -->
     <div id="register-form" style="display:none;flex-direction:column;gap:12px">
-      <div style="text-align:center;margin-bottom:8px">
-        <div style="font-size:14px;color:var(--muted)">Crea un nuovo account owner</div>
-      </div>
+      <div style="text-align:center;margin-bottom:8px"><div style="font-size:14px;color:var(--muted)">Crea un nuovo account owner</div></div>
       <input id="reg-email" type="email" placeholder="Email" class="wz-input" autocomplete="email">
       <input id="reg-password" type="password" placeholder="Password (min. 6 caratteri)" class="wz-input">
-      <input id="reg-password2" type="password" placeholder="Conferma password" class="wz-input"
-             onkeydown="if(event.key==='Enter') doRegister()">
+      <input id="reg-password2" type="password" placeholder="Conferma password" class="wz-input" onkeydown="if(event.key==='Enter') doRegister()">
       <div id="register-error" class="wz-error"></div>
       <button class="wz-btn-primary" onclick="doRegister()">REGISTRATI</button>
-      <button class="wz-btn-secondary" onclick="mostraLogin()">← Torna al login</button>
+      <button class="wz-btn-secondary" onclick="mostraLogin()">&#x2190; Torna al login</button>
     </div>
-
-    <!-- PIN Operatore -->
     <div id="operatore-pin-form" style="display:none;flex-direction:column;align-items:center;gap:16px;padding:20px 0">
-      <div class="pin-logo-icon" style="margin:0 auto">👤</div>
+      <div class="pin-logo-icon" style="margin:0 auto">&#x1F464;</div>
       <div class="pin-logo-text">Accesso Operatore</div>
       <div class="pin-subtitle">Inserisci il tuo PIN a 6 cifre</div>
       <div style="display:flex;gap:10px;margin:8px 0">
@@ -263,14 +140,14 @@
         <button class="pin-btn" onclick="premiCifraOperatore('7')">7</button>
         <button class="pin-btn" onclick="premiCifraOperatore('8')">8</button>
         <button class="pin-btn" onclick="premiCifraOperatore('9')">9</button>
-        <button class="pin-btn canc" onclick="cancellaCifraOperatore()">⌫</button>
+        <button class="pin-btn canc" onclick="cancellaCifraOperatore()">&#x232B;</button>
         <button class="pin-btn zero" onclick="premiCifraOperatore('0')">0</button>
-        <button class="pin-btn canc" onclick="mostraLoginDaOperatore()">←</button>
+        <button class="pin-btn canc" onclick="mostraLoginDaOperatore()">&#x2190;</button>
       </div>
     </div>
   </div>
 
-  <!-- ── ONBOARDING WIZARD ── -->
+  <!-- ONBOARDING -->
   <div class="screen" id="onboarding-screen">
     <div style="text-align:center;padding:24px 0 20px">
       <div class="pin-logo-text">Benvenuto!</div>
@@ -280,9 +157,7 @@
     <div id="wz-content"></div>
   </div>
 
-<!-- PIN owner rimosso -->
-
-  <!-- ── HOME ── -->
+  <!-- HOME -->
   <div class="screen" id="main-screen">
     <div id="benvenuto-operatore" style="display:none;text-align:center;padding:10px 16px 0;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;color:var(--accent3)"></div>
     <div class="time-display">
@@ -294,183 +169,97 @@
       <div class="stat"><div class="val" id="stat-oggi">0</div><div class="lbl">Oggi</div></div>
       <div class="stat"><div class="val" id="stat-mese">0</div><div class="lbl">Mese</div></div>
     </div>
-    <!-- Griglia operatore (con badge) -->
     <div class="action-grid" id="grid-operatore" style="display:none">
-      <div class="action-btn ingresso" onclick="apriIngresso()">
-        <span class="btn-icon">🚗</span>
-        <div class="btn-label">Ingresso</div>
-        <div class="btn-sub">Registra entrata</div>
-      </div>
-      <div class="action-btn uscita" onclick="apriUscita()">
-        <span class="btn-icon">🏁</span>
-        <div class="btn-label">Uscita</div>
-        <div class="btn-sub">Registra uscita</div>
-      </div>
-      <div class="action-btn lista" onclick="apriLista()">
-        <span class="btn-icon">📋</span>
-        <div class="btn-label">Lista</div>
-        <div class="btn-sub">Soste attive</div>
-      </div>
-      <div class="action-btn" id="badge-btn-home" style="border-top:2px solid var(--green)" onclick="apriBadge()">
-        <span class="btn-icon">📍</span>
-        <div class="btn-label" style="color:var(--green)">Badge</div>
-        <div class="btn-sub">Timbra turno</div>
-      </div>
+      <div class="action-btn ingresso" onclick="apriIngresso()"><span class="btn-icon">&#x1F697;</span><div class="btn-label">Ingresso</div><div class="btn-sub">Registra entrata</div></div>
+      <div class="action-btn uscita" onclick="apriUscita()"><span class="btn-icon">&#x1F3C1;</span><div class="btn-label">Uscita</div><div class="btn-sub">Registra uscita</div></div>
+      <div class="action-btn lista" onclick="apriLista()"><span class="btn-icon">&#x1F4CB;</span><div class="btn-label">Lista</div><div class="btn-sub">Soste attive</div></div>
+      <div class="action-btn" id="badge-btn-home" style="border-top:2px solid var(--green)" onclick="apriBadge()"><span class="btn-icon">&#x1F4CD;</span><div class="btn-label" style="color:var(--green)">Badge</div><div class="btn-sub">Timbra turno</div></div>
     </div>
-
-    <!-- Griglia owner (senza badge, con cassa) -->
     <div class="action-grid" id="grid-owner" style="display:none">
-      <div class="action-btn ingresso" onclick="apriIngresso()">
-        <span class="btn-icon">🚗</span>
-        <div class="btn-label">Ingresso</div>
-        <div class="btn-sub">Registra entrata</div>
-      </div>
-      <div class="action-btn uscita" onclick="apriUscita()">
-        <span class="btn-icon">🏁</span>
-        <div class="btn-label">Uscita</div>
-        <div class="btn-sub">Registra uscita</div>
-      </div>
-      <div class="action-btn lista" onclick="apriLista()">
-        <span class="btn-icon">📋</span>
-        <div class="btn-label">Lista</div>
-        <div class="btn-sub">Soste attive</div>
-      </div>
-      <div class="action-btn" style="border-top:2px solid var(--amber)" onclick="apriCassa()">
-        <span class="btn-icon">📊</span>
-        <div class="btn-label" style="color:var(--amber)">Cassa</div>
-        <div class="btn-sub">Registro giornaliero</div>
-      </div>
+      <div class="action-btn ingresso" onclick="apriIngresso()"><span class="btn-icon">&#x1F697;</span><div class="btn-label">Ingresso</div><div class="btn-sub">Registra entrata</div></div>
+      <div class="action-btn uscita" onclick="apriUscita()"><span class="btn-icon">&#x1F3C1;</span><div class="btn-label">Uscita</div><div class="btn-sub">Registra uscita</div></div>
+      <div class="action-btn lista" onclick="apriLista()"><span class="btn-icon">&#x1F4CB;</span><div class="btn-label">Lista</div><div class="btn-sub">Soste attive</div></div>
+      <div class="action-btn" style="border-top:2px solid var(--amber)" onclick="apriCassa()"><span class="btn-icon">&#x1F4CA;</span><div class="btn-label" style="color:var(--amber)">Cassa</div><div class="btn-sub">Registro giornaliero</div></div>
     </div>
   </div>
 
-  <!-- ── INGRESSO ── -->
+  <!-- INGRESSO -->
   <div class="screen" id="ingresso-screen">
-    <div class="screen-header">
-      <div class="back-btn" onclick="tornaHome()">←</div>
-      <div class="screen-title">🚗 Ingresso</div>
-    </div>
-    <div class="targa-display" id="targa-display">
-      <div class="targa-value" id="targa-value"></div>
-      <div class="targa-placeholder" id="targa-placeholder">Scansiona o inserisci targa</div>
-    </div>
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F697; Ingresso</div></div>
+    <div class="targa-display" id="targa-display"><div class="targa-value" id="targa-value"></div><div class="targa-placeholder" id="targa-placeholder">Scansiona o inserisci targa</div></div>
     <div class="camera-btns">
-      <button class="camera-btn" onclick="apriCamera()">
-        <span class="btn-emoji">📷</span>
-        <span class="btn-txt">FOTOCAMERA</span>
-      </button>
-      <button class="camera-btn gallery" onclick="apriGalleria()">
-        <span class="btn-emoji">🖼️</span>
-        <span class="btn-txt">GALLERIA</span>
-      </button>
+      <button class="camera-btn" onclick="apriCamera()"><span class="btn-emoji">&#x1F4F7;</span><span class="btn-txt">FOTOCAMERA</span></button>
+      <button class="camera-btn gallery" onclick="apriGalleria()"><span class="btn-emoji">&#x1F5BC;&#xFE0F;</span><span class="btn-txt">GALLERIA</span></button>
     </div>
     <div class="manual-section">
       <div class="manual-label">Inserimento manuale</div>
       <div class="manual-input-row">
-        <input id="manual-targa-input" class="manual-input" type="text" maxlength="8"
-               placeholder="AB123CD" onkeydown="if(event.key==='Enter') confermaTArgaManuale()">
-        <button class="manual-confirm-btn" onclick="confermaTArgaManuale()">✓</button>
+        <input id="manual-targa-input" class="manual-input" type="text" maxlength="8" placeholder="AB123CD" onkeydown="if(event.key==='Enter') confermaTArgaManuale()">
+        <button class="manual-confirm-btn" onclick="confermaTArgaManuale()">&#x2713;</button>
       </div>
     </div>
-    <div class="tipo-section">
-      <div class="manual-label">Categoria veicolo</div>
-      <div class="tipo-grid" id="tipo-grid"></div>
-    </div>
-    <div class="conv-section" id="conv-section" style="display:none">
-      <div class="manual-label">Convenzione</div>
-      <div class="conv-grid" id="conv-grid"></div>
-    </div>
-    <button class="conferma-btn" id="conferma-ingresso-btn" onclick="confermaIngresso()">
-      ✓ CONFERMA INGRESSO
-    </button>
-    <input type="file" id="camera-input" accept="image/*" capture="environment"
-           onchange="gestisciImmagineOCR(this.files[0])">
-    <input type="file" id="gallery-input" accept="image/*"
-           onchange="gestisciImmagineOCR(this.files[0])">
+    <div class="tipo-section"><div class="manual-label">Categoria veicolo</div><div class="tipo-grid" id="tipo-grid"></div></div>
+    <div class="conv-section" id="conv-section" style="display:none"><div class="manual-label">Convenzione</div><div class="conv-grid" id="conv-grid"></div></div>
+    <button class="conferma-btn" id="conferma-ingresso-btn" onclick="confermaIngresso()">&#x2713; CONFERMA INGRESSO</button>
+    <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="gestisciImmagineOCR(this.files[0])">
+    <input type="file" id="gallery-input" accept="image/*" onchange="gestisciImmagineOCR(this.files[0])">
   </div>
 
-  <!-- ── USCITA ── -->
+  <!-- USCITA -->
   <div class="screen" id="uscita-screen">
-    <div class="screen-header">
-      <div class="back-btn" onclick="tornaHome()">←</div>
-      <div class="screen-title">🏁 Uscita</div>
-    </div>
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F3C1; Uscita</div></div>
     <div id="soste-attive-list"></div>
   </div>
 
-  <!-- ── LISTA ── -->
+  <!-- LISTA -->
   <div class="screen" id="lista-screen">
-    <div class="screen-header">
-      <div class="back-btn" onclick="tornaHome()">←</div>
-      <div class="screen-title">📋 Lista Soste</div>
-    </div>
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F4CB; Lista Soste</div></div>
     <div id="lista-soste-container"></div>
   </div>
 
-  <!-- ── RICERCA ── -->
+  <!-- RICERCA -->
   <div class="screen" id="ricerca-screen">
-    <div class="screen-header">
-      <div class="back-btn" onclick="tornaHome()">←</div>
-      <div class="screen-title">🔍 Cerca Targa</div>
-    </div>
-    <input id="search-targa-input" class="search-input" type="text"
-           placeholder="ES: AB123CD" maxlength="8"
-           oninput="eseguiRicerca()" onkeyup="eseguiRicerca()">
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F50D; Cerca Targa</div></div>
+    <input id="search-targa-input" class="search-input" type="text" placeholder="ES: AB123CD" maxlength="8" oninput="eseguiRicerca()" onkeyup="eseguiRicerca()">
     <div id="ricerca-risultati"></div>
   </div>
 
-  <!-- ── BADGE ── -->
+  <!-- BADGE -->
   <div class="screen" id="badge-screen">
-    <div class="screen-header">
-      <div class="back-btn" onclick="tornaHome()">←</div>
-      <div class="screen-title">📍 Timbra Turno</div>
-    </div>
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F4CD; Timbra Turno</div></div>
     <div class="badge-card">
-      <div class="badge-nome" id="badge-nome-operatore">—</div>
+      <div class="badge-nome" id="badge-nome-operatore">&#x2014;</div>
       <div class="badge-ultimo" id="badge-ultimo">Nessuna timbratura recente</div>
       <div class="badge-btns">
-        <button class="badge-btn-entrata" id="badge-btn-entrata" onclick="timbra('entrata')">
-          🟢<br>ENTRATA
-        </button>
-        <button class="badge-btn-uscita" id="badge-btn-uscita" onclick="timbra('uscita')">
-          🔴<br>USCITA
-        </button>
+        <button class="badge-btn-entrata" id="badge-btn-entrata" onclick="timbra('entrata')">&#x1F7E2;<br>ENTRATA</button>
+        <button class="badge-btn-uscita" id="badge-btn-uscita" onclick="timbra('uscita')">&#x1F534;<br>USCITA</button>
       </div>
       <div class="badge-stato" id="badge-stato">Premi un bottone per timbrare</div>
     </div>
     <div style="text-align:center">
-      <button onclick="cambioNomeOperatore()"
-              style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;color:var(--muted);cursor:pointer;font-size:13px">
-        ✏️ Cambia nome operatore
-      </button>
+      <button onclick="cambioNomeOperatore()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;color:var(--muted);cursor:pointer;font-size:13px">&#x270F;&#xFE0F; Cambia nome operatore</button>
     </div>
   </div>
 
-  <!-- ── CASSA ── -->
+  <!-- CASSA -->
   <div class="screen" id="cassa-screen">
-    <div class="screen-header">
-      <div class="back-btn" onclick="tornaHome()">←</div>
-      <div class="screen-title">💰 Cassa del giorno</div>
-    </div>
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F4CA; Cassa del giorno</div></div>
     <div id="cassa-container"></div>
   </div>
 
-</div><!-- /main chiuso qui -->
+</div>
 
-<!-- ═══════════════════════════════════════════════════════
-     OVERLAY CONFERMA INGRESSO
-═══════════════════════════════════════════════════════ -->
+<!-- OVERLAY INGRESSO -->
 <div class="overlay" id="overlay-ingresso">
-  <div class="overlay-icon">✅</div>
+  <div class="overlay-icon">&#x2705;</div>
   <div class="overlay-title">INGRESSO REGISTRATO</div>
   <div class="overlay-targa" id="overlay-targa"></div>
   <div class="overlay-sub" id="overlay-time"></div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     OVERLAY CONFERMA USCITA
-═══════════════════════════════════════════════════════ -->
+<!-- OVERLAY USCITA -->
 <div class="overlay" id="overlay-uscita" style="gap:10px">
-  <div class="overlay-icon">🏁</div>
+  <div class="overlay-icon">&#x1F3C1;</div>
   <div class="overlay-title">CONFERMA USCITA</div>
   <div class="overlay-targa" id="uscita-targa"></div>
   <div style="text-align:center">
@@ -484,35 +273,46 @@
     <div id="uscita-dettaglio" style="font-size:11px;color:var(--muted);margin-top:6px"></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:340px">
-    <button onclick="annullaUscita()"
-            style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--muted);font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;cursor:pointer">
-      ✕ ANNULLA
-    </button>
-    <button onclick="confermaUscita()"
-            style="padding:16px;border:none;border-radius:12px;background:var(--green);color:white;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;cursor:pointer">
-      ✓ CONFERMA
-    </button>
+    <button onclick="annullaUscita()" style="padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--muted);font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;cursor:pointer">&#x2715; ANNULLA</button>
+    <button onclick="confermaUscita()" style="padding:16px;border:none;border-radius:12px;background:var(--green);color:white;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;cursor:pointer">&#x2713; CONFERMA</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     OVERLAY OCR
-═══════════════════════════════════════════════════════ -->
+<!-- OVERLAY OCR -->
 <div class="ocr-overlay" id="ocr-overlay">
   <div class="ocr-title">Targa rilevata</div>
   <div class="ocr-conf" id="ocr-confidence"></div>
   <input class="ocr-input" id="ocr-targa-input" type="text" maxlength="8">
   <div class="ocr-btns">
-    <button class="ocr-btn confirm" onclick="confermaOCR()">✓ CONFERMA</button>
-    <button class="ocr-btn cancel" onclick="chiudiOverlayOCR()">✕ ANNULLA</button>
+    <button class="ocr-btn confirm" onclick="confermaOCR()">&#x2713; CONFERMA</button>
+    <button class="ocr-btn cancel" onclick="chiudiOverlayOCR()">&#x2715; ANNULLA</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     SCRIPTS
-═══════════════════════════════════════════════════════ -->
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // Funzioni lingua — definite subito prima del DOM
+  function cambiaLingua() {
+    var lang = localStorage.getItem('charlotte_lang') || 'it';
+    var nl = lang === 'it' ? 'en' : 'it';
+    localStorage.setItem('charlotte_lang', nl);
+    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
+    var b = document.getElementById('lang-btn-label');
+    if (b) b.textContent = nl === 'it' ? 'English' : 'Italiano';
+    var m = document.getElementById('logo-menu');
+    if (m) m.style.display = 'none';
+  }
+
+  function toggleLangLogin() {
+    var lang = localStorage.getItem('charlotte_lang') || 'it';
+    var nl = lang === 'it' ? 'en' : 'it';
+    localStorage.setItem('charlotte_lang', nl);
+    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
+    var b = document.getElementById('lang-login-btn');
+    if (b) b.textContent = nl === 'it' ? 'English' : 'Italiano';
+  }
+
   (function() {
     var v = Date.now();
     var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js','js/stampa.js','js/lang.js'];
@@ -522,9 +322,7 @@
       s.src = f + '?v=' + v;
       s.onload = function() {
         loaded++;
-        if (loaded === files.length) {
-          appReady = true;
-        }
+        if (loaded === files.length) { appReady = true; }
       };
       document.head.appendChild(s);
     });
@@ -533,23 +331,20 @@
 </script>
 
 <script>
-  // ── INIT ────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const splash = document.getElementById('splash-screen');
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      var splash = document.getElementById('splash-screen');
       if (splash) splash.classList.add('fadeout');
-      setTimeout(() => { if (splash) splash.remove(); }, 1200);
+      setTimeout(function() { if (splash) splash.remove(); }, 1200);
     }, 1800);
 
-    // Aspetta che tutti i file JS siano caricati
     function waitReady() {
       if (appReady) {
         initSupabase();
         controllaSessione();
-        setTimeout(() => {
+        setTimeout(function() {
           if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
-          aggiornaLangBtn();
-        }, 100);
+        }, 200);
       } else {
         setTimeout(waitReady, 50);
       }
@@ -557,70 +352,32 @@
     waitReady();
   });
 
-  // ── LINGUA ──────────────────────────────────────────────
-  function aggiornaLangBtn() {
-    const btn = document.getElementById('lang-btn-label');
-    if (btn) {
-      const lang = localStorage.getItem('charlotte_lang') || 'it';
-      btn.textContent = lang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano';
-    }
-  }
-
-
-
-  // ── LINGUA ── (funzioni globali)
-  function cambiaLingua() {
-    var lang = localStorage.getItem('charlotte_lang') || 'it';
-    var nuovaLang = lang === 'it' ? 'en' : 'it';
-    localStorage.setItem('charlotte_lang', nuovaLang);
-    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
-    var b = document.getElementById('lang-btn-label');
-    if (b) b.textContent = nuovaLang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano';
-    var m = document.getElementById('logo-menu');
-    if (m) m.style.display = 'none';
-  }
-
-  function toggleLangLogin() {
-    var lang = localStorage.getItem('charlotte_lang') || 'it';
-    var nuovaLang = lang === 'it' ? 'en' : 'it';
-    localStorage.setItem('charlotte_lang', nuovaLang);
-    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
-    var b = document.getElementById('lang-login-btn');
-    if (b) b.textContent = nuovaLang === 'it' ? '🇬🇧 English' : '🇮🇹 Italiano';
-  }
-
-  // ── MENU LOGO ───────────────────────────────────────────
   function toggleMenuLogo() {
-    const menu = document.getElementById('logo-menu');
+    var menu = document.getElementById('logo-menu');
     if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
   }
 
   function chiudiMenuLogo() {
-    const menu = document.getElementById('logo-menu');
+    var menu = document.getElementById('logo-menu');
     if (menu) menu.style.display = 'none';
   }
 
-  // Chiudi menu cliccando fuori
   document.addEventListener('click', function(e) {
-    const menu = document.getElementById('logo-menu');
-    const logo = document.querySelector('.logo-icon');
-    if (menu && !menu.contains(e.target) && e.target !== logo) {
-      menu.style.display = 'none';
-    }
+    var menu = document.getElementById('logo-menu');
+    var logo = document.querySelector('.logo-icon');
+    if (menu && !menu.contains(e.target) && e.target !== logo) menu.style.display = 'none';
   });
 
-  // ── BADGE SCREEN ────────────────────────────────────────
   function apriBadge() {
     mostraSchermata('badge-screen');
     aggiornaUIBadge();
   }
 
-  // ── OWNER LOCK ───────────────────────────────────────────
   function apriOwnerLock() {
     document.getElementById('owner-lock').classList.remove('hidden');
     document.getElementById('owner-lock-password').value = '';
     document.getElementById('owner-lock-error').textContent = '';
-    setTimeout(() => document.getElementById('owner-lock-password').focus(), 100);
+    setTimeout(function() { document.getElementById('owner-lock-password').focus(); }, 100);
   }
 
   function chiudiOwnerLock() {
@@ -628,30 +385,17 @@
   }
 
   async function verificaPasswordOwner() {
-    const pwd = document.getElementById('owner-lock-password').value;
-    const errEl = document.getElementById('owner-lock-error');
+    var pwd = document.getElementById('owner-lock-password').value;
+    var errEl = document.getElementById('owner-lock-error');
     if (!pwd) { errEl.textContent = 'Inserisci la password.'; return; }
-
-    const accountId = localStorage.getItem('charlotte_account_id');
-    const { data } = await sbClient
-      .from('accounts')
-      .select('owner_password')
-      .eq('id', accountId)
-      .single();
-
-    if (!data?.owner_password) {
-      // Prima volta — imposta la password
-      const { error } = await sbClient
-        .from('accounts')
-        .update({ owner_password: pwd })
-        .eq('id', accountId);
-      if (!error) {
-        chiudiOwnerLock();
-        window.location.href = 'owner.html';
-      }
+    var accountId = localStorage.getItem('charlotte_account_id');
+    var res = await sbClient.from('accounts').select('owner_password').eq('id', accountId).single();
+    var data = res.data;
+    if (!data || !data.owner_password) {
+      var upd = await sbClient.from('accounts').update({ owner_password: pwd }).eq('id', accountId);
+      if (!upd.error) { chiudiOwnerLock(); window.location.href = 'owner.html'; }
       return;
     }
-
     if (data.owner_password === pwd) {
       chiudiOwnerLock();
       window.location.href = 'owner.html';
@@ -661,127 +405,68 @@
     }
   }
 
-  // ── WIZARD ONBOARDING ───────────────────────────────────
-  let wzStep = 0;
-  const wzSteps = [
-    { title: 'Nome Azienda', html: `
-      <div class="wz-step">
-        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Come si chiama la tua azienda?</p>
-        <input id="wz-company" class="wz-input" placeholder="Es. Rossi Parcheggi S.r.l." style="margin-bottom:12px">
-        <div class="wz-error" id="wz-err"></div>
-        <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
-      </div>` },
-    { title: 'Garages', html: `
-      <div class="wz-step">
-        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Aggiungi i tuoi garage</p>
-        <div id="wz-garages-list"></div>
-        <button class="wz-btn-secondary" onclick="wzAddGarage()">+ Aggiungi garage</button>
-        <div class="wz-error" id="wz-err"></div>
-        <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
-      </div>` },
-
-    { title: 'Password Owner', html: `
-      <div class="wz-step">
-        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Imposta una password per proteggere il pannello Owner</p>
-        <input id="wz-owner-pwd" class="wz-input" type="password" placeholder="Password owner" style="margin-bottom:8px">
-        <input id="wz-owner-pwd2" class="wz-input" type="password" placeholder="Conferma password" style="margin-bottom:12px">
-        <div class="wz-error" id="wz-err"></div>
-        <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
-      </div>` },
-    { title: 'Abbonamento', html: `
-      <div class="wz-step">
-        <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Scegli il tuo piano</p>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-          <div class="wz-garage-row" onclick="wzSelectPlan('base',this)" style="cursor:pointer">
-            <strong style="color:var(--accent3)">Base — 19€/mese</strong>
-            <span style="font-size:12px;color:var(--muted)">1 garage · operatori illimitati</span>
-          </div>
-          <div class="wz-garage-row" onclick="wzSelectPlan('pro',this)" style="cursor:pointer">
-            <strong style="color:var(--accent3)">Pro — 39€/mese</strong>
-            <span style="font-size:12px;color:var(--muted)">Fino a 5 garage · analytics · report email</span>
-          </div>
-          <div class="wz-garage-row" onclick="wzSelectPlan('enterprise',this)" style="cursor:pointer">
-            <strong style="color:var(--accent3)">Enterprise — 79€/mese</strong>
-            <span style="font-size:12px;color:var(--muted)">Garage illimitati · API · supporto dedicato</span>
-          </div>
-        </div>
-        <div class="wz-error" id="wz-err"></div>
-        <button class="wz-btn-primary" onclick="wzNext()">CONTINUA →</button>
-      </div>` },
-    { title: 'Pronto!', html: `
-      <div class="wz-step" style="text-align:center;padding:20px 0">
-        <div style="font-size:72px;margin-bottom:16px">🎉</div>
-        <div class="pin-logo-text" style="margin-bottom:8px">Tutto pronto!</div>
-        <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Configura le tariffe e le coordinate GPS dei garage dal pannello Owner.</p>
-        <button class="wz-btn-primary" onclick="wzComplete()">INIZIA AD USARE CHARLOTTE</button>
-      </div>` }
+  var wzStep = 0;
+  var wzSteps = [
+    { title: 'Nome Azienda', html: '<div class="wz-step"><p style="color:var(--muted);font-size:14px;margin-bottom:16px">Come si chiama la tua azienda?</p><input id="wz-company" class="wz-input" placeholder="Es. Rossi Parcheggi S.r.l." style="margin-bottom:12px"><div class="wz-error" id="wz-err"></div><button class="wz-btn-primary" onclick="wzNext()">CONTINUA</button></div>' },
+    { title: 'Garages', html: '<div class="wz-step"><p style="color:var(--muted);font-size:14px;margin-bottom:16px">Aggiungi i tuoi garage</p><div id="wz-garages-list"></div><button class="wz-btn-secondary" onclick="wzAddGarage()">+ Aggiungi garage</button><div class="wz-error" id="wz-err"></div><button class="wz-btn-primary" onclick="wzNext()">CONTINUA</button></div>' },
+    { title: 'Password Owner', html: '<div class="wz-step"><p style="color:var(--muted);font-size:14px;margin-bottom:16px">Imposta una password per proteggere il pannello Owner</p><input id="wz-owner-pwd" class="wz-input" type="password" placeholder="Password owner" style="margin-bottom:8px"><input id="wz-owner-pwd2" class="wz-input" type="password" placeholder="Conferma password" style="margin-bottom:12px"><div class="wz-error" id="wz-err"></div><button class="wz-btn-primary" onclick="wzNext()">CONTINUA</button></div>' },
+    { title: 'Abbonamento', html: '<div class="wz-step"><p style="color:var(--muted);font-size:14px;margin-bottom:16px">Scegli il tuo piano</p><div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"><div class="wz-garage-row" onclick="wzSelectPlan(\'starter\',this)" style="cursor:pointer"><strong style="color:var(--accent3)">Starter - 79/mese</strong><span style="font-size:12px;color:var(--muted)">1 garage - operatori illimitati</span></div><div class="wz-garage-row" onclick="wzSelectPlan(\'pro\',this)" style="cursor:pointer"><strong style="color:var(--accent3)">Pro - 129/mese</strong><span style="font-size:12px;color:var(--muted)">Fino a 5 garage</span></div><div class="wz-garage-row" onclick="wzSelectPlan(\'enterprise\',this)" style="cursor:pointer"><strong style="color:var(--accent3)">Enterprise - 199/mese</strong><span style="font-size:12px;color:var(--muted)">Garage illimitati</span></div></div><div class="wz-error" id="wz-err"></div><button class="wz-btn-primary" onclick="wzNext()">CONTINUA</button></div>' },
+    { title: 'Pronto!', html: '<div class="wz-step" style="text-align:center;padding:20px 0"><div style="font-size:72px;margin-bottom:16px">&#x1F389;</div><div class="pin-logo-text" style="margin-bottom:8px">Tutto pronto!</div><p style="color:var(--muted);font-size:14px;margin-bottom:24px">Configura le tariffe dal pannello Owner.</p><button class="wz-btn-primary" onclick="wzComplete()">INIZIA</button></div>' }
   ];
 
-  let wzPlanSelected = null;
-  let wzGarages = [{ name: '', address: '' }];
-  let wzOwnerPwd = '';
+  var wzPlanSelected = null;
+  var wzGarages = [{ name: '', address: '' }];
+  var wzOwnerPwd = '';
 
   function avviaWizard() {
-    wzStep = 0;
-    wzGarages = [{ name: '', address: '' }];
-    wzPlanSelected = null;
-    wzOwnerPwd = '';
-    renderWzDots();
-    renderWzStep();
+    wzStep = 0; wzGarages = [{name:'',address:''}]; wzPlanSelected = null; wzOwnerPwd = '';
+    renderWzDots(); renderWzStep();
   }
 
   function renderWzDots() {
-    const el = document.getElementById('wz-dots');
+    var el = document.getElementById('wz-dots');
     if (!el) return;
-    el.innerHTML = wzSteps.map((_, i) =>
-      `<div class="wz-dot ${i < wzStep ? 'done' : i === wzStep ? 'active' : ''}"></div>`
-    ).join('');
+    el.innerHTML = wzSteps.map(function(_,i) {
+      return '<div class="wz-dot ' + (i < wzStep ? 'done' : i === wzStep ? 'active' : '') + '"></div>';
+    }).join('');
   }
 
   function renderWzStep() {
-    const el = document.getElementById('wz-content');
+    var el = document.getElementById('wz-content');
     if (el) el.innerHTML = wzSteps[wzStep].html;
     if (wzStep === 1) renderWzGarages();
   }
 
   function renderWzGarages() {
-    const el = document.getElementById('wz-garages-list');
+    var el = document.getElementById('wz-garages-list');
     if (!el) return;
-    el.innerHTML = wzGarages.map((g, i) => `
-      <div class="wz-garage-row" style="margin-bottom:10px">
-        <input class="wz-input" placeholder="Nome garage" value="${g.name}"
-               oninput="wzGarages[${i}].name=this.value" style="margin-bottom:6px">
-        <input class="wz-input" placeholder="Indirizzo" value="${g.address}"
-               oninput="wzGarages[${i}].address=this.value">
-        ${wzGarages.length > 1 ? `<button class="wz-garage-remove" onclick="wzRemoveGarage(${i})">✕</button>` : ''}
-      </div>`).join('');
+    el.innerHTML = wzGarages.map(function(g,i) {
+      return '<div class="wz-garage-row" style="margin-bottom:10px"><input class="wz-input" placeholder="Nome garage" value="' + g.name + '" oninput="wzGarages[' + i + '].name=this.value" style="margin-bottom:6px"><input class="wz-input" placeholder="Indirizzo" value="' + g.address + '" oninput="wzGarages[' + i + '].address=this.value">' + (wzGarages.length > 1 ? '<button class="wz-garage-remove" onclick="wzRemoveGarage(' + i + ')">&#x2715;</button>' : '') + '</div>';
+    }).join('');
   }
 
-  function wzAddGarage() { wzGarages.push({ name: '', address: '' }); renderWzGarages(); }
-  function wzRemoveGarage(i) { wzGarages.splice(i, 1); renderWzGarages(); }
-
+  function wzAddGarage() { wzGarages.push({name:'',address:''}); renderWzGarages(); }
+  function wzRemoveGarage(i) { wzGarages.splice(i,1); renderWzGarages(); }
   function wzSelectPlan(plan, el) {
     wzPlanSelected = plan;
-    document.querySelectorAll('#wz-content .wz-garage-row').forEach(r => r.style.borderColor = '');
+    document.querySelectorAll('#wz-content .wz-garage-row').forEach(function(r) { r.style.borderColor = ''; });
     el.style.borderColor = 'var(--accent)';
   }
 
   async function wzNext() {
-    const errEl = document.getElementById('wz-err');
+    var errEl = document.getElementById('wz-err');
     if (errEl) errEl.textContent = '';
-
     if (wzStep === 0) {
-      const val = document.getElementById('wz-company')?.value?.trim();
+      var val = document.getElementById('wz-company') && document.getElementById('wz-company').value.trim();
       if (!val) { if (errEl) errEl.textContent = 'Inserisci il nome azienda'; return; }
       localStorage.setItem('wz_company', val);
     }
     if (wzStep === 1) {
-      const valid = wzGarages.every(g => g.name.trim());
-      if (!valid) { if (errEl) errEl.textContent = 'Inserisci almeno il nome per ogni garage'; return; }
+      if (!wzGarages.every(function(g) { return g.name.trim(); })) { if (errEl) errEl.textContent = 'Inserisci il nome per ogni garage'; return; }
     }
     if (wzStep === 2) {
-      const p1 = document.getElementById('wz-owner-pwd')?.value;
-      const p2 = document.getElementById('wz-owner-pwd2')?.value;
+      var p1 = document.getElementById('wz-owner-pwd') && document.getElementById('wz-owner-pwd').value;
+      var p2 = document.getElementById('wz-owner-pwd2') && document.getElementById('wz-owner-pwd2').value;
       if (!p1 || p1.length < 4) { if (errEl) errEl.textContent = 'Password minimo 4 caratteri'; return; }
       if (p1 !== p2) { if (errEl) errEl.textContent = 'Le password non coincidono'; return; }
       wzOwnerPwd = p1;
@@ -789,40 +474,31 @@
     if (wzStep === 3) {
       if (!wzPlanSelected) { if (errEl) errEl.textContent = 'Seleziona un piano'; return; }
     }
-
     wzStep++;
     if (wzStep < wzSteps.length) { renderWzDots(); renderWzStep(); }
   }
 
   async function wzComplete() {
-    const company = localStorage.getItem('wz_company') || 'La mia azienda';
-
-    const { data: acc, error: accErr } = await sbClient.from('accounts').insert({
+    var company = localStorage.getItem('wz_company') || 'La mia azienda';
+    var res = await sbClient.from('accounts').insert({
       owner_id: currentUser.id,
       company_name: company,
-      plan: wzPlanSelected || 'base',
+      plan: wzPlanSelected || 'starter',
       onboarding_complete: true,
       owner_password: wzOwnerPwd,
-      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+      trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     }).select().single();
-
-    if (accErr) { alert('Errore nel salvare l\'account. Riprova.'); return; }
-
-    for (const g of wzGarages) {
+    if (res.error) { alert('Errore nel salvare. Riprova.'); return; }
+    var acc = res.data;
+    for (var i = 0; i < wzGarages.length; i++) {
+      var g = wzGarages[i];
       if (g.name.trim()) {
-        await sbClient.from('garages').insert({
-          account_id: acc.id,
-          name: g.name.trim(),
-          address: g.address.trim(),
-          active: true
-        });
+        await sbClient.from('garages').insert({ account_id: acc.id, name: g.name.trim(), address: g.address.trim(), active: true });
       }
     }
-
     localStorage.setItem('charlotte_account_id', acc.id);
     localStorage.setItem('charlotte_company', company);
     localStorage.removeItem('wz_company');
-
     mostraSchermata('main-screen');
     aggiornaNomeSocietà(company);
     inizializzaApp();
