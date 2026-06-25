@@ -220,22 +220,39 @@ function applicaTraduzioni() {
   const lblTexts = en ? ['Parked','Today','Month'] : ['In sosta','Oggi','Mese'];
   lbls.forEach((l,i) => { if (lblTexts[i]) l.textContent = lblTexts[i]; });
 
-  // Bottoni griglia
-  const btns = [
-    ['Ingresso','Entry','Registra entrata','Register arrival'],
-    ['Uscita','Exit','Registra uscita','Register departure'],
-    ['Lista','List','Soste attive','Active stays'],
-    ['Badge','Badge','Timbra turno','Clock in/out'],
-    ['Cassa','Cash','Registro giornaliero','Daily register'],
-  ];
+  // Bottoni griglia - traduzione per testo invece che per indice
+  const btnMap = {
+    'Ingresso': 'Entry', 'Entry': 'Entry',
+    'Uscita': 'Exit', 'Exit': 'Exit',
+    'Lista': 'List', 'List': 'List',
+    'Badge': 'Badge',
+    'Cassa': 'Cash', 'Cash': 'Cash',
+  };
+  const subMap = {
+    'Registra entrata': 'Register arrival', 'Register arrival': 'Register arrival',
+    'Registra uscita': 'Register departure', 'Register departure': 'Register departure',
+    'Soste attive': 'Active stays', 'Active stays': 'Active stays',
+    'Timbra turno': 'Clock in/out', 'Clock in/out': 'Clock in/out',
+    'Registro giornaliero': 'Daily register', 'Daily register': 'Daily register',
+  };
 
-  document.querySelectorAll('.btn-label').forEach((el, i) => {
-    const btn = btns[i];
-    if (btn) el.textContent = en ? btn[1] : btn[0];
+  document.querySelectorAll('.btn-label').forEach(el => {
+    const testo = el.textContent.trim();
+    if (en && btnMap[testo]) el.textContent = btnMap[testo];
+    else if (!en) {
+      for (const [it, eng] of Object.entries(btnMap)) {
+        if (eng === testo && it !== eng) { el.textContent = it; break; }
+      }
+    }
   });
-  document.querySelectorAll('.btn-sub').forEach((el, i) => {
-    const btn = btns[i];
-    if (btn) el.textContent = en ? btn[3] : btn[2];
+  document.querySelectorAll('.btn-sub').forEach(el => {
+    const testo = el.textContent.trim();
+    if (en && subMap[testo]) el.textContent = subMap[testo];
+    else if (!en) {
+      for (const [it, eng] of Object.entries(subMap)) {
+        if (eng === testo) { el.textContent = it; break; }
+      }
+    }
   });
 
   // Titoli schermate
@@ -331,6 +348,28 @@ function applicaTraduzioni() {
   if (ownerLockBtn) ownerLockBtn.textContent = en ? 'ACCESS' : 'ACCEDI';
   const ownerLockCanc = document.querySelector('.owner-lock .wz-btn-secondary');
   if (ownerLockCanc) ownerLockCanc.textContent = en ? 'Cancel' : 'Annulla';
+
+  // Traduci categorie veicolo
+  const catMap = {
+    'Moto': 'Motorcycle', 'Motorcycle': 'Motorcycle',
+    'Auto Piccola': 'Small Car', 'Small Car': 'Small Car',
+    'Auto Media': 'Medium Car', 'Medium Car': 'Medium Car',
+    'Auto Grande': 'Large Car', 'Large Car': 'Large Car',
+    'Luxury/Van': 'Luxury/Van',
+  };
+  document.querySelectorAll('.tipo-btn, .conv-btn').forEach(el => {
+    const testo = el.textContent.trim();
+    for (const [it, eng] of Object.entries(catMap)) {
+      if (en && testo.includes(it)) { el.innerHTML = el.innerHTML.replace(it, eng); break; }
+      if (!en && testo.includes(eng) && it !== eng) { el.innerHTML = el.innerHTML.replace(eng, it); break; }
+    }
+  });
+
+  // Aggiorna label bottone lingua
+  const langBtn = document.getElementById('lang-btn-label');
+  if (langBtn) langBtn.textContent = en ? 'Italiano' : 'English';
+  const langLoginBtn = document.getElementById('lang-login-btn');
+  if (langLoginBtn) langLoginBtn.textContent = en ? 'Italiano' : 'English';
 
   // Aggiorna data-i18n se presenti
   document.querySelectorAll('[data-i18n]').forEach(el => {
