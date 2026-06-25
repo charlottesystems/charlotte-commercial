@@ -3,12 +3,22 @@
 // Calcolo importo soste, tariffe standard e convenzioni
 // ============================================================
 
+const CATEGORIE_LABELS = {
+  it: { moto: 'Moto', piccola: 'Auto Piccola', media: 'Auto Media', grande: 'Auto Grande', luxury_van: 'Luxury/Van' },
+  en: { moto: 'Motorcycle', piccola: 'Small Car', media: 'Medium Car', grande: 'Large Car', luxury_van: 'Luxury/Van' }
+};
+
+function getCategorieLabels() {
+  const lang = localStorage.getItem('charlotte_lang') || 'it';
+  return CATEGORIE_LABELS[lang] || CATEGORIE_LABELS['it'];
+}
+
 const CATEGORIE = [
-  { id: 'moto',        label: 'Moto',        icon: '🏍️' },
-  { id: 'piccola',     label: 'Auto Piccola', icon: '🚗' },
-  { id: 'media',       label: 'Auto Media',   icon: '🚙' },
-  { id: 'grande',      label: 'Auto Grande',  icon: '🚐' },
-  { id: 'luxury_van',  label: 'Luxury/Van',   icon: '🚌' },
+  { id: 'moto',       get label() { return getCategorieLabels().moto; },       icon: '🏍️' },
+  { id: 'piccola',    get label() { return getCategorieLabels().piccola; },    icon: '🚗' },
+  { id: 'media',      get label() { return getCategorieLabels().media; },      icon: '🚙' },
+  { id: 'grande',     get label() { return getCategorieLabels().grande; },     icon: '🚐' },
+  { id: 'luxury_van', get label() { return getCategorieLabels().luxury_van; }, icon: '🚌' },
 ];
 
 // ── CARICA TARIFFE GARAGE ────────────────────────────────────
