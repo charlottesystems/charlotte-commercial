@@ -176,6 +176,9 @@
     <button class="owner-tab" data-tab="prenotazioni" onclick="mostraSezioneOwner('prenotazioni')">
       📅 Prenotazioni
     </button>
+    <button class="owner-tab" data-tab="categorie" onclick="mostraSezioneOwner('categorie')">
+      🏷️ Categorie
+    </button>
     <button class="owner-tab" data-tab="turni" onclick="mostraSezioneOwner('turni')">
       🕐 Ing/Usc
     </button>
@@ -212,6 +215,12 @@
   <div class="owner-section" id="owner-prenotazioni" style="display:none">
     <div class="section-label" style="margin-bottom:12px">Gestisci prenotazioni e link pubblici</div>
     <div id="prenotazioni-container"></div>
+  </div>
+
+  <!-- Sezione Categorie Custom -->
+  <div class="owner-section" id="owner-categorie" style="display:none">
+    <div class="section-label" style="margin-bottom:12px">Categorie veicolo personalizzate per questo garage</div>
+    <div id="categorie-custom-container"></div>
   </div>
 
   <!-- Sezione Turni -->
