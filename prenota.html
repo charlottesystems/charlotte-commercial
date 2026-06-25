@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>Prenota — Charlotte Parking</title>
+  <link rel="icon" href="icon-512.png" type="image/png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { max-width: 520px; margin: 0 auto; padding: 24px 16px 40px; }
+    .prenota-header { text-align: center; padding: 24px 0 20px; }
+    .garage-nome { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 28px; color: var(--white); margin-bottom: 4px; }
+    .garage-addr { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .form-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .form-card h3 { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 16px; color: var(--accent3); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: Exo 2, sans-serif; font-size: 15px; outline: none; box-sizing: border-box; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .preventivo-box { background: rgba(16,185,129,0.08); border: 1px solid var(--green); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center; display: none; }
+    .preventivo-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .preventivo-importo { font-family: 'Share Tech Mono', monospace; font-size: 36px; color: var(--green); font-weight: bold; }
+    .preventivo-dettaglio { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .submit-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; padding: 18px; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 1px; color: white; cursor: pointer; box-shadow: 0 4px 20px rgba(124,58,237,0.4); transition: all 0.2s; }
+    .submit-btn:active { transform: scale(0.97); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .success-screen { display: none; text-align: center; padding: 40px 20px; }
+    .success-screen .icon { font-size: 72px; margin-bottom: 16px; }
+    .success-screen h2 { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 26px; color: var(--white); margin-bottom: 8px; }
+    .success-screen p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .error-msg { color: var(--red); font-size: 13px; margin-top: 8px; text-align: center; min-height: 18px; }
+    .tariffe-info { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    select option { background: var(--bg2); color: var(--text); }
+  </style>
+</head>
+<body>
+
+<div id="loading-screen" style="text-align:center;padding:60px 20px">
+  <div style="font-size:48px;margin-bottom:16px">🅿️</div>
+  <div style="font-family:Rajdhani,sans-serif;font-size:18px;color:var(--muted)">Caricamento...</div>
+</div>
+
+<div id="error-screen" style="display:none;text-align:center;padding:60px 20px">
+  <div style="font-size:48px;margin-bottom:16px">❌</div>
+  <div style="font-family:Rajdhani,sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Garage non trovato</div>
+  <div style="font-size:14px;color:var(--muted)">Il link non è valido o il garage non è disponibile.</div>
+</div>
+
+<div id="form-screen" style="display:none">
+  <div class="prenota-header">
+    <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:28px;color:white;margin:0 auto 12px;box-shadow:0 0 24px rgba(124,58,237,0.5)">🅿</div>
+    <div class="garage-nome" id="garage-nome">—</div>
+    <div class="garage-addr" id="garage-addr"></div>
+  </div>
+
+  <div class="form-card">
+    <h3>I tuoi dati</h3>
+    <div class="field">
+      <label>Nome e Cognome *</label>
+      <input id="f-nome" type="text" placeholder="Es. Mario Rossi">
+    </div>
+    <div class="field">
+      <label>Targa veicolo</label>
+      <input id="f-targa" type="text" placeholder="Es. AB123CD" style="text-transform:uppercase"
+             oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="field">
+      <label>Email di conferma *</label>
+      <input id="f-email" type="email" placeholder="Es. mario@email.com">
+    </div>
+    <div class="field">
+      <label>Telefono</label>
+      <input id="f-tel" type="tel" placeholder="Es. +39 333 1234567">
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>Dettagli sosta</h3>
+    <div class="field">
+      <label>Categoria veicolo *</label>
+      <select id="f-categoria" onchange="calcolaPreventivo()">
+        <option value="">Seleziona...</option>
+      </select>
+    </div>
+    <div class="field" id="conv-field" style="display:none">
+      <label>Convenzione (opzionale)</label>
+      <select id="f-convenzione" onchange="calcolaPreventivo()">
+        <option value="">Nessuna convenzione</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Data e ora ingresso *</label>
+      <input id="f-ingresso" type="datetime-local" onchange="calcolaPreventivo()">
+    </div>
+    <div class="field">
+      <label>Data e ora uscita prevista *</label>
+      <input id="f-uscita" type="datetime-local" onchange="calcolaPreventivo()">
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <textarea id="f-note" placeholder="Es. veicolo elettrico, necessità di ricarica..."></textarea>
+    </div>
+  </div>
+
+  <div class="preventivo-box" id="preventivo-box">
+    <div class="preventivo-label">PREVENTIVO STIMATO</div>
+    <div class="preventivo-importo" id="preventivo-importo">€ 0.00</div>
+    <div class="preventivo-dettaglio" id="preventivo-dettaglio"></div>
+  </div>
+
+  <div class="error-msg" id="form-error"></div>
+
+  <button class="submit-btn" id="submit-btn" onclick="inviaPrenotazione()">
+    ✓ INVIA PRENOTAZIONE
+  </button>
+
+  <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">
+    Prenotazione soggetta a conferma da parte del garage.<br>
+    Riceverai una email di conferma.
+  </div>
+</div>
+
+<div class="success-screen" id="success-screen">
+  <div class="icon">✅</div>
+  <h2>Prenotazione inviata!</h2>
+  <p>La tua richiesta è stata ricevuta.<br>
+  Il garage ti contatterà per conferma.<br><br>
+  Controlla la tua email per il riepilogo.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://cmglerkaiycllfvgjuww.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtZ2xlcmthaXljbGxmdmdqdXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Mzk3MzEsImV4cCI6MjA5NjUxNTczMX0.Rq1BMRKhQium6tFCmZvid53rjcAXNpckmsSSnTlAiDE';
+  const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const CATEGORIE = [
+    { id: 'moto', label: 'Moto' },
+    { id: 'piccola', label: 'Auto Piccola' },
+    { id: 'media', label: 'Auto Media' },
+    { id: 'grande', label: 'Auto Grande' },
+    { id: 'luxury_van', label: 'Luxury / Van' },
+  ];
+
+  let garageData = null;
+  let tariffeData = [];
+  let convenzioniData = [];
+
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const garageId = params.get('garage');
+
+    if (!garageId) { mostraErrore(); return; }
+
+    // Carica garage
+    const { data: garage } = await sbClient
+      .from('garages')
+      .select('id, name, address, account_id, active')
+      .eq('id', garageId)
+      .eq('active', true)
+      .single();
+
+    if (!garage) { mostraErrore(); return; }
+    garageData = garage;
+
+    // Carica tariffe
+    const { data: tariffe } = await sbClient
+      .from('tariffe')
+      .select('*')
+      .eq('garage_id', garageId);
+    tariffeData = tariffe || [];
+
+    // Carica convenzioni
+    const { data: convenzioni } = await sbClient
+      .from('convenzioni')
+      .select('*, tariffe_convenzioni(*)')
+      .eq('garage_id', garageId)
+      .eq('attiva', true);
+    convenzioniData = convenzioni || [];
+
+    // Popola UI
+    document.getElementById('garage-nome').textContent = garage.name;
+    document.getElementById('garage-addr').textContent = garage.address || '';
+    document.title = 'Prenota — ' + garage.name;
+
+    // Categorie con tariffe configurate
+    const catSel = document.getElementById('f-categoria');
+    const catDisponibili = CATEGORIE.filter(c => tariffeData.some(t => t.categoria === c.id));
+    catDisponibili.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.id;
+      opt.textContent = cat.label;
+      catSel.appendChild(opt);
+    });
+
+    // Convenzioni
+    if (convenzioniData.length > 0) {
+      const convSel = document.getElementById('f-convenzione');
+      convenzioniData.forEach(conv => {
+        const opt = document.createElement('option');
+        opt.value = conv.id;
+        opt.textContent = conv.nome;
+        convSel.appendChild(opt);
+      });
+      document.getElementById('conv-field').style.display = 'block';
+    }
+
+    // Date default: domani
+    const domani = new Date();
+    domani.setDate(domani.getDate() + 1);
+    domani.setHours(9, 0, 0, 0);
+    const dopodomani = new Date(domani);
+    dopodomani.setHours(18, 0, 0, 0);
+
+    document.getElementById('f-ingresso').value = domani.toISOString().slice(0, 16);
+    document.getElementById('f-uscita').value = dopodomani.toISOString().slice(0, 16);
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('form-screen').style.display = 'block';
+
+    calcolaPreventivo();
+  }
+
+  function mostraErrore() {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'block';
+  }
+
+  function calcolaPreventivo() {
+    const catId = document.getElementById('f-categoria').value;
+    const convId = document.getElementById('f-convenzione').value;
+    const ingressoVal = document.getElementById('f-ingresso').value;
+    const uscitaVal = document.getElementById('f-uscita').value;
+
+    const box = document.getElementById('preventivo-box');
+
+    if (!catId || !ingressoVal || !uscitaVal) { box.style.display = 'none'; return; }
+
+    const ingresso = new Date(ingressoVal);
+    const uscita = new Date(uscitaVal);
+    if (uscita <= ingresso) { box.style.display = 'none'; return; }
+
+    const tariffa = tariffeData.find(t => t.categoria === catId);
+    const conv = convId ? convenzioniData.find(c => c.id === convId) : null;
+
+    if (!tariffa) { box.style.display = 'none'; return; }
+
+    // Calcolo semplificato
+    const durataMs = uscita - ingresso;
+    const durataOre = durataMs / 3600000;
+    const durataMinuti = Math.floor(durataMs / 60000);
+    let importo = 0;
+    let dettaglio = '';
+
+    if (conv) {
+      const tc = conv.tariffe_convenzioni?.find(t => t.categoria === catId);
+      if (tc) {
+        const giorni = Math.max(1, Math.ceil(durataOre / 24));
+        importo = giorni * tc.prezzo_giornaliero;
+        dettaglio = giorni + ' giorn. × €' + tc.prezzo_giornaliero.toFixed(2) + ' (conv. ' + conv.nome + ')';
+      }
+    } else {
+      const soglia = tariffa.soglia_giornaliero_ore || 4;
+      if (durataOre >= soglia) {
+        const giorni = Math.max(1, Math.ceil(durataOre / 24));
+        importo = giorni * tariffa.prezzo_giornaliero;
+        dettaglio = giorni + ' giorn. × €' + tariffa.prezzo_giornaliero.toFixed(2);
+      } else {
+        importo = tariffa.prezzo_prima_ora;
+        const oreExtra = Math.max(0, Math.ceil(durataOre) - 1);
+        importo += oreExtra * tariffa.prezzo_ora_successiva;
+        dettaglio = '1° ora €' + tariffa.prezzo_prima_ora.toFixed(2) + (oreExtra > 0 ? ' + ' + oreExtra + 'h × €' + tariffa.prezzo_ora_successiva.toFixed(2) : '');
+      }
+    }
+
+    document.getElementById('preventivo-importo').textContent = '€ ' + importo.toFixed(2);
+    document.getElementById('preventivo-dettaglio').textContent = dettaglio + ' · ' + formatDurata(durataMinuti);
+    box.style.display = 'block';
+
+    return importo;
+  }
+
+  function formatDurata(minuti) {
+    const h = Math.floor(minuti / 60);
+    const m = minuti % 60;
+    return h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+  }
+
+  async function inviaPrenotazione() {
+    const errEl = document.getElementById('form-error');
+    errEl.textContent = '';
+
+    const nome = document.getElementById('f-nome').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const targa = document.getElementById('f-targa').value.trim();
+    const tel = document.getElementById('f-tel').value.trim();
+    const cat = document.getElementById('f-categoria').value;
+    const convId = document.getElementById('f-convenzione').value || null;
+    const ingresso = document.getElementById('f-ingresso').value;
+    const uscita = document.getElementById('f-uscita').value;
+    const note = document.getElementById('f-note').value.trim();
+
+    if (!nome) { errEl.textContent = 'Inserisci il tuo nome.'; return; }
+    if (!email) { errEl.textContent = 'Inserisci la tua email.'; return; }
+    if (!cat) { errEl.textContent = 'Seleziona la categoria del veicolo.'; return; }
+    if (!ingresso || !uscita) { errEl.textContent = 'Inserisci le date di ingresso e uscita.'; return; }
+    if (new Date(uscita) <= new Date(ingresso)) { errEl.textContent = 'La data di uscita deve essere dopo quella di ingresso.'; return; }
+
+    const importo = calcolaPreventivo();
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Invio in corso...';
+
+    const { error } = await sbClient.from('prenotazioni').insert({
+      garage_id: garageData.id,
+      account_id: garageData.account_id,
+      nome_cliente: nome + (tel ? ' · ' + tel : ''),
+      targa: targa || null,
+      categoria: cat,
+      convenzione_id: convId,
+      data_ingresso: new Date(ingresso).toISOString(),
+      data_uscita: new Date(uscita).toISOString(),
+      note: (note || '') + (email ? ' [email: ' + email + ']' : ''),
+      importo_preventivo: importo || null,
+      stato: 'in_attesa'
+    });
+
+    if (error) {
+      errEl.textContent = 'Errore nell\'invio. Riprova.';
+      btn.disabled = false;
+      btn.textContent = '✓ INVIA PRENOTAZIONE';
+      return;
+    }
+
+    document.getElementById('form-screen').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+  }
+
+  init();
+</script>
+</body>
+</html>
