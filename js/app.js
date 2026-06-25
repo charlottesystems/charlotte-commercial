@@ -53,7 +53,6 @@ async function renderPrenotazioniApp() {
     .from('prenotazioni')
     .select('*')
     .eq('garage_id', garageCorrente.id)
-    .neq('stato', 'rifiutata')
     .order('data_ingresso', { ascending: true });
 
   if (error) {
@@ -166,12 +165,7 @@ function cardPrenotazioneApp(p, canConfirm) {
     'style="background:var(--accent);border:none;border-radius:8px;padding:6px 12px;color:white;cursor:pointer;font-size:12px;font-family:Rajdhani,sans-serif;font-weight:700;white-space:nowrap">Ricalcola</button>' +
     '</div></div>';
 
-  if (canConfirm && p.stato === 'in_attesa') {
-    html += '<div style="display:flex;gap:8px;margin:-4px 0 8px;padding:0 4px">' +
-      '<button onclick="confermaPren(this)" data-id="' + p.id + '" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:8px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">&#x2713; Conferma</button>' +
-      '<button onclick="rifiutaPren(this)" data-id="' + p.id + '" style="flex:1;background:none;border:1px solid var(--red);border-radius:8px;padding:8px;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">&#x2715; Rifiuta</button>' +
-      '</div>';
-  }
+
 
   return html;
 }
