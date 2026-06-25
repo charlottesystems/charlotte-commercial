@@ -192,6 +192,9 @@ const TRANSLATIONS = {
 
 let currentLang = localStorage.getItem('charlotte_lang') || 'it';
 
+// Applica lingua immediatamente al caricamento
+document.addEventListener('DOMContentLoaded', function() { setTimeout(applicaTraduzioni, 300); });
+
 function t(key) {
   return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS['it'][key] || key;
 }
@@ -203,20 +206,91 @@ function setLang(lang) {
 }
 
 function applicaTraduzioni() {
-  // Applica traduzioni a tutti gli elementi con data-i18n
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    const attr = el.getAttribute('data-i18n-attr');
-    if (attr) {
-      el.setAttribute(attr, t(key));
-    } else {
-      el.textContent = t(key);
+  const lang = currentLang;
+  const en = lang === 'en';
+
+  // Elementi statici della pagina
+  const map = {
+    'targa-placeholder': en ? 'Scan or enter plate' : 'Scansiona o inserisci targa',
+    'stat-attive': null, // valori numerici, non tradurre
+  };
+
+  // Label statistiche
+  const lbls = document.querySelectorAll('.stat .lbl');
+  const lblTexts = en ? ['Parked','Today','Month'] : ['In sosta','Oggi','Mese'];
+  lbls.forEach((l,i) => { if (lblTexts[i]) l.textContent = lblTexts[i]; });
+
+  // Bottoni griglia
+  const btns = [
+    ['Ingresso','Entry','Registra entrata','Register arrival'],
+    ['Uscita','Exit','Registra uscita','Register departure'],
+    ['Lista','List','Soste attive','Active stays'],
+    ['Badge','Badge','Timbra turno','Clock in/out'],
+    ['Cassa','Cash','Registro giornaliero','Daily register'],
+  ];
+
+  document.querySelectorAll('.btn-label').forEach((el, i) => {
+    const btn = btns[i];
+    if (btn) el.textContent = en ? btn[1] : btn[0];
+  });
+  document.querySelectorAll('.btn-sub').forEach((el, i) => {
+    const btn = btns[i];
+    if (btn) el.textContent = en ? btn[3] : btn[2];
+  });
+
+  // Titoli schermate
+  const titoli = document.querySelectorAll('.screen-title');
+  const titoliMap = {
+    '🚗 Ingresso': '🚗 Entry',
+    '🏁 Uscita': '🏁 Exit',
+    '📋 Lista Soste': '📋 Stays List',
+    '📍 Timbra Turno': '📍 Clock In/Out',
+    '💰 Cassa del giorno': '💰 Daily Cash',
+    '🔍 Cerca Targa': '🔍 Search Plate',
+  };
+  titoli.forEach(el => {
+    const testo = el.textContent.trim();
+    if (en && titoliMap[testo]) el.textContent = titoliMap[testo];
+    else if (!en) {
+      // Trova chiave italiana
+      for (const [it, eng] of Object.entries(titoliMap)) {
+        if (eng === testo) { el.textContent = it; break; }
+      }
     }
   });
 
-  // Aggiorna placeholder
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  // Login form
+  const loginBtn = document.querySelector('#login-form .wz-btn-primary');
+  if (loginBtn) loginBtn.textContent = en ? 'SIGN IN' : 'ACCEDI';
+  const regBtn = document.querySelector('#login-form .wz-btn-secondary');
+  if (regBtn) regBtn.textContent = en ? 'Create owner account →' : 'Crea account owner →';
+  const opBtn = document.querySelector('#operatore-pin-form .pin-logo-text');
+  if (opBtn) opBtn.textContent = en ? 'Operator Access' : 'Accesso Operatore';
+  const opSub = document.querySelector('#operatore-pin-form .pin-subtitle');
+  if (opSub) opSub.textContent = en ? 'Enter your 6-digit PIN' : 'Inserisci il tuo PIN a 6 cifre';
+
+  // Overlay uscita
+  const confUscita = document.querySelector('#overlay-uscita .overlay-title');
+  if (confUscita) confUscita.textContent = en ? 'CONFIRM EXIT' : 'CONFERMA USCITA';
+  const labelImporto = document.querySelector('#overlay-uscita [style*="margin-bottom:4px"]');
+  if (labelImporto) labelImporto.textContent = en ? 'AMOUNT' : 'IMPORTO';
+
+  // Badge
+  const badgeStato = document.getElementById('badge-stato');
+  if (badgeStato && (badgeStato.textContent === 'Premi un bottone per timbrare' || badgeStato.textContent === 'Press a button to clock in/out')) {
+    badgeStato.textContent = en ? 'Press a button to clock in/out' : 'Premi un bottone per timbrare';
+  }
+
+  // Bottoni entrata/uscita badge
+  const btnEntrata = document.getElementById('badge-btn-entrata');
+  if (btnEntrata) btnEntrata.innerHTML = (en ? '🟢<br>CLOCK IN' : '🟢<br>ENTRATA');
+  const btnUscita = document.getElementById('badge-btn-uscita');
+  if (btnUscita) btnUscita.innerHTML = (en ? '🔴<br>CLOCK OUT' : '🔴<br>USCITA');
+
+  // Aggiorna data-i18n se presenti
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) el.textContent = TRANSLATIONS[lang][key];
   });
 }
 
