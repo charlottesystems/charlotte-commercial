@@ -174,12 +174,14 @@
       <div class="action-btn uscita" onclick="apriUscita()"><span class="btn-icon">&#x1F3C1;</span><div class="btn-label">Uscita</div><div class="btn-sub">Registra uscita</div></div>
       <div class="action-btn lista" onclick="apriLista()"><span class="btn-icon">&#x1F4CB;</span><div class="btn-label">Lista</div><div class="btn-sub">Soste attive</div></div>
       <div class="action-btn" id="badge-btn-home" style="border-top:2px solid var(--green)" onclick="apriBadge()"><span class="btn-icon">&#x1F4CD;</span><div class="btn-label" style="color:var(--green)">Badge</div><div class="btn-sub">Timbra turno</div></div>
+      <div class="action-btn" style="border-top:2px solid #6366f1;grid-column:1/-1" onclick="apriPrenotazioni()"><span class="btn-icon">&#x1F4C5;</span><div class="btn-label" style="color:#6366f1">Prenotazioni</div><div class="btn-sub">Richieste ricevute</div></div>
     </div>
     <div class="action-grid" id="grid-owner" style="display:none">
       <div class="action-btn ingresso" onclick="apriIngresso()"><span class="btn-icon">&#x1F697;</span><div class="btn-label">Ingresso</div><div class="btn-sub">Registra entrata</div></div>
       <div class="action-btn uscita" onclick="apriUscita()"><span class="btn-icon">&#x1F3C1;</span><div class="btn-label">Uscita</div><div class="btn-sub">Registra uscita</div></div>
       <div class="action-btn lista" onclick="apriLista()"><span class="btn-icon">&#x1F4CB;</span><div class="btn-label">Lista</div><div class="btn-sub">Soste attive</div></div>
       <div class="action-btn" style="border-top:2px solid var(--amber)" onclick="apriCassa()"><span class="btn-icon">&#x1F4CA;</span><div class="btn-label" style="color:var(--amber)">Cassa</div><div class="btn-sub">Registro giornaliero</div></div>
+      <div class="action-btn" style="border-top:2px solid #6366f1;grid-column:1/-1" onclick="apriPrenotazioni()"><span class="btn-icon">&#x1F4C5;</span><div class="btn-label" style="color:#6366f1">Prenotazioni</div><div class="btn-sub">Richieste ricevute</div></div>
     </div>
   </div>
 
@@ -239,6 +241,12 @@
     <div style="text-align:center">
       <button onclick="cambioNomeOperatore()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;color:var(--muted);cursor:pointer;font-size:13px">&#x270F;&#xFE0F; Cambia nome operatore</button>
     </div>
+  </div>
+
+  <!-- PRENOTAZIONI -->
+  <div class="screen" id="prenotazioni-screen">
+    <div class="screen-header"><div class="back-btn" onclick="tornaHome()">&#x2190;</div><div class="screen-title">&#x1F4C5; Prenotazioni</div></div>
+    <div id="prenotazioni-app-container"></div>
   </div>
 
   <!-- CASSA -->
