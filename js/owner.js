@@ -602,16 +602,11 @@ async function renderPrenotazioni() {
   const garageIds = ownerGarageList.map(g => g.id);
   const { data: prenotazioni } = await sbClient.from('prenotazioni').select('*').in('garage_id', garageIds).order('created_at', { ascending: false }).limit(50);
   const lista = prenotazioni || [];
-  const inAttesa = lista.filter(p => p.stato === 'in_attesa');
-  const confermate = lista.filter(p => p.stato === 'confermata');
-  const rifiutate = lista.filter(p => p.stato === 'rifiutata');
   let prenotHtml = '<div class="section-label" style="margin-bottom:12px">Prenotazioni ricevute (' + lista.length + ')</div>';
   if (lista.length === 0) {
-    prenotHtml += '<div class="empty-state"><div class="empty-icon">&#x1F4C5;</div><div class="empty-text">Nessuna prenotazione ancora.</div></div>';
+    prenotHtml += '<div class="empty-state"><div class="empty-icon">&#x1F4C5;</div><div class="empty-text">Nessuna prenotazione ancora.<br>Condividi il link del garage!</div></div>';
   } else {
-    if (inAttesa.length > 0) { prenotHtml += '<div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">&#x23F3; In attesa (' + inAttesa.length + ')</div>'; inAttesa.forEach(p => { prenotHtml += cardPrenotazione(p); }); }
-    if (confermate.length > 0) { prenotHtml += '<div style="font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">&#x2713; Confermate (' + confermate.length + ')</div>'; confermate.forEach(p => { prenotHtml += cardPrenotazione(p); }); }
-    if (rifiutate.length > 0) { prenotHtml += '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px">&#x2715; Rifiutate (' + rifiutate.length + ')</div>'; rifiutate.forEach(p => { prenotHtml += cardPrenotazione(p); }); }
+    lista.forEach(p => { prenotHtml += cardPrenotazione(p); });
   }
   container.innerHTML = linksHtml + prenotHtml;
 }
@@ -628,11 +623,7 @@ function cardPrenotazione(p) {
     '<div style="padding:10px 14px"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">&#x1F4C5; ' + dataI + ' &#x2192; ' + dataU + '</div>' +
     (p.importo_preventivo ? '<div style="font-size:13px;color:var(--green);margin-bottom:6px">Preventivo: &#x20AC;' + parseFloat(p.importo_preventivo).toFixed(2) + '</div>' : '') +
     (p.note ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-style:italic">' + p.note + '</div>' : '') +
-    (p.stato === 'in_attesa' ?
-      '<div style="display:flex;gap:8px">' +
-      '<button onclick="aggiornaPrenotazione(&quot;' + p.id + '&quot;, &quot;confermata&quot;)" style="flex:1;background:var(--green);border:none;border-radius:8px;padding:8px;color:white;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">&#x2713; Conferma</button>' +
-      '<button onclick="aggiornaPrenotazione(&quot;' + p.id + '&quot;, &quot;rifiutata&quot;)" style="flex:1;background:none;border:1px solid var(--red);border-radius:8px;padding:8px;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px">&#x2715; Rifiuta</button>' +
-      '</div>' : '') +
+
     '</div></div>';
 }
 
