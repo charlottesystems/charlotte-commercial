@@ -96,7 +96,7 @@
     </div>
     <div class="field">
       <label>Ora ingresso prevista *</label>
-      <input id="f-ingresso-ora" type="time" onchange="calcolaPreventivo()" value="09:00">
+      <select id="f-ingresso-ora" onchange="calcolaPreventivo()"><option value="00:00" >00:00</option><option value="00:30" >00:30</option><option value="01:00" >01:00</option><option value="01:30" >01:30</option><option value="02:00" >02:00</option><option value="02:30" >02:30</option><option value="03:00" >03:00</option><option value="03:30" >03:30</option><option value="04:00" >04:00</option><option value="04:30" >04:30</option><option value="05:00" >05:00</option><option value="05:30" >05:30</option><option value="06:00" >06:00</option><option value="06:30" >06:30</option><option value="07:00" >07:00</option><option value="07:30" >07:30</option><option value="08:00" >08:00</option><option value="08:30" >08:30</option><option value="09:00" selected>09:00</option><option value="09:30" >09:30</option><option value="10:00" >10:00</option><option value="10:30" >10:30</option><option value="11:00" >11:00</option><option value="11:30" >11:30</option><option value="12:00" >12:00</option><option value="12:30" >12:30</option><option value="13:00" >13:00</option><option value="13:30" >13:30</option><option value="14:00" >14:00</option><option value="14:30" >14:30</option><option value="15:00" >15:00</option><option value="15:30" >15:30</option><option value="16:00" >16:00</option><option value="16:30" >16:30</option><option value="17:00" >17:00</option><option value="17:30" >17:30</option><option value="18:00" >18:00</option><option value="18:30" >18:30</option><option value="19:00" >19:00</option><option value="19:30" >19:30</option><option value="20:00" >20:00</option><option value="20:30" >20:30</option><option value="21:00" >21:00</option><option value="21:30" >21:30</option><option value="22:00" >22:00</option><option value="22:30" >22:30</option><option value="23:00" >23:00</option><option value="23:30" >23:30</option></select>
     </div>
     <div class="field">
       <label>Data uscita prevista *</label>
@@ -104,7 +104,7 @@
     </div>
     <div class="field">
       <label>Ora uscita prevista *</label>
-      <input id="f-uscita-ora" type="time" onchange="calcolaPreventivo()" value="18:00">
+      <select id="f-uscita-ora" onchange="calcolaPreventivo()"><option value="00:00" >00:00</option><option value="00:30" >00:30</option><option value="01:00" >01:00</option><option value="01:30" >01:30</option><option value="02:00" >02:00</option><option value="02:30" >02:30</option><option value="03:00" >03:00</option><option value="03:30" >03:30</option><option value="04:00" >04:00</option><option value="04:30" >04:30</option><option value="05:00" >05:00</option><option value="05:30" >05:30</option><option value="06:00" >06:00</option><option value="06:30" >06:30</option><option value="07:00" >07:00</option><option value="07:30" >07:30</option><option value="08:00" >08:00</option><option value="08:30" >08:30</option><option value="09:00" >09:00</option><option value="09:30" >09:30</option><option value="10:00" >10:00</option><option value="10:30" >10:30</option><option value="11:00" >11:00</option><option value="11:30" >11:30</option><option value="12:00" >12:00</option><option value="12:30" >12:30</option><option value="13:00" >13:00</option><option value="13:30" >13:30</option><option value="14:00" >14:00</option><option value="14:30" >14:30</option><option value="15:00" >15:00</option><option value="15:30" >15:30</option><option value="16:00" >16:00</option><option value="16:30" >16:30</option><option value="17:00" >17:00</option><option value="17:30" >17:30</option><option value="18:00" selected>18:00</option><option value="18:30" >18:30</option><option value="19:00" >19:00</option><option value="19:30" >19:30</option><option value="20:00" >20:00</option><option value="20:30" >20:30</option><option value="21:00" >21:00</option><option value="21:30" >21:30</option><option value="22:00" >22:00</option><option value="22:30" >22:30</option><option value="23:00" >23:00</option><option value="23:30" >23:30</option></select>
     </div>
     <div class="field">
       <label>Note</label>
@@ -195,7 +195,14 @@
     document.getElementById('garage-addr').textContent = garage.address || '';
     document.title = 'Prenota — ' + garage.name;
 
-    // Categorie con tariffe configurate
+    // Carica categorie custom
+    const { data: catsCustom } = await sbClient
+      .from('categorie_custom')
+      .select('*')
+      .eq('garage_id', garageId)
+      .order('nome');
+
+    // Categorie standard con tariffe configurate
     const catSel = document.getElementById('f-categoria');
     const catDisponibili = CATEGORIE.filter(c => tariffeData.some(t => t.categoria === c.id));
     catDisponibili.forEach(cat => {
@@ -204,6 +211,20 @@
       opt.textContent = cat.label;
       catSel.appendChild(opt);
     });
+
+    // Categorie custom con tariffe configurate
+    (catsCustom || []).forEach(cat => {
+      const hasTariffa = tariffeData.some(t => t.categoria_custom === cat.id);
+      if (hasTariffa) {
+        const opt = document.createElement('option');
+        opt.value = 'custom_' + cat.id;
+        opt.textContent = (cat.icona || '') + ' ' + cat.nome;
+        catSel.appendChild(opt);
+      }
+    });
+
+    // Salva categorie custom per calcolo preventivo
+    window._catsCustom = catsCustom || [];
 
     // Convenzioni
     if (convenzioniData.length > 0) {
@@ -225,9 +246,7 @@
     dopodomani.setHours(18, 0, 0, 0);
 
     document.getElementById('f-ingresso-data').value = domani.toISOString().slice(0, 10);
-    document.getElementById('f-ingresso-ora').value = '09:00';
     document.getElementById('f-uscita-data').value = dopodomani.toISOString().slice(0, 10);
-    document.getElementById('f-uscita-ora').value = '18:00';
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('form-screen').style.display = 'block';
@@ -258,7 +277,13 @@
     const uscita = new Date(uscitaVal);
     if (uscita <= ingresso) { box.style.display = 'none'; return; }
 
-    const tariffa = tariffeData.find(t => t.categoria === catId);
+    let tariffa;
+    if (catId.startsWith('custom_')) {
+      const customId = catId.replace('custom_', '');
+      tariffa = tariffeData.find(t => t.categoria_custom === customId);
+    } else {
+      tariffa = tariffeData.find(t => t.categoria === catId);
+    }
     const conv = convId ? convenzioniData.find(c => c.id === convId) : null;
 
     if (!tariffa) { box.style.display = 'none'; return; }
