@@ -21,7 +21,7 @@ async function caricaGaragesOwner() {
 
   const { data } = await sbClient
     .from('garages')
-    .select('id, name')
+    .select('id, name, email, telefono, orario_apertura, orario_chiusura, giorni_apertura, lat, lng, raggio_metri, active')
     .eq('account_id', accountId)
     .eq('active', true)
     .order('name');
@@ -472,14 +472,36 @@ async function renderGarages() {
   ).join('') + '<button class="wz-btn-primary" style="margin-top:8px" onclick="aggiungiGarage()">+ Aggiungi garage</button>';
 }
 
+function generaOpzioniOre(selected) {
+  let html = '';
+  for (let h = 0; h < 24; h++) {
+    for (let m of ['00', '30']) {
+      const val = String(h).padStart(2,'0') + ':' + m;
+      const sel = (selected && selected.slice(0,5) === val) ? 'selected' : '';
+      html += '<option value="' + val + '" ' + sel + '>' + val + '</option>';
+    }
+  }
+  return html;
+}
+
 async function salvaGarage(garageId) {
   const nome = document.getElementById('g-nome-' + garageId)?.value?.trim();
   const addr = document.getElementById('g-addr-' + garageId)?.value?.trim();
   const lat = parseFloat(document.getElementById('g-lat-' + garageId)?.value) || null;
   const lng = parseFloat(document.getElementById('g-lng-' + garageId)?.value) || null;
   const raggio = parseInt(document.getElementById('g-raggio-' + garageId)?.value) || 100;
+  const email = document.getElementById('g-email-' + garageId)?.value?.trim() || null;
+  const telefono = document.getElementById('g-tel-' + garageId)?.value?.trim() || null;
+  const orarioApertura = document.getElementById('g-open-' + garageId)?.value || '07:00';
+  const orarioChiusura = document.getElementById('g-close-' + garageId)?.value || '20:00';
+  const giorniChecked = Array.from(document.querySelectorAll('[id^="g-giorno-' + garageId + '-"]:checked')).map(el => el.value);
+  const giorni = giorniChecked.join(',') || '1,2,3,4,5,6';
   const msg = document.getElementById('msg-g-' + garageId);
-  const { error } = await sbClient.from('garages').update({ name: nome, address: addr, lat, lng, raggio_metri: raggio }).eq('id', garageId);
+  const { error } = await sbClient.from('garages').update({
+    name: nome, address: addr, lat, lng, raggio_metri: raggio,
+    email, telefono, orario_apertura: orarioApertura, orario_chiusura: orarioChiusura,
+    giorni_apertura: giorni
+  }).eq('id', garageId);
   if (msg) { msg.style.color = error ? 'var(--red)' : 'var(--green)'; msg.textContent = error ? 'Errore.' : 'Salvato!'; setTimeout(() => { msg.textContent = ''; caricaGaragesOwner(); }, 1500); }
 }
 
