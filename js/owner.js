@@ -350,6 +350,16 @@ async function toggleGarage(garageId, attivoCorrente) {
   await renderGarages();
 }
 
+async function eliminaGarage(garageId, nome) {
+  if (!confirm('Eliminare il garage "' + nome + '"? Questa azione cancellerà anche tutte le soste e tariffe associate.')) return;
+  await sbClient.from('tariffe').delete().eq('garage_id', garageId);
+  await sbClient.from('convenzioni').delete().eq('garage_id', garageId);
+  await sbClient.from('categorie_custom').delete().eq('garage_id', garageId);
+  await sbClient.from('garages').delete().eq('id', garageId);
+  await caricaGaragesOwner();
+  await renderGarages();
+}
+
 async function aggiungiGarage() {
   const nome = prompt('Nome del nuovo garage:');
   if (!nome?.trim()) return;
