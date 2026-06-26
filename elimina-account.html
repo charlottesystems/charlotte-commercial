@@ -39,12 +39,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js"></script>
 <script>
-let sbClient;
-window.addEventListener('load', () => {
-  sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-});
+const SUPA_URL = 'https://cmglerkaiycllfvgjuww.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtZ2xlcmthaXljbGxmdmdqdXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Mzk3MzEsImV4cCI6MjA5NjUxNTczMX0.Rq1BMRKhQium6tFCmZvid53rjcAXNpckmsSSnTlAiDE';
+const sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function eliminaAccount() {
   const conferma = document.getElementById('conferma-input').value.trim().toUpperCase();
