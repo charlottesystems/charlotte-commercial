@@ -41,7 +41,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script>
-const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let sbClient;
+window.addEventListener('load', () => {
+  sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+});
 
 async function eliminaAccount() {
   const conferma = document.getElementById('conferma-input').value.trim().toUpperCase();
