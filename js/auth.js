@@ -337,6 +337,10 @@ function aggiornaHeaderRuolo() {
     if (ownerBadge) ownerBadge.style.display = 'none';
   }
 
+  // Mostra link elimina account solo per owner
+  const eliminaLink = document.getElementById('elimina-link-owner');
+  if (eliminaLink) eliminaLink.style.display = ruolo === 'owner' ? 'block' : 'none';
+
   if (ruolo === 'operatore') {
     const nomeOp = localStorage.getItem('charlotte_operatore_nome');
     const el = document.getElementById('company-name-header');
