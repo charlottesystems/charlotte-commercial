@@ -342,6 +342,10 @@ function aggiornaHeaderRuolo() {
   const eliminaLink = document.getElementById('elimina-link-owner');
   if (eliminaLink) eliminaLink.style.display = ruolo === 'owner' ? 'block' : 'none';
 
+  // Mostra link gestisci abbonamento solo per owner
+  const abbLink = document.getElementById('gestisci-abbonamento-link');
+  if (abbLink) abbLink.style.display = ruolo === 'owner' ? 'flex' : 'none';
+
   if (ruolo === 'operatore') {
     const nomeOp = localStorage.getItem('charlotte_operatore_nome');
     const el = document.getElementById('company-name-header');
