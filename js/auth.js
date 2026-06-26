@@ -60,6 +60,18 @@ async function dopoLoginOwner() {
   localStorage.removeItem('charlotte_operatore_id');
   localStorage.removeItem('charlotte_operatore_nome');
 
+  // Verifica abbonamento
+  const statoAbb = await verificaAbbonamento(account);
+  if (statoAbb === 'blocked') {
+    mostraSchermataBloccata(account);
+    return;
+  }
+  if (statoAbb === 'deleted') {
+    await doLogout();
+    alert('Il tuo account è stato eliminato per inattività. Registrati nuovamente per usare Charlotte.');
+    return;
+  }
+
   mostraSchermata('main-screen');
   aggiornaNomeSocietà(account.company_name);
   inizializzaApp();
