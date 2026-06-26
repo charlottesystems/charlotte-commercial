@@ -47,13 +47,6 @@ async function eliminaAccount() {
   const conferma = document.getElementById('conferma-input').value.trim().toUpperCase();
   const msg = document.getElementById('msg');
 
-  if (conferma !== 'ELIMINA') {
-    msg.className = 'msg error';
-    msg.textContent = 'Scrivi ELIMINA per confermare.';
-    msg.style.display = 'block';
-    return;
-  }
-
   const accountId = localStorage.getItem('charlotte_account_id');
   if (!accountId) {
     msg.className = 'msg error';
