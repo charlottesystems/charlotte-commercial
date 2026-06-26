@@ -361,10 +361,26 @@ async function eliminaGarage(garageId, nome) {
 }
 
 async function aggiungiGarage() {
+  const accountId = localStorage.getItem('charlotte_account_id');
+
+  // Controlla piano e limite garage
+  const { data: account } = await sbClient.from('accounts').select('plan').eq('id', accountId).single();
+  const piano = account?.plan || 'trial';
+  const { data: garages } = await sbClient.from('garages').select('id').eq('account_id', accountId).eq('active', true);
+  const numGarages = garages?.length || 0;
+
+  const limiti = { trial: 1, starter: 1, pro: 5, enterprise: 999 };
+  const limite = limiti[piano] ?? 1;
+
+  if (numGarages >= limite) {
+    const nomiPiani = { trial: 'prova gratuita', starter: 'Starter', pro: 'Pro', enterprise: 'Enterprise' };
+    alert('Il piano ' + nomiPiani[piano] + ' consente massimo ' + limite + ' garage. Aggiorna il tuo abbonamento per aggiungerne altri.');
+    return;
+  }
+
   const nome = prompt('Nome del nuovo garage:');
   if (!nome?.trim()) return;
   const addr = prompt('Indirizzo (opzionale):') || '';
-  const accountId = localStorage.getItem('charlotte_account_id');
   const { error } = await sbClient.from('garages').insert({ account_id: accountId, name: nome.trim(), address: addr.trim(), active: true });
   if (error) { alert('Errore nella creazione.'); return; }
   await caricaGaragesOwner();
