@@ -34,10 +34,66 @@ async function doLogin() {
   await dopoLoginOwner();
 }
 
+async function verificaAbbonamento(account) {
+  const ora = new Date();
+  const trialFine = account.trial_ends_at ? new Date(account.trial_ends_at) : null;
+  const bloccatoAt = account.blocked_at ? new Date(account.blocked_at) : null;
+
+  // Ha abbonamento attivo → ok
+  if (account.stripe_subscription_id) return 'ok';
+
+  // Trial scaduto e non ancora bloccato → blocca ora
+  if (trialFine && ora > trialFine && !bloccatoAt) {
+    await sbClient.from('accounts').update({ blocked_at: ora.toISOString() }).eq('id', account.id);
+    return 'blocked';
+  }
+
+  // Già bloccato → controlla se passati 30gg → cancella
+  if (bloccatoAt) {
+    const giorniBloccato = (ora - bloccatoAt) / (1000 * 60 * 60 * 24);
+    if (giorniBloccato >= 30) {
+      await sbClient.from('soste').delete().eq('garage_id', account.id);
+      await sbClient.from('accounts').delete().eq('id', account.id);
+      return 'deleted';
+    }
+    return 'blocked';
+  }
+
+  return 'ok';
+}
+
+function mostraSchermataBloccata(account) {
+  const bloccatoAt = account.blocked_at ? new Date(account.blocked_at) : null;
+  const ora = new Date();
+  const giorniBloccato = bloccatoAt ? Math.floor((ora - bloccatoAt) / (1000 * 60 * 60 * 24)) : 0;
+  const giorniRimasti = 30 - giorniBloccato;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const header = document.getElementById('main-header');
+  if (header) header.style.display = 'none';
+
+  let el = document.getElementById('blocked-screen');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'blocked-screen';
+    el.className = 'screen active';
+    el.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:32px;text-align:center';
+    document.querySelector('.main') ? document.querySelector('.main').appendChild(el) : document.body.appendChild(el);
+  }
+  el.classList.add('active');
+
+  el.innerHTML = '<div style="font-size:64px;margin-bottom:16px">&#x23F0;</div>' +
+    '<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:26px;color:var(--white);margin-bottom:8px">Periodo di prova terminato</div>' +
+    '<div style="font-size:14px;color:var(--muted);margin-bottom:24px;max-width:340px">Il tuo periodo di prova gratuita &#xe8 scaduto. Sottoscrivi un abbonamento per continuare ad usare Charlotte Parking.</div>' +
+    (giorniRimasti > 0 ? '<div style="font-size:12px;color:var(--amber);margin-bottom:20px">&#x26A0;&#xFE0F; I tuoi dati verranno eliminati tra <strong>' + giorniRimasti + ' giorni</strong>.</div>' : '') +
+    '<a href="checkout.html" style="display:block;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;padding:16px 32px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;color:white;text-decoration:none;margin-bottom:12px">Scegli un piano &#x2192;</a>' +
+    '<button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:8px">Esci</button>';
+}
+
 async function dopoLoginOwner() {
   const { data: account } = await sbClient
     .from('accounts')
-    .select('id, company_name, onboarding_complete, pin_app')
+    .select('id, company_name, onboarding_complete, trial_ends_at, blocked_at, stripe_subscription_id')
     .eq('owner_id', currentUser.id)
     .maybeSingle();
 
@@ -154,7 +210,6 @@ function cancellaCifraOperatore() {
 async function verificaPinOperatore() {
   const errEl = document.getElementById('op-pin-error');
 
-  // Cerca operatore con questo PIN su tutti gli account
   const { data: operatori, error } = await sbClient
     .from('operatori')
     .select('id, account_id, nome, attivo, pin_bloccato_fino, pin_tentativi, accounts(company_name)')
@@ -174,7 +229,6 @@ async function verificaPinOperatore() {
 
   const op = operatori[0];
 
-  // Controlla blocco
   if (op.pin_bloccato_fino && new Date(op.pin_bloccato_fino) > new Date()) {
     const minuti = Math.ceil((new Date(op.pin_bloccato_fino) - new Date()) / 60000);
     errEl.textContent = 'PIN bloccato. Riprova tra ' + minuti + ' min.';
@@ -183,11 +237,7 @@ async function verificaPinOperatore() {
     return;
   }
 
-  // PIN corretto — reset tentativi
-  await sbClient.from('operatori').update({
-    pin_tentativi: 0,
-    pin_bloccato_fino: null
-  }).eq('id', op.id);
+  await sbClient.from('operatori').update({ pin_tentativi: 0, pin_bloccato_fino: null }).eq('id', op.id);
 
   currentOperatore = op;
   localStorage.setItem('charlotte_account_id', op.account_id);
@@ -224,14 +274,11 @@ async function doLogout() {
   }
 }
 
-// PIN owner rimosso — login diretto alla home
-
 // ── SESSIONE ALL'AVVIO ───────────────────────────────────────
 
 async function controllaSessione() {
   const ruolo = localStorage.getItem('charlotte_ruolo');
 
-  // Se era un operatore, ripristina sessione direttamente
   if (ruolo === 'operatore') {
     const opId = localStorage.getItem('charlotte_operatore_id');
     const opNome = localStorage.getItem('charlotte_operatore_nome');
@@ -243,7 +290,6 @@ async function controllaSessione() {
     }
   }
 
-  // Altrimenti controlla sessione Supabase Auth per owner
   const { data: { session } } = await sbClient.auth.getSession();
   if (session) {
     currentUser = session.user;
@@ -277,13 +323,11 @@ function aggiornaHeaderRuolo() {
   const ownerBtn = document.getElementById('owner-btn-header');
   if (ownerBtn) ownerBtn.style.display = ruolo === 'owner' ? 'inline-flex' : 'none';
 
-  // Griglia corretta per ruolo
   const gridOwner = document.getElementById('grid-owner');
   const gridOperatore = document.getElementById('grid-operatore');
   if (gridOwner) gridOwner.style.display = ruolo === 'owner' ? 'grid' : 'none';
   if (gridOperatore) gridOperatore.style.display = ruolo === 'operatore' ? 'grid' : 'none';
 
-  // Tema dorato owner
   const ownerBadge = document.getElementById('owner-badge');
   if (ruolo === 'owner') {
     document.body.classList.add('is-owner');
@@ -298,10 +342,7 @@ function aggiornaHeaderRuolo() {
     const el = document.getElementById('company-name-header');
     if (el && nomeOp) el.textContent = nomeOp;
     const benv = document.getElementById('benvenuto-operatore');
-    if (benv && nomeOp) {
-      benv.textContent = '👋 Benvenuto, ' + nomeOp;
-      benv.style.display = 'block';
-    }
+    if (benv && nomeOp) { benv.textContent = '&#x1F44B; Benvenuto, ' + nomeOp; benv.style.display = 'block'; }
   } else {
     aggiornaNomeSocietà(localStorage.getItem('charlotte_company'));
     const benv = document.getElementById('benvenuto-operatore');
