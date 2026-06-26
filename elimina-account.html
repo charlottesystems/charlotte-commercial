@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charlotte Parking — Elimina Account</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { max-width: 520px; margin: 0 auto; padding: 32px 24px; }
+    h1 { font-family: Rajdhani, sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+    p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin: 24px 0; }
+    .step { display: flex; gap: 12px; margin-bottom: 16px; }
+    .step-num { background: var(--accent); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .step-text { font-size: 14px; color: var(--text); line-height: 1.6; }
+    .warning { background: rgba(239,68,68,0.1); border: 1px solid var(--red); border-radius: 12px; padding: 16px; margin: 16px 0; font-size: 13px; color: var(--red); }
+    .email-btn { display: block; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; padding: 16px; text-align: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 18px; color: white; text-decoration: none; margin-top: 16px; }
+    .back { display: inline-block; margin-bottom: 24px; color: var(--accent3); text-decoration: none; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="back">← Torna all'app</a>
+
+<h1>Elimina Account</h1>
+<p>Puoi richiedere l'eliminazione del tuo account Charlotte Parking e di tutti i dati associati in qualsiasi momento.</p>
+
+<div class="warning">
+  ⚠️ L'eliminazione dell'account è permanente e irreversibile. Tutti i dati (garage, soste, operatori, prenotazioni, tariffe) verranno cancellati definitivamente.
+</div>
+
+<div class="card">
+  <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--accent3);margin-bottom:16px">Come richiedere l'eliminazione</div>
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text">Invia una email a <strong>charlotteparkingapp@gmail.com</strong> con oggetto: <strong>"Richiesta eliminazione account"</strong></div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text">Indica l'indirizzo email associato al tuo account Charlotte Parking</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text">Riceverai conferma dell'eliminazione entro 5 giorni lavorativi</div>
+  </div>
+
+  <a href="mailto:charlotteparkingapp@gmail.com?subject=Richiesta%20eliminazione%20account&body=Salve%2C%20richiedo%20l'eliminazione%20del%20mio%20account%20Charlotte%20Parking%20associato%20a%20questa%20email." class="email-btn">
+    ✉ Invia richiesta via email
+  </a>
+</div>
+
+<p style="font-size:12px;color:var(--muted)">
+  Per ulteriori informazioni consulta la nostra <a href="privacy.html" style="color:var(--accent3)">Privacy Policy</a>.
+</p>
+
+</body>
+</html>
