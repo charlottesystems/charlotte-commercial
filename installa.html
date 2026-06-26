@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installa Charlotte Parking</title>
+  <link rel="icon" href="icon-512.png" type="image/png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { max-width: 520px; margin: 0 auto; padding: 32px 20px 60px; }
+    h1 { font-family: Rajdhani, sans-serif; font-size: 2rem; font-weight: 700; color: var(--white); margin-bottom: 6px; text-align: center; }
+    .subtitle { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 20px; }
+    .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .card-icon { font-size: 36px; }
+    .card-title { font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 20px; color: var(--white); }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .step { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+    .step-num { background: var(--accent); color: white; border-radius: 50%; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 13px; }
+    .step-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+    .btn { display: block; text-align: center; border-radius: 14px; padding: 16px; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 18px; text-decoration: none; margin-top: 16px; }
+    .btn-android { background: linear-gradient(135deg, #34a853, #1a7a32); color: white; }
+    .btn-web { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
+    .note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+    .logo { text-align: center; margin-bottom: 24px; }
+    .logo-icon { width: 72px; height: 72px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 36px; color: white; margin: 0 auto 12px; box-shadow: 0 0 30px rgba(124,58,237,0.4); }
+  </style>
+</head>
+<body>
+
+<div class="logo">
+  <div class="logo-icon">C</div>
+  <h1>Charlotte Parking</h1>
+  <div class="subtitle">Scegli come installare l'app sul tuo dispositivo</div>
+</div>
+
+<!-- ANDROID -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">🤖</div>
+    <div>
+      <div class="card-title">Android</div>
+      <div class="card-sub">Samsung, Xiaomi, Huawei, OnePlus e altri</div>
+    </div>
+  </div>
+  <a href="https://play.google.com/store/apps/details?id=app.charlotteparking.charlotte" class="btn btn-android">
+    &#x2193; Scarica dal Play Store
+  </a>
+  <div class="note">Richiede Android 7.0 o superiore</div>
+</div>
+
+<!-- iOS -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">🍎</div>
+    <div>
+      <div class="card-title">iPhone / iPad</div>
+      <div class="card-sub">Installa come app dalla home screen</div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--text);margin-bottom:14px">Clicca il link qui sotto e aprilo con <strong>Safari</strong> (non Chrome):</p>
+
+  <a href="https://charlottesystems.github.io/charlotte-commercial/" class="btn btn-web" style="margin-bottom:16px">
+    &#x1F310; Apri Charlotte in Safari
+  </a>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text">Una volta aperta la pagina, in basso al centro trovi il tasto <strong>Condividi</strong> &#x2B06;</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text">Scorri le opzioni e tocca <strong>"Aggiungi a schermata Home"</strong> &#x2795;</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text">Tocca <strong>Aggiungi</strong> in alto a destra — l'icona Charlotte apparirà sulla tua schermata home</div>
+  </div>
+
+  <div class="note">Funziona su iOS 14 o superiore · Usa Safari, non Chrome</div>
+</div>
+
+<!-- DESKTOP -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">&#x1F4BB;</div>
+    <div>
+      <div class="card-title">Computer</div>
+      <div class="card-sub">Windows, Mac, Linux</div>
+    </div>
+  </div>
+  <a href="https://charlottesystems.github.io/charlotte-commercial/" class="btn btn-web">
+    &#x1F310; Apri nel browser
+  </a>
+  <div class="note">Funziona su qualsiasi browser moderno</div>
+</div>
+
+</body>
+</html>
