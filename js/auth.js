@@ -131,6 +131,7 @@ async function dopoLoginOwner() {
   mostraSchermata('main-screen');
   aggiornaNomeSocietà(account.company_name);
   aggiornaHeaderRuolo();
+  mostraBannerTrial(account);
   await inizializzaApp();
 }
 
@@ -356,4 +357,27 @@ function aggiornaHeaderRuolo() {
 
 function isOwner() {
   return localStorage.getItem('charlotte_ruolo') === 'owner';
+}
+
+function mostraBannerTrial(account) {
+  const el = document.getElementById('trial-banner');
+  if (!el) return;
+
+  // Ha abbonamento attivo → nascondi banner
+  if (account.stripe_subscription_id) { el.style.display = 'none'; return; }
+
+  const trialFine = account.trial_ends_at ? new Date(account.trial_ends_at) : null;
+  if (!trialFine) { el.style.display = 'none'; return; }
+
+  const oggi = new Date();
+  const giorniRimasti = Math.ceil((trialFine - oggi) / (1000 * 60 * 60 * 24));
+
+  if (giorniRimasti <= 0) { el.style.display = 'none'; return; }
+
+  el.style.display = 'block';
+  const colore = giorniRimasti <= 7 ? 'var(--red)' : giorniRimasti <= 14 ? 'var(--amber)' : 'var(--accent3)';
+  el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+    '<span style="font-size:12px;color:' + colore + '">&#x23F0; Prova gratuita: <strong>' + giorniRimasti + ' giorni rimanenti</strong></span>' +
+    '<a href="checkout.html" style="font-size:11px;color:white;background:var(--accent);border-radius:6px;padding:4px 10px;text-decoration:none;font-family:Rajdhani,sans-serif;font-weight:700">Abbonati</a>' +
+    '</div>';
 }
