@@ -130,8 +130,8 @@ async function dopoLoginOwner() {
 
   mostraSchermata('main-screen');
   aggiornaNomeSocietà(account.company_name);
-  inizializzaApp();
   aggiornaHeaderRuolo();
+  await inizializzaApp();
 }
 
 // ── REGISTRAZIONE OWNER ───────────────────────────────────────
