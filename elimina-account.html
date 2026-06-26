@@ -4,54 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Charlotte Parking — Elimina Account</title>
+  <link rel="icon" href="icon-512.png" type="image/png">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body { max-width: 520px; margin: 0 auto; padding: 32px 24px; }
+    body { max-width: 520px; margin: 0 auto; padding: 32px 24px 60px; }
     h1 { font-family: Rajdhani, sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--white); margin-bottom: 8px; }
     p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
     .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin: 24px 0; }
-    .step { display: flex; gap: 12px; margin-bottom: 16px; }
-    .step-num { background: var(--accent); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 14px; flex-shrink: 0; }
-    .step-text { font-size: 14px; color: var(--text); line-height: 1.6; }
     .warning { background: rgba(239,68,68,0.1); border: 1px solid var(--red); border-radius: 12px; padding: 16px; margin: 16px 0; font-size: 13px; color: var(--red); }
-    .email-btn { display: block; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; padding: 16px; text-align: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 18px; color: white; text-decoration: none; margin-top: 16px; }
-    .back { display: inline-block; margin-bottom: 24px; color: var(--accent3); text-decoration: none; font-size: 13px; }
+    .btn-delete { display: block; width: 100%; background: var(--red); border: none; border-radius: 14px; padding: 16px; text-align: center; font-family: Rajdhani, sans-serif; font-weight: 700; font-size: 18px; color: white; cursor: pointer; margin-top: 16px; }
+    .btn-back { display: inline-block; margin-bottom: 24px; color: var(--accent3); text-decoration: none; font-size: 13px; }
+    .msg { text-align: center; padding: 16px; border-radius: 12px; font-size: 14px; margin-top: 12px; display: none; }
+    .msg.success { background: rgba(16,185,129,0.1); border: 1px solid var(--green); color: var(--green); }
+    .msg.error { background: rgba(239,68,68,0.1); border: 1px solid var(--red); color: var(--red); }
   </style>
 </head>
 <body>
 
-<a href="index.html" class="back">← Torna all'app</a>
+<a href="index.html" class="btn-back">← Torna all'app</a>
 
 <h1>Elimina Account</h1>
-<p>Puoi richiedere l'eliminazione del tuo account Charlotte Parking e di tutti i dati associati in qualsiasi momento.</p>
+<p>Questa operazione eliminerà permanentemente il tuo account e tutti i dati associati.</p>
 
 <div class="warning">
-  ⚠️ L'eliminazione dell'account è permanente e irreversibile. Tutti i dati (garage, soste, operatori, prenotazioni, tariffe) verranno cancellati definitivamente.
+  ⚠️ L'eliminazione è <strong>permanente e irreversibile</strong>. Verranno cancellati tutti i garage, soste, operatori, prenotazioni e tariffe.
 </div>
 
 <div class="card">
-  <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--accent3);margin-bottom:16px">Come richiedere l'eliminazione</div>
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-text">Invia una email a <strong>charlotteparkingapp@gmail.com</strong> con oggetto: <strong>"Richiesta eliminazione account"</strong></div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text">Indica l'indirizzo email associato al tuo account Charlotte Parking</div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text">Riceverai conferma dell'eliminazione entro 5 giorni lavorativi</div>
-  </div>
-
-  <a href="mailto:charlotteparkingapp@gmail.com?subject=Richiesta%20eliminazione%20account&body=Salve%2C%20richiedo%20l'eliminazione%20del%20mio%20account%20Charlotte%20Parking%20associato%20a%20questa%20email." class="email-btn">
-    ✉ Invia richiesta via email
-  </a>
+  <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--accent3);margin-bottom:12px">Conferma eliminazione</div>
+  <p style="margin-bottom:8px">Scrivi <strong style="color:var(--white)">ELIMINA</strong> per confermare:</p>
+  <input id="conferma-input" class="wz-input" type="text" placeholder="Scrivi ELIMINA" style="text-transform:uppercase;text-align:center;letter-spacing:4px">
+  <button class="btn-delete" onclick="eliminaAccount()">🗑 Elimina il mio account</button>
+  <div id="msg" class="msg"></div>
 </div>
 
-<p style="font-size:12px;color:var(--muted)">
-  Per ulteriori informazioni consulta la nostra <a href="privacy.html" style="color:var(--accent3)">Privacy Policy</a>.
-</p>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function eliminaAccount() {
+  const conferma = document.getElementById('conferma-input').value.trim().toUpperCase();
+  const msg = document.getElementById('msg');
+
+  if (conferma !== 'ELIMINA') {
+    msg.className = 'msg error';
+    msg.textContent = 'Scrivi ELIMINA per confermare.';
+    msg.style.display = 'block';
+    return;
+  }
+
+  const accountId = localStorage.getItem('charlotte_account_id');
+  if (!accountId) {
+    msg.className = 'msg error';
+    msg.textContent = 'Sessione non trovata. Accedi prima dall\'app.';
+    msg.style.display = 'block';
+    return;
+  }
+
+  msg.className = 'msg';
+  msg.style.background = 'rgba(124,58,237,0.1)';
+  msg.style.border = '1px solid var(--accent)';
+  msg.style.color = 'var(--accent3)';
+  msg.textContent = 'Eliminazione in corso...';
+  msg.style.display = 'block';
+
+  try {
+    // Elimina dati in cascata
+    const { data: garages } = await sbClient.from('garages').select('id').eq('account_id', accountId);
+    const garageIds = (garages || []).map(g => g.id);
+
+    if (garageIds.length > 0) {
+      await sbClient.from('soste').delete().in('garage_id', garageIds);
+      await sbClient.from('tariffe').delete().in('garage_id', garageIds);
+      await sbClient.from('convenzioni').delete().in('garage_id', garageIds);
+      await sbClient.from('categorie_custom').delete().in('garage_id', garageIds);
+      await sbClient.from('prenotazioni').delete().in('garage_id', garageIds);
+      await sbClient.from('turni').delete().in('garage_id', garageIds);
+      await sbClient.from('garages').delete().eq('account_id', accountId);
+    }
+
+    await sbClient.from('operatori').delete().eq('account_id', accountId);
+    await sbClient.from('accounts').delete().eq('id', accountId);
+    await sbClient.auth.signOut();
+
+    // Pulisci localStorage
+    localStorage.clear();
+
+    msg.className = 'msg success';
+    msg.textContent = '✓ Account eliminato. Verrai reindirizzato...';
+    msg.style.display = 'block';
+    msg.style.background = '';
+    msg.style.border = '';
+    msg.style.color = '';
+
+    setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+
+  } catch(e) {
+    msg.className = 'msg error';
+    msg.textContent = 'Errore durante l\'eliminazione. Riprova.';
+    msg.style.display = 'block';
+    msg.style.background = '';
+    msg.style.border = '';
+    msg.style.color = '';
+  }
+}
+</script>
 
 </body>
 </html>
