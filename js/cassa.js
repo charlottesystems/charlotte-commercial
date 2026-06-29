@@ -6,6 +6,7 @@
 
 let cassaTab = 'oggi';
 let _apexLoaded = false;
+let _pdfLibsLoaded = false;
 
 async function apriCassa() {
   mostraSchermata('cassa-screen');
@@ -17,8 +18,21 @@ async function caricaCassa() {
   const container = document.getElementById('cassa-container');
   if (!container) return;
 
-  container.innerHTML = renderTabBar() + '<div id="cassa-body"></div>';
+  container.innerHTML = renderTabBar() + '<div id="cassa-body"></div>' + renderBtnPDF();
   await caricaCassaTab(cassaTab);
+}
+
+function renderBtnPDF() {
+  return `
+    <button onclick="scaricaReportPDF()"
+      style="position:fixed;bottom:24px;right:16px;z-index:500;
+             background:linear-gradient(135deg,var(--accent),var(--accent2));
+             border:none;border-radius:50px;padding:12px 20px;
+             color:#fff;font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;
+             cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.45);
+             display:flex;align-items:center;gap:8px" id="btn-scarica-pdf">
+      📄 Scarica PDF
+    </button>`;
 }
 
 function renderTabBar() {
@@ -416,6 +430,131 @@ function caricaApexCharts() {
     s.src = 'https://cdn.jsdelivr.net/npm/apexcharts@3';
     s.onload = () => { _apexLoaded = true; resolve(); };
     document.head.appendChild(s);
+  });
+}
+
+// ── EXPORT PDF ────────────────────────────────────────────────
+
+async function scaricaReportPDF() {
+  const btn = document.getElementById('btn-scarica-pdf');
+  if (btn) { btn.textContent = '⏳ Generazione...'; btn.disabled = true; }
+
+  await caricaLibsPDF();
+
+  const body = document.getElementById('cassa-body');
+  if (!body) return;
+
+  // Etichetta periodo
+  const labelTab = { oggi:'Oggi', settimana:'Settimana', mese:'Mese', '6mesi':'6 Mesi', grafici:'Grafici' };
+  const periodo = labelTab[cassaTab] || cassaTab;
+  const dataOra = new Date().toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  const nomeGarage = garageCorrente?.name || 'Garage';
+
+  try {
+    const canvas = await html2canvas(body, {
+      backgroundColor: '#0a0a0f',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      scrollY: 0
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 12;
+    const contentW = pageW - margin * 2;
+
+    // Header
+    pdf.setFillColor(10, 10, 15);
+    pdf.rect(0, 0, pageW, 22, 'F');
+    pdf.setTextColor(16, 185, 129);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(16);
+    pdf.text('CHARLOTTE', margin, 13);
+    pdf.setTextColor(170, 170, 170);
+    pdf.setFontSize(9);
+    pdf.text('Report Cassa — ' + periodo + ' — ' + nomeGarage, margin, 19);
+    pdf.setFontSize(8);
+    pdf.text(dataOra, pageW - margin, 19, { align: 'right' });
+
+    // Linea separatrice
+    pdf.setDrawColor(42, 42, 58);
+    pdf.line(margin, 23, pageW - margin, 23);
+
+    // Immagine del contenuto
+    const imgH = (canvas.height * contentW) / canvas.width;
+    let y = 27;
+    let altezzaRimanente = imgH;
+    let sorgY = 0;
+
+    // Pagina per pagina se il contenuto è lungo
+    while (altezzaRimanente > 0) {
+      const spazioDisponibile = pageH - y - 8;
+      const altezzaSlice = Math.min(altezzaRimanente, spazioDisponibile);
+      const propSorgente = altezzaSlice / imgH;
+      const altezzaCanvasSlice = canvas.height * propSorgente;
+
+      // Crea canvas slice
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = altezzaCanvasSlice;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.drawImage(canvas, 0, sorgY, canvas.width, altezzaCanvasSlice, 0, 0, canvas.width, altezzaCanvasSlice);
+
+      pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, y, contentW, altezzaSlice);
+
+      altezzaRimanente -= altezzaSlice;
+      sorgY += altezzaCanvasSlice;
+
+      if (altezzaRimanente > 0) {
+        pdf.addPage();
+        // Header su ogni pagina
+        pdf.setFillColor(10, 10, 15);
+        pdf.rect(0, 0, pageW, 18, 'F');
+        pdf.setTextColor(16, 185, 129);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(11);
+        pdf.text('CHARLOTTE — ' + nomeGarage + ' — ' + periodo, margin, 12);
+        pdf.setDrawColor(42, 42, 58);
+        pdf.line(margin, 16, pageW - margin, 16);
+        y = 20;
+      }
+    }
+
+    // Footer sull'ultima pagina
+    pdf.setTextColor(80, 80, 100);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(7);
+    pdf.text('Generato da Charlotte Parking · charlotteparking.it', pageW / 2, pageH - 5, { align: 'center' });
+
+    pdf.save('charlotte_' + nomeGarage.replace(/\s+/g,'-') + '_' + cassaTab + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch(e) {
+    alert('Errore nella generazione del PDF. Riprova.');
+  }
+
+  if (btn) { btn.innerHTML = '📄 Scarica PDF'; btn.disabled = false; }
+}
+
+function caricaLibsPDF() {
+  return new Promise(resolve => {
+    if (_pdfLibsLoaded && window.html2canvas && window.jspdf) { resolve(); return; }
+
+    let loaded = 0;
+    const check = () => { if (++loaded === 2) { _pdfLibsLoaded = true; resolve(); } };
+
+    const s1 = document.createElement('script');
+    s1.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    s1.onload = check;
+    document.head.appendChild(s1);
+
+    const s2 = document.createElement('script');
+    s2.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+    s2.onload = check;
+    document.head.appendChild(s2);
   });
 }
 

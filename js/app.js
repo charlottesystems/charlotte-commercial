@@ -348,6 +348,8 @@ function mostraSchermata(id) {
 function tornaHome() {
   mostraSchermata('main-screen');
   resetIngresso();
+  const btnPdf = document.getElementById('btn-scarica-pdf');
+  if (btnPdf) btnPdf.remove();
 }
 
 // ── INGRESSO ─────────────────────────────────────────────────
