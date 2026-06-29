@@ -1,10 +1,11 @@
 // ============================================================
 // CHARLOTTE COMMERCIAL — cassa.js
 // Registro cassa: oggi / settimana / mese / 6 mesi
-// con breakdown per convenzione
+// con breakdown per convenzione e grafici
 // ============================================================
 
 let cassaTab = 'oggi';
+let _apexLoaded = false;
 
 async function apriCassa() {
   mostraSchermata('cassa-screen');
@@ -25,7 +26,8 @@ function renderTabBar() {
     { id: 'oggi',      label: 'Oggi' },
     { id: 'settimana', label: 'Settimana' },
     { id: 'mese',      label: 'Mese' },
-    { id: '6mesi',     label: '6 Mesi' }
+    { id: '6mesi',     label: '6 Mesi' },
+    { id: 'grafici',   label: '📊' }
   ];
   const btns = tabs.map(t => `
     <button onclick="cambiaCassaTab('${t.id}')" id="tab-${t.id}"
@@ -39,7 +41,7 @@ function renderTabBar() {
 
 async function cambiaCassaTab(tab) {
   cassaTab = tab;
-  ['oggi','settimana','mese','6mesi'].forEach(id => {
+  ['oggi','settimana','mese','6mesi','grafici'].forEach(id => {
     const btn = document.getElementById('tab-' + id);
     if (!btn) return;
     const attivo = id === tab;
@@ -58,6 +60,7 @@ async function caricaCassaTab(tab) {
   else if (tab === 'settimana') await renderCassaAggregata(body, 7,   'giorno');
   else if (tab === 'mese')      await renderCassaAggregata(body, 30,  'giorno');
   else if (tab === '6mesi')     await renderCassaAggregata(body, 180, 'mese');
+  else if (tab === 'grafici')   await renderCassaGrafici(body);
 }
 
 // ── TAB OGGI ─────────────────────────────────────────────────
@@ -265,6 +268,155 @@ function formattaMese(chiave) {
   const [anno, mese] = chiave.split('-');
   const nomiMesi = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
   return nomiMesi[parseInt(mese) - 1] + ' ' + anno;
+}
+
+// ── TAB GRAFICI ───────────────────────────────────────────────
+
+async function renderCassaGrafici(body) {
+  body.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Caricamento grafici...</div>';
+
+  // Carica ApexCharts solo la prima volta
+  await caricaApexCharts();
+
+  // Fetch ultimi 12 mesi — solo campi leggeri
+  const inizio = new Date();
+  inizio.setMonth(inizio.getMonth() - 11);
+  inizio.setDate(1);
+  inizio.setHours(0, 0, 0, 0);
+
+  const { data } = await sbClient.from('soste')
+    .select('uscita_at, importo, convenzione_id')
+    .eq('garage_id', garageCorrente.id)
+    .gte('uscita_at', inizio.toISOString())
+    .not('uscita_at', 'is', null);
+
+  const soste = data || [];
+
+  // Aggrega per mese
+  const mesiMap = {};
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(inizio);
+    d.setMonth(inizio.getMonth() + i);
+    const chiave = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    mesiMap[chiave] = { importo: 0, count: 0 };
+  }
+  soste.forEach(s => {
+    const d = new Date(s.uscita_at);
+    const chiave = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    if (mesiMap[chiave]) {
+      mesiMap[chiave].importo += parseFloat(s.importo) || 0;
+      mesiMap[chiave].count++;
+    }
+  });
+
+  const nomiMesi = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  const labels = Object.keys(mesiMap).map(k => {
+    const [anno, mese] = k.split('-');
+    return nomiMesi[parseInt(mese) - 1] + ' ' + anno.slice(2);
+  });
+  const importi = Object.values(mesiMap).map(v => parseFloat(v.importo.toFixed(2)));
+  const counts  = Object.values(mesiMap).map(v => v.count);
+
+  // Aggrega per convenzione (donut)
+  const convMap = {};
+  soste.forEach(s => {
+    const chiave = s.convenzione_id || '__nessuna__';
+    convMap[chiave] = (convMap[chiave] || 0) + (parseFloat(s.importo) || 0);
+  });
+  const convAttive = convenzioniGarage || [];
+  const donutLabels = Object.keys(convMap).map(k =>
+    k === '__nessuna__' ? 'Standard' : (convAttive.find(c => c.id === k)?.nome || 'Conv. rimossa')
+  );
+  const donutValori = Object.values(convMap).map(v => parseFloat(v.toFixed(2)));
+
+  const totaleAnno = importi.reduce((a, b) => a + b, 0);
+  const autoAnno   = counts.reduce((a, b) => a + b, 0);
+
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totaleAnno)}</div><div class="lbl">Incasso 12 mesi</div></div>
+      <div class="stat"><div class="val">${autoAnno}</div><div class="lbl">Auto totali</div></div>
+    </div>
+
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">
+      📈 Andamento incassi
+    </div>
+    <div id="chart-area" style="margin-bottom:24px"></div>
+
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">
+      🚗 Affluenza mensile
+    </div>
+    <div id="chart-bar" style="margin-bottom:24px"></div>
+
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">
+      🥧 Provenienza ricavi
+    </div>
+    <div id="chart-donut"></div>
+  `;
+
+  const baseOpts = {
+    chart: { background: 'transparent', toolbar: { show: false }, fontFamily: 'Rajdhani, sans-serif' },
+    theme: { mode: 'dark' },
+    grid: { borderColor: '#2a2a3a' },
+    xaxis: { categories: labels, labels: { style: { colors: '#888', fontSize: '11px' } } },
+    tooltip: { theme: 'dark' }
+  };
+
+  // Area chart — stile azionario
+  new ApexCharts(document.getElementById('chart-area'), {
+    ...baseOpts,
+    chart: { ...baseOpts.chart, type: 'area', height: 200, sparkline: { enabled: false } },
+    series: [{ name: 'Incasso (€)', data: importi }],
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+    colors: ['#10b981'],
+    yaxis: { labels: { formatter: v => '€' + v.toLocaleString('it-IT'), style: { colors: '#888', fontSize: '11px' } } },
+    dataLabels: { enabled: false },
+    markers: { size: 3, colors: ['#10b981'], strokeWidth: 0 }
+  }).render();
+
+  // Bar chart — affluenza
+  new ApexCharts(document.getElementById('chart-bar'), {
+    ...baseOpts,
+    chart: { ...baseOpts.chart, type: 'bar', height: 180 },
+    series: [{ name: 'Auto', data: counts }],
+    colors: ['#7c3aed'],
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '60%' } },
+    yaxis: { labels: { style: { colors: '#888', fontSize: '11px' } } },
+    dataLabels: { enabled: false }
+  }).render();
+
+  // Donut chart — convenzioni
+  if (donutValori.length > 0) {
+    new ApexCharts(document.getElementById('chart-donut'), {
+      chart: { ...baseOpts.chart, type: 'donut', height: 280 },
+      theme: { mode: 'dark' },
+      series: donutValori,
+      labels: donutLabels,
+      colors: ['#10b981','#7c3aed','#d4a843','#6366f1','#f59e0b','#ec4899'],
+      legend: { position: 'bottom', labels: { colors: '#aaa' } },
+      dataLabels: { style: { fontSize: '12px' } },
+      tooltip: { theme: 'dark', y: { formatter: v => '€' + v.toLocaleString('it-IT') } },
+      plotOptions: { pie: { donut: { size: '60%', labels: { show: true,
+        total: { show: true, label: 'Totale', color: '#aaa', formatter: w =>
+          '€' + w.globals.seriesTotals.reduce((a, b) => a + b, 0).toLocaleString('it-IT')
+        }
+      }}}}
+    }).render();
+  } else {
+    document.getElementById('chart-donut').innerHTML =
+      '<div style="color:var(--muted);text-align:center;padding:16px;font-size:13px">Nessuna convenzione usata nel periodo</div>';
+  }
+}
+
+function caricaApexCharts() {
+  return new Promise(resolve => {
+    if (_apexLoaded || window.ApexCharts) { _apexLoaded = true; resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/apexcharts@3';
+    s.onload = () => { _apexLoaded = true; resolve(); };
+    document.head.appendChild(s);
+  });
 }
 
 // ── EXPORT CSV ────────────────────────────────────────────────
