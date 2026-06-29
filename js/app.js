@@ -276,12 +276,14 @@ async function caricaGarages() {
 
   garageList = data;
   garageCorrente = data[0];
+  if (typeof initNotifiche === 'function') initNotifiche();
 
   const sel = document.getElementById('garage-select');
   if (sel) {
     sel.innerHTML = data.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
     sel.addEventListener('change', async () => {
       garageCorrente = garageList.find(g => g.id === sel.value);
+      if (typeof avviaListenerNotifiche === 'function') avviaListenerNotifiche(garageCorrente.id);
       await caricaTariffeEConvenzioni();
       await aggiornaStatistiche();
     });

@@ -66,6 +66,11 @@
       <button id="bt-btn" onclick="chiudiMenuLogo(); gestisciConnessioneBT()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         &#x1F5A8; <span id="bt-label">Connetti stampante</span>
       </button>
+      <button id="notifiche-btn-menu"
+        onclick="chiudiMenuLogo(); toggleNotifiche()"
+        style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--green);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
+        🔔 Notifiche attive
+      </button>
       <button onclick="cambiaLingua()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--muted);cursor:pointer;padding:10px 12px;border-radius:8px;font-size:14px;font-family:Rajdhani,sans-serif;font-weight:700">
         &#x1F310; <span id="lang-btn-label">English</span>
       </button>
@@ -254,6 +259,13 @@
     <div style="text-align:center">
       <button onclick="cambioNomeOperatore()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;color:var(--muted);cursor:pointer;font-size:13px">&#x270F;&#xFE0F; Cambia nome operatore</button>
     </div>
+    <div style="text-align:center;margin-top:12px">
+      <button id="notifiche-btn-badge"
+        onclick="toggleNotifiche()"
+        style="background:none;border:1px solid var(--green);border-radius:8px;padding:8px 16px;color:var(--green);cursor:pointer;font-size:13px;font-family:Rajdhani,sans-serif;font-weight:700">
+        🔔 Notifiche attive
+      </button>
+    </div>
   </div>
 
   <!-- PRENOTAZIONI -->
@@ -343,7 +355,7 @@
 
   (function() {
     var v = Date.now();
-    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js','js/stampa.js','js/lang.js'];
+    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/app.js','js/badge.js','js/cassa.js','js/stampa.js','js/lang.js','js/notifiche.js'];
     var loaded = 0;
     files.forEach(function(f) {
       var s = document.createElement('script');
