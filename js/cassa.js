@@ -104,11 +104,8 @@ async function renderCassaOggi(body) {
       <div class="stat"><div class="val" style="color:var(--amber)">${attive}</div><div class="lbl">In sosta</div></div>
     </div>
     ${renderBreakdownConvenzioni(soste, totale)}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;margin-top:16px">
+    <div style="margin-bottom:12px;margin-top:16px">
       <div class="section-label">Dettaglio soste</div>
-      <button onclick="esportaCassaCSV()" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--accent3);cursor:pointer;font-size:12px;font-family:Rajdhani,sans-serif;font-weight:700">
-        📥 CSV
-      </button>
     </div>
     ${soste.length === 0
       ? '<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">Nessuna sosta chiusa oggi</div></div>'
