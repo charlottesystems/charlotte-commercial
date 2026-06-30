@@ -52,30 +52,62 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2. Cancella tutti i dati in cascata
+    // 2. Cancella tutti i dati in cascata — se una delete fallisce, ci si ferma
+    //    e NON si elimina l'utente auth, per evitare dati orfani senza owner.
     const { data: garages } = await supabase
       .from('garages')
       .select('id')
       .eq('account_id', account.id)
 
     const garageIds = (garages || []).map((g: any) => g.id)
+    const erroriCascata: string[] = []
 
-    if (garageIds.length > 0) {
-      await supabase.from('soste').delete().in('garage_id', garageIds)
-      await supabase.from('tariffe').delete().in('garage_id', garageIds)
-      await supabase.from('convenzioni').delete().in('garage_id', garageIds)
-      await supabase.from('prenotazioni').delete().in('garage_id', garageIds)
-      await supabase.from('turni').delete().in('garage_id', garageIds)
-      await supabase.from('push_subscriptions').delete().in('garage_id', garageIds)
-      try { await supabase.from('categorie_custom').delete().in('garage_id', garageIds) } catch {}
-      await supabase.from('garages').delete().eq('account_id', account.id)
+    const eseguiDelete = async (label: string, p: PromiseLike<{ error: any }>) => {
+      const { error } = await p
+      if (error) erroriCascata.push(label + ': ' + error.message)
     }
 
-    await supabase.from('operatori').delete().eq('account_id', account.id)
-    await supabase.from('accounts').delete().eq('id', account.id)
+    if (garageIds.length > 0) {
+      await eseguiDelete('soste', supabase.from('soste').delete().in('garage_id', garageIds))
+      await eseguiDelete('tariffe', supabase.from('tariffe').delete().in('garage_id', garageIds))
+      await eseguiDelete('convenzioni', supabase.from('convenzioni').delete().in('garage_id', garageIds))
+      await eseguiDelete('prenotazioni', supabase.from('prenotazioni').delete().in('garage_id', garageIds))
+      await eseguiDelete('turni', supabase.from('turni').delete().in('garage_id', garageIds))
+      await eseguiDelete('push_subscriptions', supabase.from('push_subscriptions').delete().in('garage_id', garageIds))
+      await eseguiDelete('categorie_custom', supabase.from('categorie_custom').delete().in('garage_id', garageIds))
+      if (erroriCascata.length === 0) {
+        await eseguiDelete('garages', supabase.from('garages').delete().eq('account_id', account.id))
+      }
+    }
+
+    if (erroriCascata.length > 0) {
+      console.error('Cascata delete fallita, account non rimosso:', erroriCascata)
+      return new Response(JSON.stringify({ error: 'cascade_delete_failed', details: erroriCascata }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    await eseguiDelete('operatori', supabase.from('operatori').delete().eq('account_id', account.id))
+    if (erroriCascata.length > 0) {
+      console.error('Cancellazione operatori fallita, account non rimosso:', erroriCascata)
+      return new Response(JSON.stringify({ error: 'cascade_delete_failed', details: erroriCascata }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const { error: accountDelErr } = await supabase.from('accounts').delete().eq('id', account.id)
+    if (accountDelErr) {
+      console.error('Cancellazione account fallita:', accountDelErr)
+      return new Response(JSON.stringify({ error: 'account_delete_failed' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
     await supabase.from('pending_subscriptions').delete().eq('email', user.email!)
 
-    // 3. Elimina utente auth
+    // 3. Elimina utente auth — solo dopo che tutti i dati sono stati rimossi con successo
     await supabase.auth.admin.deleteUser(user.id)
 
     console.log('Account deleted immediately:', user.id)

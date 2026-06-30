@@ -290,6 +290,7 @@ async function caricaGarages() {
       sel.dataset.listenerAttached = 'true';
       sel.addEventListener('change', async () => {
         garageCorrente = garageList.find(g => g.id === sel.value);
+        if (!garageCorrente) return;
         if (typeof avviaListenerNotifiche === 'function') avviaListenerNotifiche(garageCorrente.id);
         if (typeof iscriviPushNotifiche === 'function' && notificheAttive() && localStorage.getItem('charlotte_push_iscritto') === '1') iscriviPushNotifiche(garageCorrente.id);
         await caricaTariffeEConvenzioni();
@@ -526,7 +527,10 @@ async function confermaIngresso() {
     if (sostaStampata && confirm('Stampare il ticket di ingresso?')) {
       await stampaTicketIngresso(sostaStampata);
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('Errore stampa ticket ingresso:', e);
+    alert('Impossibile stampare il ticket. Riprova dal dettaglio sosta.');
+  }
 
   _ingressoTimeout = setTimeout(() => {
     _ingressoTimeout = null;

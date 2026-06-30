@@ -40,7 +40,14 @@ async function verificaAbbonamento(account) {
   const bloccatoAt = account.blocked_at ? new Date(account.blocked_at) : null;
 
   // Ha abbonamento attivo (anche se disdetto ma non ancora scaduto) → ok
-  if (account.stripe_subscription_id) return 'ok';
+  const cancelsAt = account.cancels_at ? new Date(account.cancels_at) : null;
+  if (account.stripe_subscription_id && (!cancelsAt || ora <= cancelsAt)) return 'ok';
+
+  // Abbonamento con disdetta già scaduta ma webhook subscription.deleted non ancora arrivato → blocca subito
+  if (account.stripe_subscription_id && cancelsAt && ora > cancelsAt && !bloccatoAt) {
+    await sbClient.from('accounts').update({ blocked_at: ora.toISOString() }).eq('id', account.id);
+    return 'blocked';
+  }
 
   // Trial scaduto e non ancora bloccato → blocca ora
   if (trialFine && ora > trialFine && !bloccatoAt) {
@@ -278,7 +285,7 @@ async function verificaPinOperatore() {
   localStorage.setItem('charlotte_operatore_nome', op.nome);
 
   mostraSchermata('main-screen');
-  inizializzaApp();
+  await inizializzaApp();
   aggiornaHeaderRuolo();
 }
 
@@ -314,8 +321,19 @@ async function controllaSessione() {
     const opId = localStorage.getItem('charlotte_operatore_id');
     const opNome = localStorage.getItem('charlotte_operatore_nome');
     if (opId && opNome) {
+      // Rivalida che l'operatore esista ancora nel DB e sia attivo
+      const accountId = localStorage.getItem('charlotte_account_id');
+      const { data: op } = await sbClient.from('operatori')
+        .select('id, attivo').eq('id', opId).eq('account_id', accountId).maybeSingle();
+      if (!op || op.attivo === false) {
+        localStorage.removeItem('charlotte_ruolo');
+        localStorage.removeItem('charlotte_operatore_id');
+        localStorage.removeItem('charlotte_operatore_nome');
+        mostraSchermata('login-screen');
+        return;
+      }
       mostraSchermata('main-screen');
-      inizializzaApp();
+      await inizializzaApp();
       aggiornaHeaderRuolo();
       return;
     }

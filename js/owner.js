@@ -225,8 +225,8 @@ async function salvaConvenzione(convId) {
   const msg = document.getElementById('msg-conv-' + convId);
   for (const cat of CATEGORIE) {
     const el = document.getElementById('tc-' + convId + '-' + cat.id);
-    const val = parseFloat(el?.value || 0);
-    if (val <= 0) continue;
+    const val = parseFloat(el?.value);
+    if (isNaN(val) || val < 0) continue;
     await sbClient.from('tariffe_convenzioni').upsert({ convenzione_id: convId, categoria: cat.id, prezzo_giornaliero: val }, { onConflict: 'convenzione_id,categoria' });
   }
   if (msg) { msg.style.color = 'var(--green)'; msg.textContent = 'Salvato!'; setTimeout(() => { msg.textContent = ''; }, 1500); }
@@ -366,7 +366,8 @@ async function aggiungiGarage() {
   // Controlla piano e limite garage
   const { data: account } = await sbClient.from('accounts').select('plan').eq('id', accountId).single();
   const piano = account?.plan || 'trial';
-  const { data: garages } = await sbClient.from('garages').select('id').eq('account_id', accountId).eq('active', true);
+  const { data: garages, error: erroreGarages } = await sbClient.from('garages').select('id').eq('account_id', accountId).eq('active', true);
+  if (erroreGarages) { alert('Errore nel controllo del limite garage. Riprova.'); return; }
   const numGarages = garages?.length || 0;
 
   const limiti = { trial: 1, starter: 1, pro: 5, enterprise: 999 };

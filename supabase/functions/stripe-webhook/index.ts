@@ -97,28 +97,30 @@ async function handlePaymentSuccess(event: Stripe.Event) {
 
   console.log('Activating subscription for:', email, 'plan:', plan)
 
-  // Cerca utente in Supabase
-  const { data: usersPage } = await supabase.auth.admin.listUsers({ perPage: 1000 })
-  const user = usersPage?.users?.find((u) => u.email?.toLowerCase() === email!.toLowerCase())
+  // Cerca utente in Supabase (paginato per supportare >1000 utenti)
+  const user = await findUserByEmail(email!)
 
   if (user) {
     // Utente trovato → attiva abbonamento
     const trialEnd = new Date()
     trialEnd.setDate(trialEnd.getDate() + 30)
 
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from('accounts')
       .update({
         stripe_subscription_id: subscriptionId,
         stripe_customer_id: customerId,
         blocked_at: null,
+        cancels_at: null,
         plan,
         trial_ends_at: trialEnd.toISOString(),
-      })
+      }, { count: 'exact' })
       .eq('owner_id', user.id)
 
     if (error) {
       console.error('Error updating account:', error)
+    } else if (!count) {
+      console.error('No account row found for owner_id:', user.id, '— not removing pending')
     } else {
       console.log('Account activated for user:', user.id)
       // Rimuovi eventuale pending
@@ -150,8 +152,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
   const email = customer.email
   if (!email) return
 
-  const { data: usersPage } = await supabase.auth.admin.listUsers({ perPage: 1000 })
-  const user = usersPage?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase())
+  const user = await findUserByEmail(email)
   if (!user) return
 
   if (subscription.cancel_at_period_end) {
@@ -186,21 +187,42 @@ async function handleSubscriptionDeleted(event: Stripe.Event) {
 
   console.log('Cancelling subscription for:', email)
 
-  const { data: usersPage } = await supabase.auth.admin.listUsers({ perPage: 1000 })
-  const user = usersPage?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase())
+  const user = await findUserByEmail(email)
 
   if (user) {
-    await supabase
+    const { error, count } = await supabase
       .from('accounts')
       .update({
         stripe_subscription_id: null,
         blocked_at: new Date().toISOString(),
-      })
+      }, { count: 'exact' })
       .eq('owner_id', user.id)
 
+    if (error) {
+      console.error('Error updating account on subscription deleted:', error)
+      return // non rimuovere il pending, permette un retry sul prossimo webhook
+    }
+    if (!count) {
+      console.error('No account row updated for user:', user.id)
+      return
+    }
     console.log('Subscription cancelled for user:', user.id)
   }
 
   // Rimuovi anche pending se esisteva
   await supabase.from('pending_subscriptions').delete().eq('email', email.toLowerCase())
+}
+
+// ── Helper: ricerca utente per email con paginazione ──────────
+
+async function findUserByEmail(email: string): Promise<any | null> {
+  let page = 1
+  while (true) {
+    const { data: usersPage } = await supabase.auth.admin.listUsers({ perPage: 1000, page })
+    if (!usersPage?.users?.length) return null
+    const found = usersPage.users.find((u) => u.email?.toLowerCase() === email.toLowerCase())
+    if (found) return found
+    if (usersPage.users.length < 1000) return null
+    page++
+  }
 }
