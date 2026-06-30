@@ -666,17 +666,12 @@ async function apriLista() {
 
 async function caricaListaSoste() {
   const container = document.getElementById('lista-soste-container');
-  if (!container) return;
+  if (!container || !garageCorrente) return;
 
-  // Recupera tutti i garage dell'account per mostrare auto in sosta ovunque
-  const garages = garageList && garageList.length > 0 ? garageList : (garageCorrente ? [garageCorrente] : []);
-  if (garages.length === 0) return;
-
-  const garageIds = garages.map(g => g.id);
   const { data } = await sbClient
     .from('soste')
     .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo, operatore_ingresso_nome, garage_id')
-    .in('garage_id', garageIds)
+    .eq('garage_id', garageCorrente.id)
     .is('uscita_at', null)
     .order('ingresso_at', { ascending: false });
 
@@ -685,20 +680,8 @@ async function caricaListaSoste() {
     return;
   }
 
-  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;text-align:center">${data.length} auto attualmente in sosta</div>`;
-
-  if (garages.length > 1) {
-    // Multi-garage: raggruppa per garage
-    garages.forEach(g => {
-      const sosteGarage = data.filter(s => s.garage_id === g.id);
-      if (sosteGarage.length === 0) return;
-      html += `<div class="section-label" style="margin-top:12px">${g.name} (${sosteGarage.length})</div>`;
-      html += sosteGarage.map(s => cardSosta(s, true)).join('');
-    });
-  } else {
-    html += data.map(s => cardSosta(s, true)).join('');
-  }
-
+  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;text-align:center">${data.length} auto attualmente in sosta — ${garageCorrente.name}</div>`;
+  html += data.map(s => cardSosta(s, true)).join('');
   container.innerHTML = html;
 }
 
