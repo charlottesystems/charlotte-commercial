@@ -102,6 +102,29 @@ async function dopoLoginOwner() {
     .eq('owner_id', currentUser.id)
     .maybeSingle();
 
+  // Attiva abbonamento pendente se l'utente ha pagato dal sito prima di registrarsi
+  if (account && !account.stripe_subscription_id && currentUser.email) {
+    const { data: pending } = await sbClient
+      .from('pending_subscriptions')
+      .select('*')
+      .eq('email', currentUser.email.toLowerCase())
+      .maybeSingle();
+    if (pending) {
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + 30);
+      await sbClient.from('accounts').update({
+        stripe_subscription_id: pending.stripe_subscription_id,
+        stripe_customer_id: pending.stripe_customer_id,
+        blocked_at: null,
+        plan: pending.plan || 'pro',
+        trial_ends_at: trialEnd.toISOString(),
+      }).eq('id', account.id);
+      await sbClient.from('pending_subscriptions').delete().eq('email', currentUser.email.toLowerCase());
+      account.stripe_subscription_id = pending.stripe_subscription_id;
+      account.blocked_at = null;
+    }
+  }
+
   if (!account) {
     await sbClient.auth.signOut();
     const errEl = document.getElementById('login-error');
@@ -366,6 +389,40 @@ function aggiornaHeaderRuolo() {
 
 function isOwner() {
   return localStorage.getItem('charlotte_ruolo') === 'owner';
+}
+
+async function apriPortaleAbbonamento() {
+  const link = document.getElementById('gestisci-abbonamento-link');
+  const orig = link ? link.innerHTML : '';
+  if (link) link.innerHTML = '&#x23F3; Caricamento...';
+
+  try {
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (!session) { alert('Devi essere loggato.'); return; }
+
+    const resp = await fetch(SUPABASE_URL + '/functions/v1/create-portal-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token,
+      },
+      body: JSON.stringify({ return_url: window.location.href }),
+    });
+
+    const data = await resp.json();
+    if (data.url) {
+      window.open(data.url, '_blank');
+    } else if (data.error === 'no_customer') {
+      alert('Nessun abbonamento trovato. Se hai appena acquistato, attendi qualche istante e riprova.');
+    } else {
+      throw new Error(data.error || 'Errore');
+    }
+  } catch (err) {
+    console.error('Portal error:', err);
+    alert('Errore apertura portale. Riprova.');
+  } finally {
+    if (link) link.innerHTML = orig;
+  }
 }
 
 function mostraBannerTrial(account) {

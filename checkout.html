@@ -99,9 +99,9 @@
       <li>Supporto prioritario</li>
     </ul>
 
-    <a class="plan-btn" href="https://buy.stripe.com/4gM4gA2F48Lgaf54Rvc7u06" target="_blank">
+    <button class="plan-btn" id="checkout-btn" onclick="avviaCheckout()">
       Inizia la prova gratuita — 30 giorni →
-    </a>
+    </button>
 
     <p class="plan-note">Disdici quando vuoi. Nessun vincolo contrattuale.</p>
 
@@ -123,6 +123,55 @@
   </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Mostra email utente se già loggato
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user?.email) {
+      const btn = document.getElementById('checkout-btn');
+      btn.textContent = 'Inizia la prova gratuita — ' + session.user.email + ' →';
+    }
+  });
+
+  async function avviaCheckout() {
+    const btn = document.getElementById('checkout-btn');
+    btn.textContent = 'Reindirizzamento a Stripe...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+
+    try {
+      const { data: { session } } = await _sb.auth.getSession();
+      const email = session?.user?.email || '';
+
+      const resp = await fetch(SUPABASE_URL + '/functions/v1/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          success_url: window.location.origin + '/success.html?session_id={CHECKOUT_SESSION_ID}',
+          cancel_url: window.location.href,
+        }),
+      });
+
+      const data = await resp.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'No URL returned');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      btn.textContent = 'Inizia la prova gratuita — 30 giorni →';
+      btn.disabled = false;
+      btn.style.opacity = '';
+      alert('Errore durante il reindirizzamento. Riprova.');
+    }
+  }
+</script>
 
 </body>
 </html>
