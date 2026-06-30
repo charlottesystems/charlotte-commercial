@@ -136,13 +136,11 @@
     💳 Il pagamento avviene direttamente in garage al momento del ritiro del veicolo.
   </p>
 
-  <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
-    <button onclick="location.reload()" style="width:100%;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:15px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;letter-spacing:1px;color:var(--text);cursor:pointer">
-      ＋ Nuova prenotazione
-    </button>
-    <a href="/charlotte-commercial/" style="display:block;width:100%;box-sizing:border-box;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:15px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;letter-spacing:1px;color:white;cursor:pointer;text-decoration:none;text-align:center">
+  <div style="margin-top:20px">
+    <button onclick="history.back()" style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:15px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;letter-spacing:1px;color:white;cursor:pointer">
       ← Torna all'app
-    </a>
+    </button>
+    <div id="redirect-conto" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px"></div>
   </div>
 
 </div>
@@ -443,6 +441,16 @@
     }
     document.getElementById('form-screen').style.display = 'none';
     document.getElementById('success-screen').style.display = 'block';
+
+    // Torna automaticamente all'app dopo 3 secondi
+    let sec = 3;
+    const contoEl = document.getElementById('redirect-conto');
+    const interval = setInterval(() => {
+      sec--;
+      if (contoEl) contoEl.textContent = 'Ritorno automatico tra ' + sec + ' secondi...';
+      if (sec <= 0) { clearInterval(interval); history.back(); }
+    }, 1000);
+    if (contoEl) contoEl.textContent = 'Ritorno automatico tra ' + sec + ' secondi...';
   }
 
   init();
