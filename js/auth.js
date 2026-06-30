@@ -245,8 +245,38 @@ function cancellaCifraOperatore() {
   aggiornaDotsOperatore();
 }
 
+function pinDeviceBloccatoFino() {
+  const fino = localStorage.getItem('charlotte_pin_device_bloccato_fino');
+  return fino && new Date(fino) > new Date() ? new Date(fino) : null;
+}
+
+function registraTentativoPinFallito() {
+  const tentativi = parseInt(localStorage.getItem('charlotte_pin_device_tentativi') || '0', 10) + 1;
+  localStorage.setItem('charlotte_pin_device_tentativi', String(tentativi));
+  if (tentativi >= 5) {
+    const blocco = new Date(Date.now() + 5 * 60000);
+    localStorage.setItem('charlotte_pin_device_bloccato_fino', blocco.toISOString());
+  }
+}
+
+function resetTentativiPinDevice() {
+  localStorage.removeItem('charlotte_pin_device_tentativi');
+  localStorage.removeItem('charlotte_pin_device_bloccato_fino');
+}
+
 async function verificaPinOperatore() {
   const errEl = document.getElementById('op-pin-error');
+
+  // Rate-limit lato dispositivo: dopo 5 tentativi falliti, blocca i tentativi
+  // da questo dispositivo per 5 minuti (mitiga il brute-force del PIN a 6 cifre)
+  const bloccoDispositivo = pinDeviceBloccatoFino();
+  if (bloccoDispositivo) {
+    const minuti = Math.ceil((bloccoDispositivo - new Date()) / 60000);
+    errEl.textContent = 'Troppi tentativi. Riprova tra ' + minuti + ' min.';
+    pinOperatoreCorrente = '';
+    aggiornaDotsOperatore();
+    return;
+  }
 
   const { data: operatori, error } = await sbClient
     .from('operatori')
@@ -255,6 +285,7 @@ async function verificaPinOperatore() {
     .eq('attivo', true);
 
   if (error || !operatori || operatori.length === 0) {
+    registraTentativoPinFallito();
     aggiornaDotsOperatoreError();
     errEl.textContent = 'PIN non valido.';
     setTimeout(() => {
@@ -262,6 +293,21 @@ async function verificaPinOperatore() {
       aggiornaDotsOperatore();
       errEl.textContent = '';
     }, 1000);
+    return;
+  }
+
+  if (operatori.length > 1) {
+    // PIN non univoco a livello globale (collisione tra account diversi): non si può
+    // determinare con certezza l'operatore corretto, quindi si nega l'accesso invece
+    // di scegliere arbitrariamente operatori[0] e rischiare di loggare la persona sbagliata.
+    console.error('PIN collision across accounts for entered PIN, denying login');
+    aggiornaDotsOperatoreError();
+    errEl.textContent = 'PIN ambiguo. Contatta il gestore.';
+    setTimeout(() => {
+      pinOperatoreCorrente = '';
+      aggiornaDotsOperatore();
+      errEl.textContent = '';
+    }, 1500);
     return;
   }
 
@@ -275,6 +321,7 @@ async function verificaPinOperatore() {
     return;
   }
 
+  resetTentativiPinDevice();
   await sbClient.from('operatori').update({ pin_tentativi: 0, pin_bloccato_fino: null }).eq('id', op.id);
 
   currentOperatore = op;

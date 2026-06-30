@@ -54,15 +54,20 @@ Deno.serve(async (req) => {
     let customerId = account?.stripe_customer_id
 
     if (!customerId) {
-      // Cerca in Stripe per email
-      const customers = await stripe.customers.list({ email: user.email!, limit: 1 })
-      if (!customers.data[0]) {
+      // Cerca in Stripe per email — verifica che il customer non sia già di un altro owner
+      // (può succedere se due account diversi hanno usato/ereditato la stessa email)
+      const customers = await stripe.customers.list({ email: user.email!, limit: 5 })
+      const match = customers.data.find((c) => !c.metadata?.owner_id || c.metadata.owner_id === user.id)
+      if (!match) {
         return new Response(JSON.stringify({ error: 'no_customer' }), {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
-      customerId = customers.data[0].id
+      customerId = match.id
+      if (!match.metadata?.owner_id) {
+        await stripe.customers.update(customerId, { metadata: { owner_id: user.id } })
+      }
 
       // Salva per la prossima volta
       if (account?.id) {

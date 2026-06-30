@@ -153,6 +153,8 @@ async function aggiungiCategoriaCustom() {
   const msg = document.getElementById('msg-cc');
   const accountId = localStorage.getItem('charlotte_account_id');
   if (!nome) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Inserisci il nome.'; } return; }
+  const { data: esistenti } = await sbClient.from('categorie_custom').select('id').eq('garage_id', ownerGarageId).ilike('nome', nome);
+  if (esistenti && esistenti.length > 0) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Categoria già esistente.'; } return; }
   const { error } = await sbClient.from('categorie_custom').insert({ account_id: accountId, garage_id: ownerGarageId, nome, icona });
   if (error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Errore: ' + error.message; } return; }
   document.getElementById('cc-nome').value = '';
@@ -469,6 +471,18 @@ function calcolaDurataStorico(ingressoAt, uscitaAt) {
 
 function generaPIN() { return String(Math.floor(100000 + Math.random() * 900000)); }
 
+// Genera un PIN univoco a livello globale (non solo per account): il login operatore
+// cerca il PIN su tutta la tabella senza filtro account, quindi una collisione tra
+// account diversi farebbe loggare l'operatore sbagliato.
+async function generaPINUnivoco() {
+  for (let tentativo = 0; tentativo < 10; tentativo++) {
+    const pin = generaPIN();
+    const { data } = await sbClient.from('operatori').select('id').eq('pin', pin).limit(1);
+    if (!data || data.length === 0) return pin;
+  }
+  throw new Error('Impossibile generare un PIN univoco, riprova.');
+}
+
 async function renderOperatori() {
   const container = document.getElementById('operatori-container');
   if (!container) return;
@@ -503,14 +517,16 @@ async function aggiungiOperatore() {
   const msg = document.getElementById('msg-invito');
   const accountId = localStorage.getItem('charlotte_account_id');
   if (!nome) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Inserisci il nome.'; } return; }
-  const pin = generaPIN();
+  let pin;
+  try { pin = await generaPINUnivoco(); } catch (e) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = e.message; } return; }
   const { error } = await sbClient.from('operatori').insert({ account_id: accountId, nome, pin, attivo: true });
   if (error) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Errore.'; } return; }
   if (msg) { msg.style.color = 'var(--green)'; msg.textContent = 'Operatore aggiunto! PIN: ' + pin; document.getElementById('inv-nome').value = ''; setTimeout(() => { msg.textContent = ''; renderOperatori(); }, 6000); }
 }
 
 async function rigeneraPIN(opId) {
-  const nuovoPin = generaPIN();
+  let nuovoPin;
+  try { nuovoPin = await generaPINUnivoco(); } catch (e) { alert(e.message); return; }
   const { error } = await sbClient.from('operatori').update({ pin: nuovoPin, pin_tentativi: 0, pin_bloccato_fino: null }).eq('id', opId);
   if (!error) { alert('Nuovo PIN: ' + nuovoPin + '\nComunicalo al dipendente.'); await renderOperatori(); }
 }
@@ -640,13 +656,14 @@ async function renderPrenotazioni() {
 
 function cardPrenotazione(p) {
   const garage = ownerGarageList.find(g => g.id === p.garage_id);
-  const dataI = new Date(p.data_ingresso).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  const dataU = new Date(p.data_uscita).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  const statoColore = p.stato === 'in_attesa' ? 'var(--amber)' : p.stato === 'confermata' ? 'var(--green)' : 'var(--muted)';
+  const dataI = p.data_ingresso ? new Date(p.data_ingresso).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+  const dataU = p.data_uscita ? new Date(p.data_uscita).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+  const stato = p.stato || 'in_attesa';
+  const statoColore = stato === 'in_attesa' ? 'var(--amber)' : stato === 'confermata' ? 'var(--green)' : 'var(--muted)';
   return '<div class="tariffa-card" style="margin-bottom:8px"><div class="tariffa-card-header" style="padding:10px 14px">' +
     '<div><div style="font-size:15px;font-weight:700;color:var(--text)">' + p.nome_cliente + '</div>' +
     '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (garage?.name || '') + (p.targa ? ' · ' + p.targa : '') + (p.categoria ? ' · ' + p.categoria : '') + '</div></div>' +
-    '<span style="font-size:11px;font-family:Share Tech Mono,monospace;color:' + statoColore + '">' + p.stato.toUpperCase() + '</span></div>' +
+    '<span style="font-size:11px;font-family:Share Tech Mono,monospace;color:' + statoColore + '">' + stato.toUpperCase() + '</span></div>' +
     '<div style="padding:10px 14px"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">&#x1F4C5; ' + dataI + ' &#x2192; ' + dataU + '</div>' +
     (p.importo_preventivo ? '<div style="font-size:13px;color:var(--green);margin-bottom:6px">Preventivo: &#x20AC;' + parseFloat(p.importo_preventivo).toFixed(2) + '</div>' : '') +
     (p.note ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-style:italic">' + p.note + '</div>' : '') +

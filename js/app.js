@@ -49,8 +49,10 @@ async function renderPrenotazioniApp() {
     '<button onclick="cambiaDataPrenotazioni(1)" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">&#x203A;</button>' +
     '</div>';
 
-  // Carica tutte le prenotazioni dal giorno selezionato in poi
-  const filtroInizio = new Date();
+  // Carica tutte le prenotazioni a partire da qualche giorno prima della data selezionata
+  // (non "oggi"), altrimenti navigando nel passato/futuro con le freccette la query resta
+  // ancorata alla data corrente e può escludere prenotazioni nel range visualizzato.
+  const filtroInizio = new Date(oggi);
   filtroInizio.setDate(filtroInizio.getDate() - 3);
 
   const { data, error } = await sbClient
@@ -210,14 +212,14 @@ async function applicaConvenzione(prenId, garageId, categoria, dataIngresso, dat
 
   if (convId) {
     // Cerca tariffa convenzione
-    const { data: tc } = await sbClient.from('tariffe_convenzioni').select('prezzo_giornaliero').eq('convenzione_id', convId).eq('categoria', categoria).single();
+    const { data: tc } = await sbClient.from('tariffe_convenzioni').select('prezzo_giornaliero').eq('convenzione_id', convId).eq('categoria', categoria).maybeSingle();
     if (tc) {
       const giorni = Math.max(1, Math.ceil(durataOre / 24));
       importo = giorni * tc.prezzo_giornaliero;
     }
   } else {
     // Tariffa standard
-    const { data: tar } = await sbClient.from('tariffe').select('*').eq('garage_id', garageId).eq('categoria', categoria).single();
+    const { data: tar } = await sbClient.from('tariffe').select('*').eq('garage_id', garageId).eq('categoria', categoria).maybeSingle();
     if (tar) {
       const soglia = tar.soglia_giornaliero_ore || 4;
       if (durataOre >= soglia) {
@@ -231,6 +233,8 @@ async function applicaConvenzione(prenId, garageId, categoria, dataIngresso, dat
   if (importo !== null) {
     await sbClient.from('prenotazioni').update({ importo_preventivo: importo, convenzione_id: convId }).eq('id', prenId);
     if (prevEl) prevEl.innerHTML = 'Preventivo: <strong style="color:var(--green)">&#x20AC;' + importo.toFixed(2) + '</strong>' + (convId ? ' (convenzione)' : '');
+  } else if (prevEl) {
+    prevEl.innerHTML = '<strong style="color:var(--red)">Nessuna tariffa configurata per questa categoria' + (convId ? '/convenzione' : '') + '.</strong>';
   }
 }
 

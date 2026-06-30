@@ -36,15 +36,24 @@ Deno.serve(async (req) => {
 
   console.log('Stripe event:', event.type)
 
-  if (
-    event.type === 'checkout.session.completed' ||
-    event.type === 'invoice.payment_succeeded'
-  ) {
-    await handlePaymentSuccess(event)
-  } else if (event.type === 'customer.subscription.updated') {
-    await handleSubscriptionUpdated(event)
-  } else if (event.type === 'customer.subscription.deleted') {
-    await handleSubscriptionDeleted(event)
+  try {
+    if (
+      event.type === 'checkout.session.completed' ||
+      event.type === 'invoice.payment_succeeded'
+    ) {
+      await handlePaymentSuccess(event)
+    } else if (event.type === 'customer.subscription.updated') {
+      await handleSubscriptionUpdated(event)
+    } else if (event.type === 'customer.subscription.deleted') {
+      await handleSubscriptionDeleted(event)
+    } else if (event.type === 'invoice.payment_failed') {
+      await handlePaymentFailed(event)
+    }
+  } catch (err) {
+    // Risponde 500 così Stripe ritenta l'evento, invece di lasciare l'eccezione
+    // non gestita e perdere l'evento silenziosamente
+    console.error('Error handling event', event.type, ':', err)
+    return new Response(JSON.stringify({ error: 'handler_failed' }), { status: 500 })
   }
 
   return new Response(JSON.stringify({ received: true }), {
@@ -125,6 +134,15 @@ async function handlePaymentSuccess(event: Stripe.Event) {
       console.log('Account activated for user:', user.id)
       // Rimuovi eventuale pending
       await supabase.from('pending_subscriptions').delete().eq('email', email.toLowerCase())
+      // Marca il customer Stripe come appartenente a questo owner, per evitare
+      // che un altro account con la stessa email lo riutilizzi (vedi create-portal-session)
+      if (customerId) {
+        try {
+          await stripe.customers.update(customerId, { metadata: { owner_id: user.id } })
+        } catch (e) {
+          console.error('Error tagging stripe customer with owner_id (ignored):', e.message)
+        }
+      }
     }
   } else {
     // Utente non ancora registrato → salva in pending_subscriptions
@@ -155,6 +173,14 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
   const user = await findUserByEmail(email)
   if (!user) return
 
+  // Pagamento non riuscito (past_due/unpaid/incomplete) → blocca subito l'accesso,
+  // senza aspettare la fine del periodo
+  if (['past_due', 'unpaid', 'incomplete', 'incomplete_expired'].includes(subscription.status)) {
+    await supabase.from('accounts').update({ blocked_at: new Date().toISOString() }).eq('owner_id', user.id)
+    console.log('Subscription payment issue (' + subscription.status + '), blocking account for', email)
+    return
+  }
+
   if (subscription.cancel_at_period_end) {
     // Utente ha disdetto: salva data fine periodo, ma NON blocca ancora
     const periodEnd = subscription.current_period_end || subscription.cancel_at
@@ -166,10 +192,28 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
     await supabase.from('accounts').update({ cancels_at: cancelsAt }).eq('owner_id', user.id)
     console.log('Subscription will cancel at:', cancelsAt, 'for', email)
   } else {
-    // Ha rimosso la disdetta (rinnovo riattivato)
-    await supabase.from('accounts').update({ cancels_at: null }).eq('owner_id', user.id)
+    // Ha rimosso la disdetta o il pagamento è tornato regolare (rinnovo riattivato)
+    await supabase.from('accounts').update({ cancels_at: null, blocked_at: null }).eq('owner_id', user.id)
     console.log('Subscription renewal restored for', email)
   }
+}
+
+// ── Pagamento fattura fallito ─────────────────────────────────
+
+async function handlePaymentFailed(event: Stripe.Event) {
+  const invoice = event.data.object as Stripe.Invoice
+  const customerId = typeof invoice.customer === 'string' ? invoice.customer : null
+  if (!customerId) return
+
+  const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer
+  const email = customer.email
+  if (!email) return
+
+  const user = await findUserByEmail(email)
+  if (!user) return
+
+  await supabase.from('accounts').update({ blocked_at: new Date().toISOString() }).eq('owner_id', user.id)
+  console.log('Invoice payment failed, blocking account for', email)
 }
 
 // ── Cancella abbonamento ──────────────────────────────────────

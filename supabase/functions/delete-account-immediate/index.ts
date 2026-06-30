@@ -42,13 +42,23 @@ Deno.serve(async (req) => {
 
     if (!account) return new Response(JSON.stringify({ error: 'account_not_found' }), { status: 404, headers: corsHeaders })
 
-    // 1. Cancella abbonamento Stripe immediatamente
+    // 1. Cancella abbonamento Stripe immediatamente — se fallisce per un motivo
+    //    diverso da "già cancellato", non si procede con la cancellazione dei dati,
+    //    altrimenti l'abbonamento resterebbe orfano e continuerebbe a fatturare.
     if (account.stripe_subscription_id) {
       try {
         await stripe.subscriptions.cancel(account.stripe_subscription_id)
         console.log('Stripe subscription cancelled:', account.stripe_subscription_id)
       } catch (e) {
-        console.error('Stripe cancel error (ignored):', e.message)
+        const alreadyCancelled = e?.code === 'resource_missing' || /already.*cancel/i.test(e?.message || '')
+        if (!alreadyCancelled) {
+          console.error('Stripe cancel error, aborting deletion:', e.message)
+          return new Response(JSON.stringify({ error: 'stripe_cancel_failed', details: e.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+        console.log('Stripe subscription already cancelled, proceeding:', account.stripe_subscription_id)
       }
     }
 

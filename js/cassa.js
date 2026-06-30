@@ -201,9 +201,10 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
       .eq('garage_id', garageCorrente.id)
       .gte('uscita_at', inizio.toISOString())
       .not('uscita_at', 'is', null),
-    raggruppamento === 'mese'
-      ? fetchRicaviEsterni(garageCorrente.id, inizio)
-      : Promise.resolve([])
+    // I ricavi esterni sono tracciati a granularità mensile: si includono nel totale
+    // di qualunque periodo (anche settimana/mese), ma la ripartizione per bucket
+    // giorno-per-giorno resta possibile solo col raggruppamento 'mese'.
+    fetchRicaviEsterni(garageCorrente.id, inizio)
   ]);
 
   const soste = data || [];
@@ -223,13 +224,17 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
     bucket[chiave].count++;
   });
 
-  // Aggiungi ricavi esterni ai bucket mensili
-  esterni.forEach(e => {
-    const chiave = e.anno + '-' + String(e.mese).padStart(2, '0');
-    if (!bucket[chiave]) bucket[chiave] = { importo: 0, count: 0, esterno: 0, countEsterno: 0 };
-    bucket[chiave].esterno += parseFloat(e.incasso) || 0;
-    bucket[chiave].countEsterno += e.num_prenotazioni || 0;
-  });
+  // Aggiungi ricavi esterni ai bucket mensili (solo quando il raggruppamento è per mese:
+  // con bucket giornalieri non è possibile sapere a quale giorno assegnare un importo
+  // tracciato a livello mensile, ma resta comunque incluso nel totale del periodo sopra)
+  if (raggruppamento === 'mese') {
+    esterni.forEach(e => {
+      const chiave = e.anno + '-' + String(e.mese).padStart(2, '0');
+      if (!bucket[chiave]) bucket[chiave] = { importo: 0, count: 0, esterno: 0, countEsterno: 0 };
+      bucket[chiave].esterno += parseFloat(e.incasso) || 0;
+      bucket[chiave].countEsterno += e.num_prenotazioni || 0;
+    });
+  }
 
   const voci = Object.entries(bucket).sort((a, b) => b[0].localeCompare(a[0]));
   const maxImporto = voci.reduce((m, [, v]) => Math.max(m, v.importo + v.esterno), 0);
