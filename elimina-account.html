@@ -30,6 +30,8 @@
   ⚠️ L'eliminazione è <strong>permanente e irreversibile</strong>. Verranno cancellati tutti i garage, soste, operatori, prenotazioni e tariffe.
 </div>
 
+<div id="avviso-abbonamento" style="display:none;background:rgba(251,191,36,0.1);border:1px solid var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber);line-height:1.6"></div>
+
 <div class="card">
   <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--accent3);margin-bottom:12px">Conferma eliminazione</div>
   <p style="margin-bottom:8px">Scrivi <strong style="color:var(--white)">ELIMINA</strong> per confermare:</p>
@@ -43,6 +45,39 @@
 const SUPA_URL = 'https://cmglerkaiycllfvgjuww.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtZ2xlcmthaXljbGxmdmdqdXd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Mzk3MzEsImV4cCI6MjA5NjUxNTczMX0.Rq1BMRKhQium6tFCmZvid53rjcAXNpckmsSSnTlAiDE';
 const sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// Controlla abbonamento attivo al caricamento
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await sbClient.auth.getSession();
+  if (!session) return;
+  const { data: account } = await sbClient
+    .from('accounts')
+    .select('stripe_subscription_id, cancels_at, trial_ends_at')
+    .eq('owner_id', session.user.id)
+    .maybeSingle();
+  if (!account) return;
+
+  const avviso = document.getElementById('avviso-abbonamento');
+  const ora = new Date();
+
+  if (account.stripe_subscription_id && !account.cancels_at) {
+    // Abbonamento attivo con rinnovo automatico
+    avviso.innerHTML = '⚠️ <strong>Hai un abbonamento attivo con rinnovo automatico.</strong><br>Eliminando l\'account l\'abbonamento verrà disdetto immediatamente e perderai l\'accesso e tutti i dati. I giorni già pagati non sono rimborsabili.';
+    avviso.style.display = 'block';
+  } else if (account.cancels_at && new Date(account.cancels_at) > ora) {
+    // Abbonamento disdetto ma ancora attivo
+    const fine = new Date(account.cancels_at);
+    const giorni = Math.ceil((fine - ora) / (1000 * 60 * 60 * 24));
+    avviso.innerHTML = '⚠️ <strong>Hai ancora ' + giorni + ' giorni di abbonamento pagato</strong> (fino al ' + fine.toLocaleDateString('it-IT') + ').<br>Eliminando l\'account perderai immediatamente l\'accesso e tutti i dati. I giorni rimanenti non sono rimborsabili.';
+    avviso.style.display = 'block';
+  } else if (account.trial_ends_at && new Date(account.trial_ends_at) > ora) {
+    // Trial attivo
+    const fine = new Date(account.trial_ends_at);
+    const giorni = Math.ceil((fine - ora) / (1000 * 60 * 60 * 24));
+    avviso.innerHTML = '⚠️ <strong>Hai ancora ' + giorni + ' giorni di prova gratuita.</strong><br>Eliminando l\'account perderai immediatamente l\'accesso e tutti i dati.';
+    avviso.style.display = 'block';
+  }
+});
 
 async function eliminaAccount() {
   const conferma = document.getElementById('conferma-input').value.trim().toUpperCase();
