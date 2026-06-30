@@ -94,6 +94,23 @@ const TRANSLATIONS = {
     owner_lock_annulla: 'Annulla',
     // Lingua
     lingua_label: 'Lingua',
+    // Cassa tab
+    cassa_tab_oggi: 'Oggi', cassa_tab_sett: 'Sett', cassa_tab_mese: 'Mese', cassa_tab_6m: '6 M', cassa_tab_anno: 'Anno',
+    // Cassa contenuto
+    cassa_incasso: 'Incasso', cassa_uscite_lbl: 'Uscite', cassa_dettaglio: 'Dettaglio soste',
+    cassa_uscite_interne: 'Uscite interne', cassa_nessun_dato: 'Nessun dato nel periodo',
+    cassa_dettaglio_per: 'Dettaglio per',
+    // Owner tab
+    owner_tab_tariffe: 'Tariffe', owner_tab_convenzioni: 'Convenzioni', owner_tab_storico: 'Storico',
+    owner_tab_operatori: 'Operatori', owner_tab_prenotazioni: 'Prenotazioni', owner_tab_turni: 'Turni', owner_tab_garages: 'Garages',
+    // Owner sezioni
+    owner_lbl_tariffe: 'Configura le tariffe per ogni categoria di veicolo',
+    owner_lbl_convenzioni: 'Gestisci le convenzioni con hotel e aziende',
+    owner_lbl_storico: 'Storico soste',
+    owner_lbl_operatori: 'Gestisci gli operatori del garage',
+    owner_lbl_prenotazioni: 'Prenotazioni ricevute',
+    owner_lbl_turni: 'Turni e timbrature operatori',
+    owner_lbl_garages: 'Gestisci i tuoi garages',
   },
   en: {
     // Login
@@ -185,6 +202,23 @@ const TRANSLATIONS = {
     owner_lock_annulla: 'Cancel',
     // Lingua
     lingua_label: 'Language',
+    // Cassa tab
+    cassa_tab_oggi: 'Today', cassa_tab_sett: 'Week', cassa_tab_mese: 'Month', cassa_tab_6m: '6 M', cassa_tab_anno: 'Year',
+    // Cassa contenuto
+    cassa_incasso: 'Revenue', cassa_uscite_lbl: 'Exits', cassa_dettaglio: 'Stay details',
+    cassa_uscite_interne: 'Internal exits', cassa_nessun_dato: 'No data for this period',
+    cassa_dettaglio_per: 'Detail by',
+    // Owner tab
+    owner_tab_tariffe: 'Rates', owner_tab_convenzioni: 'Agreements', owner_tab_storico: 'History',
+    owner_tab_operatori: 'Operators', owner_tab_prenotazioni: 'Bookings', owner_tab_turni: 'Shifts', owner_tab_garages: 'Garages',
+    // Owner sezioni
+    owner_lbl_tariffe: 'Configure rates for each vehicle category',
+    owner_lbl_convenzioni: 'Manage agreements with hotels and companies',
+    owner_lbl_storico: 'Stay history',
+    owner_lbl_operatori: 'Manage garage operators',
+    owner_lbl_prenotazioni: 'Received bookings',
+    owner_lbl_turni: 'Operator shifts and clock-ins',
+    owner_lbl_garages: 'Manage your garages',
   }
 };
 
@@ -392,6 +426,10 @@ function applicaTraduzioni() {
     const key = el.getAttribute('data-i18n');
     if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) el.textContent = TRANSLATIONS[lang][key];
   });
+
+  // Re-render cassa se è la schermata attiva
+  const schermataAttiva = document.querySelector('.screen.active');
+  if (schermataAttiva?.id === 'cassa-screen' && typeof apriCassa === 'function') apriCassa();
 }
 
 function getLangFlag() {

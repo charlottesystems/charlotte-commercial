@@ -164,54 +164,54 @@
 
   <!-- Tab -->
   <div class="owner-tabs">
-    <button class="owner-tab active" data-tab="tariffe" onclick="mostraSezioneOwner('tariffe')">💰 Tariffe</button>
-    <button class="owner-tab" data-tab="convenzioni" onclick="mostraSezioneOwner('convenzioni')">🤝 Convenzioni</button>
-    <button class="owner-tab" data-tab="storico" onclick="mostraSezioneOwner('storico')">📊 Storico</button>
-    <button class="owner-tab" data-tab="operatori" onclick="mostraSezioneOwner('operatori')">👥 Operatori</button>
-    <button class="owner-tab" data-tab="prenotazioni" onclick="mostraSezioneOwner('prenotazioni')">📅 Prenotazioni</button>
-    <button class="owner-tab" data-tab="turni" onclick="mostraSezioneOwner('turni')">🕐 Turni</button>
-    <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">🏢 Garages</button>
+    <button class="owner-tab active" data-tab="tariffe" onclick="mostraSezioneOwner('tariffe')">💰 <span data-i18n="owner_tab_tariffe">Tariffe</span></button>
+    <button class="owner-tab" data-tab="convenzioni" onclick="mostraSezioneOwner('convenzioni')">🤝 <span data-i18n="owner_tab_convenzioni">Convenzioni</span></button>
+    <button class="owner-tab" data-tab="storico" onclick="mostraSezioneOwner('storico')">📊 <span data-i18n="owner_tab_storico">Storico</span></button>
+    <button class="owner-tab" data-tab="operatori" onclick="mostraSezioneOwner('operatori')">👥 <span data-i18n="owner_tab_operatori">Operatori</span></button>
+    <button class="owner-tab" data-tab="prenotazioni" onclick="mostraSezioneOwner('prenotazioni')">📅 <span data-i18n="owner_tab_prenotazioni">Prenotazioni</span></button>
+    <button class="owner-tab" data-tab="turni" onclick="mostraSezioneOwner('turni')">🕐 <span data-i18n="owner_tab_turni">Turni</span></button>
+    <button class="owner-tab" data-tab="garages" onclick="mostraSezioneOwner('garages')">🏢 <span data-i18n="owner_tab_garages">Garages</span></button>
   </div>
 
   <!-- Sezione Tariffe -->
   <div class="owner-section" id="owner-tariffe">
-    <div class="section-label" style="margin-bottom:12px">Configura le tariffe per ogni categoria di veicolo</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_tariffe">Configura le tariffe per ogni categoria di veicolo</div>
     <div id="tariffe-container"></div>
   </div>
 
   <!-- Sezione Convenzioni -->
   <div class="owner-section" id="owner-convenzioni" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Gestisci le convenzioni con hotel e aziende</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_convenzioni">Gestisci le convenzioni con hotel e aziende</div>
     <div id="convenzioni-container"></div>
   </div>
 
   <!-- Sezione Storico -->
   <div class="owner-section" id="owner-storico" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Ricerca soste per targa e periodo</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_storico">Storico soste</div>
     <div id="storico-container"></div>
   </div>
 
   <!-- Sezione Operatori -->
   <div class="owner-section" id="owner-operatori" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Gestisci e invita operatori</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_operatori">Gestisci gli operatori del garage</div>
     <div id="operatori-container"></div>
   </div>
 
   <!-- Sezione Prenotazioni -->
   <div class="owner-section" id="owner-prenotazioni" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Gestisci prenotazioni e link pubblici</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_prenotazioni">Prenotazioni ricevute</div>
     <div id="prenotazioni-container"></div>
   </div>
 
   <!-- Sezione Turni -->
   <div class="owner-section" id="owner-turni" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Controllo ingressi e uscite operatori</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_turni">Turni e timbrature operatori</div>
     <div id="turni-container"></div>
   </div>
 
   <!-- Sezione Garages -->
   <div class="owner-section" id="owner-garages" style="display:none">
-    <div class="section-label" style="margin-bottom:12px">Gestisci i tuoi garage</div>
+    <div class="section-label" style="margin-bottom:12px" data-i18n="owner_lbl_garages">Gestisci i tuoi garages</div>
     <div id="garages-container"></div>
   </div>
 
@@ -222,7 +222,7 @@
 <script>
   (function() {
     var v = Date.now();
-    var files = ['js/config.js','js/auth.js','js/tariffe.js','js/owner.js'];
+    var files = ['js/config.js','js/lang.js','js/auth.js','js/tariffe.js','js/owner.js'];
     var loaded = 0;
     files.forEach(function(f) {
       var s = document.createElement('script');
@@ -253,6 +253,7 @@
     if (el && company) el.textContent = company;
 
     await inizializzaOwner();
+    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
   }
 </script>
 

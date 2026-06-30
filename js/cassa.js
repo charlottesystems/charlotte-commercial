@@ -29,12 +29,12 @@ async function caricaCassa() {
 function renderTabBar() {
   const mostraMulti = (garageList || []).length > 1;
   const tabs = [
-    { id: 'oggi',      label: 'Oggi' },
-    { id: 'settimana', label: 'Sett' },
-    { id: 'mese',      label: 'Mese' },
-    { id: '6mesi',     label: '6 M' },
-    { id: 'anno',      label: 'Anno' },
-    { id: 'grafici',   label: '📊'   },
+    { id: 'oggi',      label: t('cassa_tab_oggi') },
+    { id: 'settimana', label: t('cassa_tab_sett') },
+    { id: 'mese',      label: t('cassa_tab_mese') },
+    { id: '6mesi',     label: t('cassa_tab_6m') },
+    { id: 'anno',      label: t('cassa_tab_anno') },
+    { id: 'grafici',   label: '📊' },
     ...(mostraMulti ? [{ id: 'multi', label: '🏢' }] : [])
   ];
   const allIds = tabs.map(t => t.id);
@@ -110,14 +110,14 @@ async function renderCassaOggi(body) {
   const attive = inSosta.count || 0;
   body.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totale)}</div><div class="lbl">Incasso</div></div>
-      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">Uscite</div></div>
-      <div class="stat"><div class="val" style="color:var(--amber)">${attive}</div><div class="lbl">In sosta</div></div>
+      <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totale)}</div><div class="lbl">${t('cassa_incasso')}</div></div>
+      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">${t('cassa_uscite_lbl')}</div></div>
+      <div class="stat"><div class="val" style="color:var(--amber)">${attive}</div><div class="lbl">${t('in_sosta_label')}</div></div>
     </div>
     ${renderBreakdownConvenzioni(soste, totale)}
-    <div style="margin-bottom:12px;margin-top:16px"><div class="section-label">Dettaglio soste</div></div>
+    <div style="margin-bottom:12px;margin-top:16px"><div class="section-label">${t('cassa_dettaglio')}</div></div>
     ${soste.length === 0
-      ? '<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">Nessuna sosta chiusa oggi</div></div>'
+      ? `<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">${t('nessuna_chiusa')}</div></div>`
       : soste.map(s => {
           const cat = CATEGORIE.find(c => c.id === s.tipo_veicolo);
           const conv = (convenzioniGarage || []).find(c => c.id === s.convenzione_id);
@@ -187,8 +187,8 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
 
   body.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:${totaleEsterno > 0 ? '8px' : '16px'}">
-      <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totale)}</div><div class="lbl">Totale ${labelPeriodo}</div></div>
-      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">Uscite interne</div></div>
+      <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totale)}</div><div class="lbl">${t('cassa_incasso')} ${labelPeriodo}</div></div>
+      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">${t('cassa_uscite_interne')}</div></div>
     </div>
     ${totaleEsterno > 0 ? `
     <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
@@ -196,9 +196,9 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
       <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:#6366f1">${formatEuro(totaleEsterno)}</div>
     </div>` : ''}
     ${renderBreakdownConvenzioni(soste, totale)}
-    <div class="section-label" style="margin-bottom:12px;margin-top:16px">Dettaglio per ${raggruppamento}</div>
+    <div class="section-label" style="margin-bottom:12px;margin-top:16px">${t('cassa_dettaglio_per')} ${raggruppamento}</div>
     ${voci.length === 0
-      ? '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">Nessun dato nel periodo</div></div>'
+      ? `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">${t('cassa_nessun_dato')}</div></div>`
       : voci.map(([chiave, v]) => {
           const etichetta = raggruppamento === 'mese' ? formattaMese(chiave) : formattaGiorno(chiave);
           const totVoce = v.importo + v.esterno;
