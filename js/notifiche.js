@@ -76,6 +76,9 @@ async function iscriviPushNotifiche(garageId) {
     const permesso = await Notification.requestPermission();
     if (permesso !== 'granted') {
       console.warn('[Charlotte] Permesso notifiche negato');
+      localStorage.removeItem('charlotte_push_iscritto');
+      localStorage.removeItem('charlotte_push_garage_id');
+      aggiornaBottoniNotifiche();
       return;
     }
 

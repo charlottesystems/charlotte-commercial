@@ -291,6 +291,7 @@ async function caricaGarages() {
       sel.addEventListener('change', async () => {
         garageCorrente = garageList.find(g => g.id === sel.value);
         if (typeof avviaListenerNotifiche === 'function') avviaListenerNotifiche(garageCorrente.id);
+        if (typeof iscriviPushNotifiche === 'function' && notificheAttive() && localStorage.getItem('charlotte_push_iscritto') === '1') iscriviPushNotifiche(garageCorrente.id);
         await caricaTariffeEConvenzioni();
         await aggiornaStatistiche();
         const schermataAttiva = document.querySelector('.screen.active')?.id;
