@@ -288,6 +288,12 @@ async function caricaGarages() {
         if (typeof avviaListenerNotifiche === 'function') avviaListenerNotifiche(garageCorrente.id);
         await caricaTariffeEConvenzioni();
         await aggiornaStatistiche();
+        const schermataAttiva = document.querySelector('.screen.active')?.id;
+        if (schermataAttiva === 'uscita-screen') await caricaSosteAttive();
+        else if (schermataAttiva === 'lista-screen') await caricaListaSoste();
+        else if (schermataAttiva === 'cassa-screen') await apriCassa();
+        else if (schermataAttiva === 'prenotazioni-screen') await renderPrenotazioniApp();
+        else if (schermataAttiva === 'ingresso-screen') { renderCategorie(); renderConvenzioniIngresso(); }
       });
     }
   }
