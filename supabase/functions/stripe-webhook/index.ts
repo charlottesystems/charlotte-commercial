@@ -156,7 +156,12 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
 
   if (subscription.cancel_at_period_end) {
     // Utente ha disdetto: salva data fine periodo, ma NON blocca ancora
-    const cancelsAt = new Date(subscription.current_period_end * 1000).toISOString()
+    const periodEnd = subscription.current_period_end || subscription.cancel_at
+    if (!periodEnd) {
+      console.error('No current_period_end in subscription event, skipping cancels_at update')
+      return
+    }
+    const cancelsAt = new Date(periodEnd * 1000).toISOString()
     await supabase.from('accounts').update({ cancels_at: cancelsAt }).eq('owner_id', user.id)
     console.log('Subscription will cancel at:', cancelsAt, 'for', email)
   } else {
