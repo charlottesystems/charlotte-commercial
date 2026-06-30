@@ -41,6 +41,8 @@ Deno.serve(async (req) => {
     event.type === 'invoice.payment_succeeded'
   ) {
     await handlePaymentSuccess(event)
+  } else if (event.type === 'customer.subscription.updated') {
+    await handleSubscriptionUpdated(event)
   } else if (event.type === 'customer.subscription.deleted') {
     await handleSubscriptionDeleted(event)
   }
@@ -134,6 +136,33 @@ async function handlePaymentSuccess(event: Stripe.Event) {
       },
       { onConflict: 'email' }
     )
+  }
+}
+
+// ── Disdetta pianificata (accesso fino a fine periodo) ────────
+
+async function handleSubscriptionUpdated(event: Stripe.Event) {
+  const subscription = event.data.object as Stripe.Subscription
+  const customerId = typeof subscription.customer === 'string' ? subscription.customer : null
+  if (!customerId) return
+
+  const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer
+  const email = customer.email
+  if (!email) return
+
+  const { data: usersPage } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+  const user = usersPage?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase())
+  if (!user) return
+
+  if (subscription.cancel_at_period_end) {
+    // Utente ha disdetto: salva data fine periodo, ma NON blocca ancora
+    const cancelsAt = new Date(subscription.current_period_end * 1000).toISOString()
+    await supabase.from('accounts').update({ cancels_at: cancelsAt }).eq('owner_id', user.id)
+    console.log('Subscription will cancel at:', cancelsAt, 'for', email)
+  } else {
+    // Ha rimosso la disdetta (rinnovo riattivato)
+    await supabase.from('accounts').update({ cancels_at: null }).eq('owner_id', user.id)
+    console.log('Subscription renewal restored for', email)
   }
 }
 

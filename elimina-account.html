@@ -80,29 +80,39 @@ async function eliminaAccount() {
   msg.style.display = 'block';
 
   try {
-    // Elimina dati in cascata
-    const { data: garages } = await sbClient.from('garages').select('id').eq('account_id', accountId);
-    const garageIds = (garages || []).map(g => g.id);
-
-    if (garageIds.length > 0) {
-      await sbClient.from('soste').delete().in('garage_id', garageIds);
-      await sbClient.from('tariffe').delete().in('garage_id', garageIds);
-      await sbClient.from('convenzioni').delete().in('garage_id', garageIds);
-      await sbClient.from('categorie_custom').delete().in('garage_id', garageIds);
-      await sbClient.from('prenotazioni').delete().in('garage_id', garageIds);
-      await sbClient.from('turni').delete().in('garage_id', garageIds);
-      await sbClient.from('garages').delete().eq('account_id', accountId);
+    // Usa Edge Function che cancella anche l'abbonamento Stripe
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (session) {
+      const resp = await fetch('https://cmglerkaiycllfvgjuww.supabase.co/functions/v1/delete-account-immediate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.access_token,
+        },
+      });
+      const result = await resp.json();
+      if (!result.success) throw new Error(result.error || 'Errore server');
+    } else {
+      // Fallback locale (solo se sessione non disponibile)
+      const { data: garages } = await sbClient.from('garages').select('id').eq('account_id', accountId);
+      const garageIds = (garages || []).map(g => g.id);
+      if (garageIds.length > 0) {
+        await sbClient.from('soste').delete().in('garage_id', garageIds);
+        await sbClient.from('tariffe').delete().in('garage_id', garageIds);
+        await sbClient.from('convenzioni').delete().in('garage_id', garageIds);
+        await sbClient.from('prenotazioni').delete().in('garage_id', garageIds);
+        await sbClient.from('turni').delete().in('garage_id', garageIds);
+        await sbClient.from('garages').delete().eq('account_id', accountId);
+      }
+      await sbClient.from('operatori').delete().eq('account_id', accountId);
+      await sbClient.from('accounts').delete().eq('id', accountId);
     }
 
-    await sbClient.from('operatori').delete().eq('account_id', accountId);
-    await sbClient.from('accounts').delete().eq('id', accountId);
     await sbClient.auth.signOut();
-
-    // Pulisci localStorage
     localStorage.clear();
 
     msg.className = 'msg success';
-    msg.textContent = '✓ Account eliminato. Verrai reindirizzato...';
+    msg.textContent = '✓ Account eliminato. Abbonamento Stripe annullato. Verrai reindirizzato...';
     msg.style.display = 'block';
     msg.style.background = '';
     msg.style.border = '';

@@ -39,7 +39,7 @@ async function verificaAbbonamento(account) {
   const trialFine = account.trial_ends_at ? new Date(account.trial_ends_at) : null;
   const bloccatoAt = account.blocked_at ? new Date(account.blocked_at) : null;
 
-  // Ha abbonamento attivo → ok
+  // Ha abbonamento attivo (anche se disdetto ma non ancora scaduto) → ok
   if (account.stripe_subscription_id) return 'ok';
 
   // Trial scaduto e non ancora bloccato → blocca ora
@@ -99,7 +99,7 @@ function mostraSchermataBloccata(account) {
 async function dopoLoginOwner() {
   const { data: account } = await sbClient
     .from('accounts')
-    .select('id, company_name, onboarding_complete, trial_ends_at, blocked_at, stripe_subscription_id')
+    .select('id, company_name, onboarding_complete, trial_ends_at, blocked_at, stripe_subscription_id, cancels_at')
     .eq('owner_id', currentUser.id)
     .maybeSingle();
 
@@ -161,6 +161,7 @@ async function dopoLoginOwner() {
   aggiornaNomeSocietà(account.company_name);
   aggiornaHeaderRuolo();
   mostraBannerTrial(account);
+  mostraBannerCancellazione(account);
   await inizializzaApp();
 }
 
@@ -424,6 +425,21 @@ async function apriPortaleAbbonamento() {
   } finally {
     if (link) link.innerHTML = orig;
   }
+}
+
+function mostraBannerCancellazione(account) {
+  if (!account.cancels_at) return;
+  const el = document.getElementById('trial-banner');
+  if (!el) return;
+  const fine = new Date(account.cancels_at);
+  const oggi = new Date();
+  const giorni = Math.ceil((fine - oggi) / (1000 * 60 * 60 * 24));
+  if (giorni <= 0) return;
+  el.style.display = 'block';
+  el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+    '<span style="font-size:12px;color:var(--amber)">&#x26A0;&#xFE0F; Abbonamento disdetto: accesso attivo ancora <strong>' + giorni + ' giorni</strong> (scade il ' + fine.toLocaleDateString('it-IT') + ')</span>' +
+    '<button onclick="apriPortaleAbbonamento()" style="font-size:11px;color:white;background:var(--accent);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700">Riattiva</button>' +
+    '</div>';
 }
 
 function mostraBannerTrial(account) {
