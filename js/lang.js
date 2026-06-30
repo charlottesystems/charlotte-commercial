@@ -429,7 +429,7 @@ function applicaTraduzioni() {
 
   // Re-render cassa se è la schermata attiva
   const schermataAttiva = document.querySelector('.screen.active');
-  if (schermataAttiva?.id === 'cassa-screen' && typeof apriCassa === 'function') apriCassa();
+  if (schermataAttiva?.id === 'cassa-screen' && typeof caricaCassa === 'function') caricaCassa();
 }
 
 function getLangFlag() {

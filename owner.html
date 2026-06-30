@@ -253,7 +253,38 @@
     if (el && company) el.textContent = company;
 
     await inizializzaOwner();
-    if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
+    applicaTraduzioniOwner();
+  }
+
+  function applicaTraduzioniOwner() {
+    const lang = localStorage.getItem('charlotte_lang') || 'it';
+    const en = lang === 'en';
+    const tabMap = {
+      tariffe:      en ? '💰 Rates'       : '💰 Tariffe',
+      convenzioni:  en ? '🤝 Agreements'  : '🤝 Convenzioni',
+      storico:      en ? '📊 History'     : '📊 Storico',
+      operatori:    en ? '👥 Operators'   : '👥 Operatori',
+      prenotazioni: en ? '📅 Bookings'    : '📅 Prenotazioni',
+      turni:        en ? '🕐 Shifts'      : '🕐 Turni',
+      garages:      en ? '🏢 Garages'     : '🏢 Garages',
+    };
+    document.querySelectorAll('.owner-tab').forEach(function(btn) {
+      var tab = btn.dataset.tab;
+      if (tabMap[tab]) btn.textContent = tabMap[tab];
+    });
+    const sectionMap = {
+      'owner-tariffe':      en ? 'Configure rates for each vehicle category'    : 'Configura le tariffe per ogni categoria di veicolo',
+      'owner-convenzioni':  en ? 'Manage agreements with hotels and companies'  : 'Gestisci le convenzioni con hotel e aziende',
+      'owner-storico':      en ? 'Stay history'                                 : 'Storico soste',
+      'owner-operatori':    en ? 'Manage garage operators'                      : 'Gestisci gli operatori del garage',
+      'owner-prenotazioni': en ? 'Received bookings'                            : 'Prenotazioni ricevute',
+      'owner-turni':        en ? 'Operator shifts and clock-ins'                : 'Turni e timbrature operatori',
+      'owner-garages':      en ? 'Manage your garages'                          : 'Gestisci i tuoi garages',
+    };
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var sectionId = el.closest('.owner-section')?.id;
+      if (sectionId && sectionMap[sectionId]) el.textContent = sectionMap[sectionId];
+    });
   }
 </script>
 
