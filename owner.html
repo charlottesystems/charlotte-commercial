@@ -22,33 +22,33 @@
     }
     .owner-tabs {
       display: flex;
+      flex-wrap: wrap;
       gap: 4px;
       margin: 16px 0;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 4px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    .owner-tabs::-webkit-scrollbar { display: none; }
     .owner-tab {
-      flex: 0 0 auto;
-      padding: 10px 12px;
+      flex: 1 1 calc(25% - 4px);
+      min-width: 0;
+      padding: 9px 4px;
       text-align: center;
       border-radius: 9px;
       cursor: pointer;
       font-family: Rajdhani, sans-serif;
       font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 0.5px;
+      font-size: 12px;
+      letter-spacing: 0;
       text-transform: uppercase;
       color: var(--muted);
       transition: all 0.2s;
       border: none;
       background: none;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .owner-tab.active {
       background: var(--accent);
