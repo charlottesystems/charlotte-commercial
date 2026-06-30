@@ -131,7 +131,12 @@ async function timbraOwner(tipo, stato) {
     return;
   }
 
-  await salvaTimbrata(accountId, garageId, operatore.nome, tipo, null, null, null);
+  try {
+    await salvaTimbrata(accountId, garageId, operatore.nome, tipo, null, null, null);
+  } catch (e) {
+    if (stato) { stato.style.color = 'var(--red)'; stato.textContent = '❌ Errore nel salvare la timbratura. Riprova.'; }
+    return;
+  }
 
   const ora = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   if (stato) {

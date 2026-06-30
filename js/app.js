@@ -10,6 +10,7 @@ let categoriaCorrente = '';
 let convenzionCorrente = null;
 let tariffeGarage = [];
 let convenzioniGarage = [];
+let _ingressoTimeout = null;
 
 // ── INIT APP ─────────────────────────────────────────────────
 
@@ -49,10 +50,14 @@ async function renderPrenotazioniApp() {
     '</div>';
 
   // Carica tutte le prenotazioni dal giorno selezionato in poi
+  const filtroInizio = new Date();
+  filtroInizio.setDate(filtroInizio.getDate() - 3);
+
   const { data, error } = await sbClient
     .from('prenotazioni')
     .select('*')
     .eq('garage_id', garageCorrente.id)
+    .gte('data_uscita', filtroInizio.toISOString())
     .order('data_ingresso', { ascending: true });
 
   if (error) {
@@ -369,10 +374,6 @@ async function apriIngresso() {
   await caricaTariffeEConvenzioni();
   renderCategorie();
   renderConvenzioniIngresso();
-  setTimeout(() => {
-    renderCategorie();
-    renderConvenzioniIngresso();
-  }, 500);
 }
 
 function resetIngresso() {
@@ -526,10 +527,18 @@ async function confermaIngresso() {
     }
   } catch(e) {}
 
-  setTimeout(() => {
+  _ingressoTimeout = setTimeout(() => {
+    _ingressoTimeout = null;
     if (ol) ol.classList.remove('show');
     tornaHome();
   }, 2000);
+}
+
+function chiudiOverlayIngresso() {
+  if (_ingressoTimeout) { clearTimeout(_ingressoTimeout); _ingressoTimeout = null; }
+  const ol = document.getElementById('overlay-ingresso');
+  if (ol) ol.classList.remove('show');
+  tornaHome();
 }
 
 // ── USCITA ────────────────────────────────────────────────────
