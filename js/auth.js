@@ -52,7 +52,12 @@ async function verificaAbbonamento(account) {
   if (bloccatoAt) {
     const giorniBloccato = (ora - bloccatoAt) / (1000 * 60 * 60 * 24);
     if (giorniBloccato >= 30) {
-      await sbClient.from('soste').delete().eq('garage_id', account.id);
+      const { data: garages } = await sbClient.from('garages').select('id').eq('account_id', account.id);
+      if (garages?.length) {
+        for (const g of garages) {
+          await sbClient.from('soste').delete().eq('garage_id', g.id);
+        }
+      }
       await sbClient.from('accounts').delete().eq('id', account.id);
       return 'deleted';
     }
@@ -351,7 +356,7 @@ function aggiornaHeaderRuolo() {
     const el = document.getElementById('company-name-header');
     if (el && nomeOp) el.textContent = nomeOp;
     const benv = document.getElementById('benvenuto-operatore');
-    if (benv && nomeOp) { benv.textContent = '&#x1F44B; Benvenuto, ' + nomeOp; benv.style.display = 'block'; }
+    if (benv && nomeOp) { benv.textContent = '👋 Benvenuto, ' + nomeOp; benv.style.display = 'block'; }
   } else {
     aggiornaNomeSocietà(localStorage.getItem('charlotte_company'));
     const benv = document.getElementById('benvenuto-operatore');

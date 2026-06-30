@@ -88,7 +88,7 @@ async function timbraOperatore(tipo, stato) {
   } catch (err) {
     if (stato) {
       stato.style.color = 'var(--red)';
-      if (err.code === 1) stato.textContent = '❌ Permesso GPS negato. Abilita la posizione.';
+      if (err.code === 1) { stato.textContent = '❌ Permesso GPS negato. Abilita la posizione.'; mostraOverlayGPSNegato(); }
       else if (err.code === 2) stato.textContent = '❌ GPS non disponibile. Riprova.';
       else if (err.code === 3) stato.textContent = '❌ Timeout GPS. Vai all\'aperto e riprova.';
       else stato.textContent = '❌ Errore GPS: ' + (err.message || 'sconosciuto');

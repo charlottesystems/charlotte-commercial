@@ -45,8 +45,7 @@ function renderTabBar() {
              font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;cursor:pointer">
       ${t.label}
     </button>`).join('');
-  return `<div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:16px">${btns}</div>
-          <script>var _cassaTabIds=${JSON.stringify(allIds)}<\/script>`;
+  return `<div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:16px">${btns}</div>`;
 }
 
 async function cambiaCassaTab(tab) {
@@ -530,6 +529,7 @@ async function fetchRicaviEsterni(garageId, dataDa) {
 }
 
 async function apriPannelloEsterni() {
+  if (localStorage.getItem('charlotte_ruolo') !== 'owner') return;
   if (document.getElementById('pannello-esterni')) return;
   const accountId = localStorage.getItem('charlotte_account_id');
 

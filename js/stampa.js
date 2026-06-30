@@ -331,7 +331,9 @@ function aggiornaStatoBT() {
   const stato = document.getElementById('bt-stato');
   const connesso = btDevice?.gatt?.connected;
   if (btn) {
-    btn.textContent = connesso ? '🔵 Stampante connessa' : '⚪ Connetti stampante';
+    const labelEl = document.getElementById('bt-label');
+    if (labelEl) labelEl.textContent = connesso ? 'Stampante connessa' : 'Connetti stampante';
+    else btn.textContent = connesso ? '🔵 Stampante connessa' : '⚪ Connetti stampante';
     btn.style.borderColor = connesso ? 'var(--green)' : 'var(--border)';
     btn.style.color = connesso ? 'var(--green)' : 'var(--muted)';
   }
