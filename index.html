@@ -98,6 +98,54 @@
   <div id="bt-stato" style="font-size:10px;color:var(--muted);text-align:center;padding:2px 0;font-family:Share Tech Mono,monospace;display:none"></div>
   <div id="trial-banner" style="display:none;background:var(--panel);border-bottom:1px solid var(--border);padding:8px 16px;position:sticky;top:0;z-index:100"></div>
 
+  <!-- TERMINI E PRIVACY -->
+  <div class="screen" id="tc-screen" style="display:none">
+    <div style="max-width:480px;margin:0 auto;padding:32px 20px 40px;display:flex;flex-direction:column;min-height:100vh;box-sizing:border-box">
+      <div style="text-align:center;margin-bottom:32px">
+        <div class="pin-logo-icon" style="margin:0 auto 12px">C</div>
+        <div class="pin-logo-text">CHARLOTTE</div>
+        <div class="pin-subtitle">Parking Management</div>
+      </div>
+
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px">
+        <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:17px;color:var(--white);margin-bottom:8px">Prima di continuare</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">
+          Per utilizzare Charlotte Parking devi accettare i nostri termini di servizio e confermare di aver letto l'informativa sulla privacy.
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;margin-bottom:16px;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--border)" id="tc-label">
+          <input type="checkbox" id="tc-check" onchange="verificaTC()"
+            style="width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--accent);cursor:pointer">
+          <span style="font-size:13px;color:var(--text);line-height:1.5">
+            Ho letto e accetto i
+            <a href="termini.html" target="_blank" style="color:var(--accent3);text-decoration:underline" onclick="event.stopPropagation()">Termini di Servizio</a>
+          </span>
+        </label>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:12px;background:var(--bg2);border-radius:10px;border:1px solid var(--border)" id="pp-label">
+          <input type="checkbox" id="pp-check" onchange="verificaTC()"
+            style="width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--accent);cursor:pointer">
+          <span style="font-size:13px;color:var(--text);line-height:1.5">
+            Ho letto l'
+            <a href="privacy.html" target="_blank" style="color:var(--accent3);text-decoration:underline" onclick="event.stopPropagation()">Informativa sulla Privacy</a>
+            (GDPR)
+          </span>
+        </label>
+      </div>
+
+      <button id="tc-btn" onclick="confermaTCPrivacy()" disabled
+        style="width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;padding:16px;
+               font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;letter-spacing:1px;color:white;cursor:not-allowed;
+               opacity:0.4;transition:opacity 0.2s,transform 0.1s">
+        ACCETTA E CONTINUA →
+      </button>
+
+      <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);line-height:1.5">
+        Utilizzando questa app accetti il trattamento dei dati<br>secondo il Regolamento UE 2016/679 (GDPR).
+      </div>
+    </div>
+  </div>
+
   <!-- LOGIN -->
   <div class="screen active" id="login-screen">
     <div style="text-align:center;padding:40px 0 32px">
@@ -382,7 +430,11 @@
     function waitReady() {
       if (appReady) {
         initSupabase();
-        controllaSessione();
+        if (localStorage.getItem('charlotte_tc_accettato') === '1') {
+          controllaSessione();
+        } else {
+          mostraSchermataTC();
+        }
         setTimeout(function() {
           if (typeof applicaTraduzioni === 'function') applicaTraduzioni();
         }, 200);
@@ -392,6 +444,38 @@
     }
     waitReady();
   });
+
+  function mostraSchermataTC() {
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.remove('active');
+      s.style.display = 'none';
+    });
+    var tc = document.getElementById('tc-screen');
+    if (tc) { tc.style.display = 'block'; tc.classList.add('active'); }
+  }
+
+  function verificaTC() {
+    var ok = document.getElementById('tc-check')?.checked && document.getElementById('pp-check')?.checked;
+    var btn = document.getElementById('tc-btn');
+    var tcLabel = document.getElementById('tc-label');
+    var ppLabel = document.getElementById('pp-label');
+    if (btn) {
+      btn.disabled = !ok;
+      btn.style.opacity = ok ? '1' : '0.4';
+      btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+    }
+    if (tcLabel) tcLabel.style.borderColor = document.getElementById('tc-check')?.checked ? 'var(--green)' : 'var(--border)';
+    if (ppLabel) ppLabel.style.borderColor = document.getElementById('pp-check')?.checked ? 'var(--green)' : 'var(--border)';
+  }
+
+  function confermaTCPrivacy() {
+    if (!document.getElementById('tc-check')?.checked || !document.getElementById('pp-check')?.checked) return;
+    localStorage.setItem('charlotte_tc_accettato', '1');
+    localStorage.setItem('charlotte_tc_data', new Date().toISOString());
+    var tc = document.getElementById('tc-screen');
+    if (tc) { tc.style.display = 'none'; tc.classList.remove('active'); }
+    controllaSessione();
+  }
 
   function toggleMenuLogo() {
     var menu = document.getElementById('logo-menu');
