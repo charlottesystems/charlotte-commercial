@@ -427,6 +427,12 @@
       setTimeout(function() { if (splash) splash.remove(); }, 1200);
     }, 1800);
 
+    // Registra service worker per push notification
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/charlotte-commercial/sw.js', { scope: '/charlotte-commercial/' })
+        .catch(function(e) { console.warn('SW non registrato:', e); });
+    }
+
     function waitReady() {
       if (appReady) {
         initSupabase();

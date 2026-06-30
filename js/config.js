@@ -10,5 +10,9 @@ const PLATE_RECOGNIZER_TOKEN = 'dbc485555c6321dfc650f557f3b63228157c7df0';
 const PLATE_RECOGNIZER_URL = 'https://charlotte-proxy.onrender.com/recognize';
 
 const APP_VERSION = '1.0.0';
+
+// Chiave pubblica VAPID per Web Push — generala su https://vapidkeys.com
+// e inseriscila qui (sostituisci anche il segreto nell'Edge Function su Supabase)
+const VAPID_PUBLIC_KEY = 'BCrqJfTIhQtjiU0ceQC88hMl-GxXWsWMlCYKrU57hY5i-BPquzyA-Ny7JI5FioBU1v27JfQYazcaFuiYSsf6Th4';
 const PIN_MAX_TENTATIVI = 3;
 const PIN_BLOCCO_MINUTI = 60;
