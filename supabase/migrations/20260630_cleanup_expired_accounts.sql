@@ -33,6 +33,12 @@ BEGIN
       DELETE FROM turni              WHERE garage_id = ANY(garage_ids);
       DELETE FROM push_subscriptions WHERE garage_id = ANY(garage_ids);
 
+      -- ricavi_esterni: presente se il garage usava piattaforme esterne (Booking.com ecc.)
+      BEGIN
+        DELETE FROM ricavi_esterni WHERE garage_id = ANY(garage_ids);
+      EXCEPTION WHEN undefined_table THEN NULL;
+      END;
+
       -- categorie_custom potrebbe non esistere su tutti i db, ignora errore
       BEGIN
         DELETE FROM categorie_custom WHERE garage_id = ANY(garage_ids);
@@ -42,8 +48,14 @@ BEGIN
       DELETE FROM garages WHERE id = ANY(garage_ids);
     END IF;
 
-    -- Cancella operatori e account
+    -- Cancella operatori, pending_subscriptions e account
     DELETE FROM operatori WHERE account_id = acc.id;
+
+    -- Rimuove eventuali pending_subscriptions rimaste (es. utente pagò ma non si registrò mai)
+    DELETE FROM pending_subscriptions WHERE email = (
+      SELECT email FROM auth.users WHERE id = acc.owner_id
+    );
+
     DELETE FROM accounts  WHERE id = acc.id;
 
     -- Cancella utente auth (richiede SECURITY DEFINER + superuser)
