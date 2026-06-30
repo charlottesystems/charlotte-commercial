@@ -92,6 +92,7 @@ function mostraSchermataBloccata(account) {
     '<div style="font-size:14px;color:var(--muted);margin-bottom:24px;max-width:340px">Il tuo periodo di prova gratuita &#xe8 scaduto. Sottoscrivi un abbonamento per continuare ad usare Charlotte Parking.</div>' +
     (giorniRimasti > 0 ? '<div style="font-size:12px;color:var(--amber);margin-bottom:20px">&#x26A0;&#xFE0F; I tuoi dati verranno eliminati tra <strong>' + giorniRimasti + ' giorni</strong>.</div>' : '') +
     '<a href="checkout.html" style="display:block;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;padding:16px 32px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;color:white;text-decoration:none;margin-bottom:12px">Scegli un piano &#x2192;</a>' +
+    '<button onclick="apriPortaleAbbonamento()" style="display:block;width:100%;background:none;border:1px solid var(--border);border-radius:14px;padding:14px 32px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:16px;color:var(--muted);cursor:pointer;margin-bottom:12px">&#x1F4B3; Gestisci abbonamento esistente</button>' +
     '<button onclick="doLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:8px">Esci</button>';
 }
 

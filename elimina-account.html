@@ -48,10 +48,26 @@ async function eliminaAccount() {
   const conferma = document.getElementById('conferma-input').value.trim().toUpperCase();
   const msg = document.getElementById('msg');
 
-  const accountId = localStorage.getItem('charlotte_account_id');
+  if (conferma !== 'ELIMINA') {
+    msg.className = 'msg error';
+    msg.textContent = 'Scrivi ELIMINA per confermare.';
+    msg.style.display = 'block';
+    return;
+  }
+
+  // Supporta sia sessione app (localStorage) che magic link (sessione Supabase)
+  let accountId = localStorage.getItem('charlotte_account_id');
+  if (!accountId) {
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (session) {
+      const { data: acc } = await sbClient.from('accounts').select('id').eq('owner_id', session.user.id).maybeSingle();
+      if (acc) accountId = acc.id;
+    }
+  }
+
   if (!accountId) {
     msg.className = 'msg error';
-    msg.textContent = 'Sessione non trovata. Accedi prima dall\'app.';
+    msg.textContent = 'Sessione non trovata. Usa il link ricevuto via email o accedi prima dall\'app.';
     msg.style.display = 'block';
     return;
   }
