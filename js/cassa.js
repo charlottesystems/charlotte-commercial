@@ -109,84 +109,29 @@ function renderToggleIVA() {
 
 function renderRigaIVA(totale) {
   if (!_mostraIVA || totale <= 0) return '';
-  const imponibile = totale / 1.22;
-  const iva = totale - imponibile;
-  return `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:8px 12px;margin-bottom:12px;display:flex;justify-content:space-around;font-size:12px">
-    <span style="color:var(--muted)">Imponibile: <strong style="color:var(--text);font-family:Share Tech Mono,monospace">${formatEuro(imponibile)}</strong></span>
-    <span style="color:var(--amber)">IVA 22%: <strong style="font-family:Share Tech Mono,monospace">${formatEuro(iva)}</strong></span>
+  const netto = totale / 1.22;
+  const iva = totale - netto;
+  return `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+      <div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Lordo</div>
+        <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:var(--muted);text-decoration:line-through">${formatEuro(totale)}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--amber);margin-bottom:3px">IVA 22%</div>
+        <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:var(--amber)">- ${formatEuro(iva)}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--green);margin-bottom:3px">Netto</div>
+        <div style="font-family:Share Tech Mono,monospace;font-size:14px;color:var(--green);font-weight:700">${formatEuro(netto)}</div>
+      </div>
+    </div>
   </div>`;
 }
 
 async function toggleIVA() {
   _mostraIVA = !_mostraIVA;
   await caricaCassaTab(cassaTab);
-}
-
-// ── REPORT CONVENZIONI MULTI-PERIODO ─────────────────────────
-
-async function renderConvenzioniReport(containerEl) {
-  const now = new Date();
-  const annoFa = new Date(now); annoFa.setDate(annoFa.getDate() - 365);
-  const { data } = await sbClient.from('soste')
-    .select('uscita_at, importo, convenzione_id')
-    .eq('garage_id', garageCorrente.id)
-    .gte('uscita_at', annoFa.toISOString())
-    .not('uscita_at', 'is', null)
-    .not('convenzione_id', 'is', null);
-
-  if (!data || data.length === 0) { containerEl.innerHTML = ''; return; }
-
-  const meseFa   = new Date(now); meseFa.setDate(meseFa.getDate() - 30);
-  const seiMesiFa = new Date(now); seiMesiFa.setDate(seiMesiFa.getDate() - 180);
-
-  const convMap = {};
-  data.forEach(s => {
-    const k = s.convenzione_id;
-    if (!convMap[k]) convMap[k] = { mese:{c:0,i:0}, '6mesi':{c:0,i:0}, anno:{c:0,i:0} };
-    const d = new Date(s.uscita_at);
-    const imp = parseFloat(s.importo) || 0;
-    if (d >= meseFa)    { convMap[k].mese.c++;   convMap[k].mese.i += imp; }
-    if (d >= seiMesiFa) { convMap[k]['6mesi'].c++; convMap[k]['6mesi'].i += imp; }
-    convMap[k].anno.c++; convMap[k].anno.i += imp;
-  });
-
-  const convAttive = convenzioniGarage || [];
-  const righe = Object.entries(convMap)
-    .sort((a, b) => b[1].anno.i - a[1].anno.i)
-    .map(([k, v]) => {
-      const nome = convAttive.find(c => c.id === k)?.nome || 'Convenzione rimossa';
-      return `
-        <div style="border-bottom:1px solid var(--border);padding:10px 0">
-          <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3);margin-bottom:8px">🤝 ${nome}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
-            ${[['mese','30 gg'],['6mesi','6 mesi'],['anno','Anno']].map(([p,lbl]) => `
-              <div style="background:var(--bg);border-radius:8px;padding:8px 4px">
-                <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${lbl}</div>
-                <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:var(--green)">${formatEuro(v[p].i)}</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:2px">🚗 ${v[p].c} auto</div>
-              </div>`).join('')}
-          </div>
-        </div>`;
-    }).join('');
-
-  containerEl.innerHTML = `
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
-      <button onclick="toggleConvenzioniReport()" id="conv-report-toggle"
-        style="display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:12px 14px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3)">
-        <span>🏨 Statistiche per convenzione</span>
-        <span id="conv-report-icon">▼</span>
-      </button>
-      <div id="conv-report-body" style="display:none;padding:0 14px 8px">${righe}</div>
-    </div>`;
-}
-
-function toggleConvenzioniReport() {
-  const b = document.getElementById('conv-report-body');
-  const i = document.getElementById('conv-report-icon');
-  if (!b) return;
-  const aperto = b.style.display !== 'none';
-  b.style.display = aperto ? 'none' : 'block';
-  if (i) i.textContent = aperto ? '▼' : '▲';
 }
 
 // ── TAB OGGI ─────────────────────────────────────────────────
@@ -206,16 +151,20 @@ async function renderCassaOggi(body) {
   const soste = data || [];
   const totale = soste.reduce((s, r) => s + (parseFloat(r.importo) || 0), 0);
   const attive = inSosta.count || 0;
+  const media = soste.length > 0 ? totale / soste.length : 0;
   body.innerHTML = `
     ${renderToggleIVA()}
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
       <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totale)}</div><div class="lbl">${t('cassa_incasso')}</div></div>
-      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">🚗 ${t('cassa_uscite_lbl')}</div></div>
-      <div class="stat"><div class="val" style="color:var(--amber)">${attive}</div><div class="lbl">${t('in_sosta_label')}</div></div>
+      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">🚗 Auto uscite</div></div>
+      <div class="stat"><div class="val" style="color:var(--muted);font-size:1rem">${soste.length > 0 ? formatEuro(media) : '—'}</div><div class="lbl">Media/auto</div></div>
     </div>
     ${renderRigaIVA(totale)}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="stat"><div class="val" style="color:var(--amber)">${attive}</div><div class="lbl">${t('in_sosta_label')}</div></div>
+      <div class="stat"><div class="val">${soste.length + attive}</div><div class="lbl">Tot. ingressi oggi</div></div>
+    </div>
     ${renderBreakdownConvenzioni(soste, totale)}
-    <div id="conv-report-container"></div>
     <div style="margin-bottom:12px;margin-top:16px"><div class="section-label">${t('cassa_dettaglio')}</div></div>
     ${soste.length === 0
       ? `<div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">${t('nessuna_chiusa')}</div></div>`
@@ -238,8 +187,6 @@ async function renderCassaOggi(body) {
           </div>`;
         }).join('')
     }`;
-  const convContainer = document.getElementById('conv-report-container');
-  if (convContainer) await renderConvenzioniReport(convContainer);
 }
 
 // ── TAB AGGREGATI ─────────────────────────────────────────────
@@ -288,11 +235,13 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
   const maxImporto = voci.reduce((m, [, v]) => Math.max(m, v.importo + v.esterno), 0);
   const labelPeriodo = giorni === 7 ? '7 giorni' : giorni === 30 ? '30 giorni' : giorni === 180 ? '6 mesi' : 'anno';
 
+  const mediaAgg = soste.length > 0 ? totaleInterno / soste.length : 0;
   body.innerHTML = `
     ${renderToggleIVA()}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
       <div class="stat"><div class="val" style="color:var(--green)">${formatEuro(totale)}</div><div class="lbl">${t('cassa_incasso')} ${labelPeriodo}</div></div>
-      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">🚗 ${t('cassa_uscite_interne')}</div></div>
+      <div class="stat"><div class="val">${soste.length}</div><div class="lbl">🚗 Auto uscite</div></div>
+      <div class="stat"><div class="val" style="color:var(--muted);font-size:1rem">${soste.length > 0 ? formatEuro(mediaAgg) : '—'}</div><div class="lbl">Media/auto</div></div>
     </div>
     ${renderRigaIVA(totale)}
     ${totaleEsterno > 0 ? `
@@ -301,7 +250,6 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
       <div style="font-family:Share Tech Mono,monospace;font-size:13px;color:#6366f1">${formatEuro(totaleEsterno)}</div>
     </div>` : ''}
     ${renderBreakdownConvenzioni(soste, totale)}
-    <div id="conv-report-container"></div>
     <div class="section-label" style="margin-bottom:12px;margin-top:16px">${t('cassa_dettaglio_per')} ${raggruppamento}</div>
     ${voci.length === 0
       ? `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">${t('cassa_nessun_dato')}</div></div>`
@@ -329,8 +277,6 @@ async function renderCassaAggregata(body, giorni, raggruppamento) {
             </div>`;
         }).join('')
     }`;
-  const convContainer = document.getElementById('conv-report-container');
-  if (convContainer) await renderConvenzioniReport(convContainer);
 }
 
 // ── TAB GRAFICI ───────────────────────────────────────────────
@@ -789,39 +735,33 @@ function renderBreakdownConvenzioni(soste, totaleGlobale) {
     .map(([k, v]) => {
       const isNessuna = k === '__nessuna__';
       const nome = isNessuna ? 'Senza convenzione' : (convAttive.find(c => c.id === k)?.nome || 'Convenzione rimossa');
+      const importoMostrato = _mostraIVA ? v.importo / 1.22 : v.importo;
+      const mediaMostrata = v.count > 0 ? importoMostrato / v.count : 0;
       const pct = totaleGlobale > 0 ? Math.round((v.importo / totaleGlobale) * 100) : 0;
       return `
         <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
           <div style="font-size:18px;flex-shrink:0">${isNessuna ? '🚗' : '🤝'}</div>
           <div style="flex:1;min-width:0">
             <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:${isNessuna ? 'var(--muted)' : 'var(--accent3)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">${v.count} uscite · media ${formatEuro(v.importo/v.count)} · ${pct}%</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">🚗 ${v.count} auto · media ${formatEuro(mediaMostrata)}${_mostraIVA ? ' netto' : ''} · ${pct}%</div>
             <div style="height:4px;background:var(--panel);border-radius:2px;overflow:hidden;margin-top:5px">
               <div style="height:100%;width:${pct}%;background:${isNessuna ? 'var(--muted)' : 'var(--accent3)'};border-radius:2px"></div>
             </div>
           </div>
-          <div style="font-family:Share Tech Mono,monospace;font-size:15px;color:var(--green);flex-shrink:0">${formatEuro(v.importo)}</div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:Share Tech Mono,monospace;font-size:15px;color:var(--green)">${formatEuro(importoMostrato)}</div>
+            ${_mostraIVA ? `<div style="font-size:10px;color:var(--muted)">netto IVA</div>` : ''}
+          </div>
         </div>`;
     }).join('');
 
   return `
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:4px">
-      <button onclick="toggleBreakdownConv()" id="breakdown-conv-toggle"
-        style="display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:12px 14px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3)">
-        <span>🤝 Breakdown convenzioni</span>
-        <span id="breakdown-conv-icon">▼</span>
-      </button>
-      <div id="breakdown-conv-body" style="display:none;padding:0 14px 8px">${righe}</div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px">
+      <div style="padding:12px 14px 4px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:14px;color:var(--accent3)">
+        🤝 Ripartizione per convenzione
+      </div>
+      <div style="padding:0 14px 8px">${righe}</div>
     </div>`;
-}
-
-function toggleBreakdownConv() {
-  const b = document.getElementById('breakdown-conv-body');
-  const i = document.getElementById('breakdown-conv-icon');
-  if (!b) return;
-  const aperto = b.style.display !== 'none';
-  b.style.display = aperto ? 'none' : 'block';
-  if (i) i.textContent = aperto ? '▼' : '▲';
 }
 
 // ── UTILITY DATE ─────────────────────────────────────────────
