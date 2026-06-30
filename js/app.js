@@ -657,35 +657,38 @@ async function apriLista() {
 }
 
 async function caricaListaSoste() {
-  if (!garageCorrente) return;
-
-  const oggi = new Date().toISOString().split('T')[0];
-  const { data } = await sbClient
-    .from('soste')
-    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo, operatore_ingresso_nome, operatore_uscita_nome')
-    .eq('garage_id', garageCorrente.id)
-    .gte('ingresso_at', `${oggi}T00:00:00`)
-    .order('ingresso_at', { ascending: false });
-
   const container = document.getElementById('lista-soste-container');
   if (!container) return;
 
+  // Recupera tutti i garage dell'account per mostrare auto in sosta ovunque
+  const garages = garageList && garageList.length > 0 ? garageList : (garageCorrente ? [garageCorrente] : []);
+  if (garages.length === 0) return;
+
+  const garageIds = garages.map(g => g.id);
+  const { data } = await sbClient
+    .from('soste')
+    .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, convenzione_id, importo, operatore_ingresso_nome, garage_id')
+    .in('garage_id', garageIds)
+    .is('uscita_at', null)
+    .order('ingresso_at', { ascending: false });
+
   if (!data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nessuna sosta oggi</div></div>';
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🅿️</div><div class="empty-text">Nessuna auto in sosta al momento</div></div>';
     return;
   }
 
-  const attive = data.filter(s => !s.uscita_at);
-  const chiuse = data.filter(s => s.uscita_at);
-  let html = '';
+  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;text-align:center">${data.length} auto attualmente in sosta</div>`;
 
-  if (attive.length > 0) {
-    html += `<div class="section-label">In sosta ora (${attive.length})</div>`;
-    html += attive.map(s => cardSosta(s, true)).join('');
-  }
-  if (chiuse.length > 0) {
-    html += `<div class="section-label" style="margin-top:16px">Uscite oggi (${chiuse.length})</div>`;
-    html += chiuse.map(s => cardSosta(s, false)).join('');
+  if (garages.length > 1) {
+    // Multi-garage: raggruppa per garage
+    garages.forEach(g => {
+      const sosteGarage = data.filter(s => s.garage_id === g.id);
+      if (sosteGarage.length === 0) return;
+      html += `<div class="section-label" style="margin-top:12px">${g.name} (${sosteGarage.length})</div>`;
+      html += sosteGarage.map(s => cardSosta(s, true)).join('');
+    });
+  } else {
+    html += data.map(s => cardSosta(s, true)).join('');
   }
 
   container.innerHTML = html;
