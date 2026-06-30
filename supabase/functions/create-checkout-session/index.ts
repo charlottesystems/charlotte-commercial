@@ -16,7 +16,9 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   httpClient: Stripe.createFetchHttpClient(),
 })
 
-const PRICE_ID = 'price_1Tnn2LL72l2Ox0vs0JpUrUgj'
+// Live: price_1Tnn2LL72l2Ox0vs0JpUrUgj
+// Test/Sandbox: price_1To1VRL72l2Ox0vsKC7STQ5o
+const PRICE_ID = Deno.env.get('STRIPE_PRICE_ID') || 'price_1Tnn2LL72l2Ox0vs0JpUrUgj'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
