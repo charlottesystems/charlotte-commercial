@@ -149,7 +149,6 @@ function buildIntestazione(garage) {
 }
 
 function buildTicketIngresso(sosta, nomeGarage, garage) {
-  nomeGarage = 'GARAGE ' + nomeGarage;
   const now = new Date(sosta.ingresso_at);
   const data = now.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const ora = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -196,7 +195,6 @@ function buildTicketIngresso(sosta, nomeGarage, garage) {
 }
 
 function buildTicketUscita(sosta, nomeGarage, garage) {
-  nomeGarage = 'GARAGE ' + nomeGarage;
   const ingresso = new Date(sosta.ingresso_at);
   const uscita = new Date(sosta.uscita_at || new Date());
   const dataI = ingresso.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
