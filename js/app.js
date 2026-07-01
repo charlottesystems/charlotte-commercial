@@ -649,6 +649,17 @@ async function confermaUscita(sostaId, importo) {
 
   if (error) { alert('Errore nel registrare l\'uscita. Riprova.'); return; }
 
+  // Stampa ticket uscita
+  try {
+    const { data: sostaStampata } = await sbClient
+      .from('soste')
+      .select('id, targa, tipo_veicolo, ingresso_at, uscita_at, importo, garage_id')
+      .eq('id', id).single();
+    if (sostaStampata && confirm('Stampare il ticket di uscita?')) {
+      await stampaTicketUscita(sostaStampata);
+    }
+  } catch (e) { console.error('Errore stampa ticket uscita:', e); }
+
   await aggiornaStatistiche();
   await caricaSosteAttive();
 }
