@@ -242,26 +242,45 @@ async function stampaTicketUscita(sosta) {
 
 // ── FALLBACK STAMPA BROWSER ──────────────────────────────────
 
+function stampaFallback(html) {
+  // Inietta il ticket in un iframe nascosto nella pagina corrente per evitare
+  // il blocco popup di Chrome su Android, poi stampa e rimuove l'iframe.
+  let iframe = document.getElementById('_charlotte_print_frame');
+  if (iframe) iframe.remove();
+
+  iframe = document.createElement('iframe');
+  iframe.id = '_charlotte_print_frame';
+  iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:58mm;height:0;border:none;visibility:hidden;';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  setTimeout(() => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(() => iframe.remove(), 2000);
+  }, 400);
+}
+
 function stampaFallbackIngresso(sosta, nomeGarage) {
   const ingresso = new Date(sosta.ingresso_at);
   const cat = CATEGORIE.find(c => c.id === sosta.tipo_veicolo);
-  const win = window.open('', '_blank', 'width=300,height=400');
-  win.document.write(ticketHTML(
+  stampaFallback(ticketHTML(
     nomeGarage, 'INGRESSO', sosta.targa,
     cat?.label || sosta.tipo_veicolo,
     ingresso.toLocaleDateString('it-IT') + ' ' + ingresso.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}),
     null, null, null
   ));
-  win.document.close();
-  setTimeout(() => { win.print(); win.close(); }, 300);
 }
 
 function stampaFallbackUscita(sosta, nomeGarage) {
   const ingresso = new Date(sosta.ingresso_at);
   const uscita = new Date(sosta.uscita_at || new Date());
   const cat = CATEGORIE.find(c => c.id === sosta.tipo_veicolo);
-  const win = window.open('', '_blank', 'width=300,height=500');
-  win.document.write(ticketHTML(
+  stampaFallback(ticketHTML(
     nomeGarage, 'USCITA', sosta.targa,
     cat?.label || sosta.tipo_veicolo,
     ingresso.toLocaleDateString('it-IT') + ' ' + ingresso.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'}),
@@ -269,8 +288,6 @@ function stampaFallbackUscita(sosta, nomeGarage) {
     calcolaDurata(sosta.ingresso_at, sosta.uscita_at),
     sosta.importo ? 'EUR ' + parseFloat(sosta.importo).toFixed(2) : null
   ));
-  win.document.close();
-  setTimeout(() => { win.print(); win.close(); }, 300);
 }
 
 function ticketHTML(garage, tipo, targa, categoria, ingresso, uscita, durata, importo) {
