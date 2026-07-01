@@ -21,18 +21,23 @@ const CMD = {
   LINE:           [LF],
 };
 
-// UUID comuni stampanti termiche Bluetooth
+// UUID servizi BLE comuni per stampanti termiche
+// NOTA: Web Bluetooth supporta solo BLE, NON Bluetooth Classic (SPP/RFCOMM).
+// Stampanti Classic BT non appariranno nella lista — richiedono app nativa Android.
 const BT_SERVICE_UUIDS = [
-  '000018f0-0000-1000-8000-00805f9b34fb', // Xprinter, HPRT
-  '00001101-0000-1000-8000-00805f9b34fb', // Serial Port Profile
-  'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // Rongta
-  '49535343-fe7d-4ae5-8fa9-9fafd205e455', // Generic
+  '000018f0-0000-1000-8000-00805f9b34fb', // Xprinter BLE (XP-P300, XP-P323B...)
+  'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // Rongta (RPP02N, RPP200...)
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455', // iSAP / Microchip BM70
+  'af9b58e0-d60a-11e3-9c1a-0800200c9a66', // Epson TM-P20/P60 BLE
+  '18f0',                                  // short UUID Xprinter
+  '1101',                                  // SPP short (alcuni BLE dual-mode)
 ];
 
 const BT_CHAR_UUIDS = [
   '00002af1-0000-1000-8000-00805f9b34fb',
   '000018f1-0000-1000-8000-00805f9b34fb',
   '49535343-8841-43f4-a8d4-ecbe34729bb3',
+  'af9b58e2-d60a-11e3-9c1a-0800200c9a66', // Epson write char
 ];
 
 let btDevice = null;
@@ -72,9 +77,10 @@ async function connettiBluetooth() {
       } catch {}
     }
 
-    return { ok: false, motivo: 'Stampante connessa ma caratteristica non trovata. Prova un altro modello.' };
+    return { ok: false, motivo: 'Stampante connessa ma caratteristica non trovata. Se la tua stampante usa Bluetooth Classic (non BLE), non è compatibile con Chrome — usa l\'app del produttore per stampare.' };
   } catch (e) {
     if (e.name === 'NotFoundError') return { ok: false, motivo: 'Nessuna stampante selezionata.' };
+    if (e.name === 'NotSupportedError') return { ok: false, motivo: 'Stampante non compatibile BLE. Se è una stampante Classic Bluetooth, usa la stampa browser oppure l\'app del produttore.' };
     return { ok: false, motivo: e.message };
   }
 }
@@ -270,15 +276,17 @@ function stampaFallbackUscita(sosta, nomeGarage) {
 function ticketHTML(garage, tipo, targa, categoria, ingresso, uscita, durata, importo) {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
   <style>
+    @page { margin: 0; size: 58mm auto; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Courier New', monospace; font-size: 12px; width: 58mm; padding: 4mm; }
+    html, body { width: 58mm; }
+    body { font-family: 'Courier New', monospace; font-size: 11px; padding: 3mm 4mm; }
     .center { text-align: center; }
     .bold { font-weight: bold; }
-    .large { font-size: 18px; }
-    .xlarge { font-size: 22px; }
-    .sep { border-top: 1px dashed #000; margin: 6px 0; }
-    .row { display: flex; justify-content: space-between; margin: 2px 0; }
-    @media print { @page { margin: 0; size: 58mm auto; } }
+    .large { font-size: 16px; }
+    .xlarge { font-size: 20px; }
+    .sep { border-top: 1px dashed #000; margin: 5px 0; }
+    .row { display: flex; justify-content: space-between; margin: 2px 0; font-size: 10px; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   </style></head><body>
   <div class="center bold large">${garage.toUpperCase()}</div>
   <div class="sep"></div>
