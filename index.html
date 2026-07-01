@@ -443,22 +443,6 @@ function waitReady() {
       }
     }
     waitReady();
-
-    // Pre-compila email da URL param ?email= (es. arrivando dal sito charlotteparking.it)
-    const _urlEmail = new URLSearchParams(window.location.search).get('email');
-    if (_urlEmail) {
-      const _waitLogin = setInterval(function() {
-        const regForm = document.getElementById('register-form');
-        const loginForm = document.getElementById('login-form');
-        if (regForm && loginForm) {
-          clearInterval(_waitLogin);
-          loginForm.style.display = 'none';
-          regForm.style.display = 'flex';
-          const emailInput = document.getElementById('reg-email');
-          if (emailInput) { emailInput.value = _urlEmail; emailInput.focus(); }
-        }
-      }, 100);
-    }
   });
 
   function mostraSchermataTC() {
