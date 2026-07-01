@@ -212,6 +212,147 @@ function buildTicketUscita(sosta, nomeGarage) {
   return bytes;
 }
 
+// ── CANVAS TICKET (per Web Share → Print Label) ──────────────
+
+function disegnaTicketCanvas(righe) {
+  const W = 384; // 58mm a ~168dpi, buona risoluzione per stampante termica
+  const FONT = '22px Courier New';
+  const FONT_BOLD = 'bold 22px Courier New';
+  const FONT_LARGE = 'bold 32px Courier New';
+  const FONT_XLARGE = 'bold 46px Courier New';
+  const PAD = 16;
+  const LINE = 28;
+
+  // Prima passata: calcola altezza
+  let y = PAD;
+  for (const r of righe) {
+    if (r.type === 'sep') y += 20;
+    else if (r.type === 'spacer') y += 14;
+    else y += (r.size === 'xl' ? 52 : r.size === 'lg' ? 38 : LINE);
+  }
+  y += PAD;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = y;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, canvas.height);
+  ctx.fillStyle = '#000000';
+
+  let cy = PAD;
+  for (const r of righe) {
+    if (r.type === 'sep') {
+      ctx.save();
+      ctx.setLineDash(r.dot ? [4, 4] : []);
+      ctx.beginPath();
+      ctx.moveTo(PAD, cy + 10);
+      ctx.lineTo(W - PAD, cy + 10);
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+      cy += 20;
+    } else if (r.type === 'spacer') {
+      cy += 14;
+    } else {
+      const fh = r.size === 'xl' ? 46 : r.size === 'lg' ? 32 : 22;
+      ctx.font = r.size === 'xl' ? FONT_XLARGE : r.size === 'lg' ? FONT_LARGE : (r.bold ? FONT_BOLD : FONT);
+      cy += fh + 4;
+      if (r.align === 'center') {
+        ctx.textAlign = 'center';
+        ctx.fillText(r.text, W / 2, cy);
+      } else if (r.right) {
+        ctx.textAlign = 'left';
+        ctx.fillText(r.text, PAD, cy);
+        ctx.textAlign = 'right';
+        ctx.fillText(r.right, W - PAD, cy);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillText(r.text, PAD, cy);
+      }
+      cy += 2;
+    }
+  }
+
+  return canvas;
+}
+
+function ticketRigheIngresso(garage, targa, categoria, ingressoStr) {
+  return [
+    { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true, size: 'lg' },
+    { type: 'sep' },
+    { type: 'text', text: 'TICKET INGRESSO', align: 'center', bold: true },
+    { type: 'sep' },
+    { type: 'spacer' },
+    { type: 'text', text: 'Targa:', align: 'center' },
+    { type: 'text', text: targa, align: 'center', bold: true, size: 'xl' },
+    { type: 'spacer' },
+    { type: 'sep', dot: true },
+    { type: 'text', text: 'Categoria:', right: categoria },
+    { type: 'text', text: 'Ingresso:', right: ingressoStr },
+    { type: 'sep', dot: true },
+    { type: 'spacer' },
+    { type: 'text', text: 'Conservare fino all\'uscita', align: 'center' },
+    { type: 'sep' },
+  ];
+}
+
+function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, durata, importo) {
+  const righe = [
+    { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true, size: 'lg' },
+    { type: 'sep' },
+    { type: 'text', text: 'TICKET USCITA', align: 'center', bold: true },
+    { type: 'sep' },
+    { type: 'spacer' },
+    { type: 'text', text: 'Targa:', align: 'center' },
+    { type: 'text', text: targa, align: 'center', bold: true, size: 'xl' },
+    { type: 'spacer' },
+    { type: 'sep', dot: true },
+    { type: 'text', text: 'Categoria:', right: categoria },
+    { type: 'text', text: 'Ingresso:', right: ingressoStr },
+    { type: 'text', text: 'Uscita:', right: uscitaStr },
+    { type: 'text', text: 'Durata:', right: durata },
+    { type: 'sep', dot: true },
+    { type: 'spacer' },
+  ];
+  if (importo) {
+    righe.push({ type: 'text', text: 'IMPORTO: ' + importo, align: 'center', bold: true, size: 'lg' });
+    righe.push({ type: 'spacer' });
+  }
+  righe.push({ type: 'sep' });
+  righe.push({ type: 'text', text: 'Grazie per aver scelto', align: 'center' });
+  righe.push({ type: 'text', text: garage, align: 'center' });
+  return righe;
+}
+
+async function condividiOStampa(canvas, nomeFile) {
+  return new Promise((resolve) => {
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], nomeFile, { type: 'image/png' });
+      // Prova Web Share API (Android Chrome)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'Ticket Charlotte Parking' });
+          resolve('share');
+          return;
+        } catch (e) {
+          if (e.name !== 'AbortError') console.warn('share error', e);
+        }
+      }
+      // Fallback: scarica l'immagine
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeFile;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      resolve('download');
+    }, 'image/png');
+  });
+}
+
 // ── FUNZIONI PRINCIPALI ──────────────────────────────────────
 
 async function stampaTicketIngresso(sosta) {
@@ -223,8 +364,12 @@ async function stampaTicketIngresso(sosta) {
     return;
   }
 
-  // Fallback: stampa browser
-  stampaFallbackIngresso(sosta, nomeGarage);
+  // Web Share / Download come immagine PNG (compatibile con Print Label)
+  const cat = CATEGORIE.find(c => c.id === sosta.tipo_veicolo);
+  const ingresso = new Date(sosta.ingresso_at);
+  const ingressoStr = ingresso.toLocaleDateString('it-IT') + ' ' + ingresso.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+  const canvas = disegnaTicketCanvas(ticketRigheIngresso(nomeGarage, sosta.targa, cat?.label || sosta.tipo_veicolo, ingressoStr));
+  await condividiOStampa(canvas, 'ticket-ingresso.png');
 }
 
 async function stampaTicketUscita(sosta) {
@@ -236,8 +381,14 @@ async function stampaTicketUscita(sosta) {
     return;
   }
 
-  // Fallback: stampa browser
-  stampaFallbackUscita(sosta, nomeGarage);
+  // Web Share / Download come immagine PNG (compatibile con Print Label)
+  const cat = CATEGORIE.find(c => c.id === sosta.tipo_veicolo);
+  const ingresso = new Date(sosta.ingresso_at);
+  const uscita = new Date(sosta.uscita_at || new Date());
+  const ingressoStr = ingresso.toLocaleDateString('it-IT') + ' ' + ingresso.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+  const uscitaStr = uscita.toLocaleDateString('it-IT') + ' ' + uscita.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+  const canvas = disegnaTicketCanvas(ticketRigheUscita(nomeGarage, sosta.targa, cat?.label || sosta.tipo_veicolo, ingressoStr, uscitaStr, calcolaDurata(sosta.ingresso_at, sosta.uscita_at), sosta.importo ? 'EUR ' + parseFloat(sosta.importo).toFixed(2) : null));
+  await condividiOStampa(canvas, 'ticket-uscita.png');
 }
 
 // ── FALLBACK STAMPA BROWSER ──────────────────────────────────
