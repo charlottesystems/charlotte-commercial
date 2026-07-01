@@ -267,6 +267,10 @@
       </div>
     </div>
     <div class="tipo-section"><div class="manual-label">Categoria veicolo</div><div class="tipo-grid" id="tipo-grid"></div></div>
+    <div class="manual-section">
+      <div class="manual-label">Modello auto <span style="color:var(--muted);font-weight:400">(opzionale)</span></div>
+      <input id="modello-auto-input" class="manual-input" type="text" placeholder="es. Fiat Tipo" style="width:100%" autocomplete="off">
+    </div>
     <div class="conv-section" id="conv-section" style="display:none"><div class="manual-label">Convenzione</div><div class="conv-grid" id="conv-grid"></div></div>
     <button class="conferma-btn" id="conferma-ingresso-btn" onclick="confermaIngresso()">&#x2713; CONFERMA INGRESSO</button>
     <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="gestisciImmagineOCR(this.files[0])">

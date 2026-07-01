@@ -146,6 +146,7 @@ function buildTicketIngresso(sosta, nomeGarage) {
     LF,
     ...CMD.ALIGN_LEFT,
     ...testoBytes('Categoria : ' + (cat?.label || sosta.tipo_veicolo)), LF,
+    ...(sosta.modello_auto ? [...testoBytes('Modello   : ' + sosta.modello_auto), LF] : []),
     ...testoBytes('Data      : ' + data), LF,
     ...testoBytes('Ora       : ' + ora), LF,
     LF,
@@ -196,6 +197,7 @@ function buildTicketUscita(sosta, nomeGarage) {
     LF,
     ...CMD.ALIGN_LEFT,
     ...testoBytes('Categoria : ' + (cat?.label || sosta.tipo_veicolo)), LF,
+    ...(sosta.modello_auto ? [...testoBytes('Modello   : ' + sosta.modello_auto), LF] : []),
     ...testoBytes(separatore('.')), LF,
     ...testoBytes('Ingresso  : ' + dataI + ' ' + oraI), LF,
     ...testoBytes('Uscita    : ' + dataU + ' ' + oraU), LF,
@@ -286,8 +288,8 @@ function disegnaTicketCanvas(righe) {
   return canvas;
 }
 
-function ticketRigheIngresso(garage, targa, categoria, ingressoStr) {
-  return [
+function ticketRigheIngresso(garage, targa, categoria, ingressoStr, modello) {
+  const righe = [
     { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true, size: 'lg' },
     { type: 'sep' },
     { type: 'text', text: 'TICKET INGRESSO', align: 'center', bold: true },
@@ -298,15 +300,19 @@ function ticketRigheIngresso(garage, targa, categoria, ingressoStr) {
     { type: 'spacer' },
     { type: 'sep', dot: true },
     { type: 'text', text: 'Categoria:', right: categoria },
+  ];
+  if (modello) righe.push({ type: 'text', text: 'Modello:', right: modello });
+  righe.push(
     { type: 'text', text: 'Ingresso:', right: ingressoStr },
     { type: 'sep', dot: true },
     { type: 'spacer' },
     { type: 'text', text: 'Conservare fino all\'uscita', align: 'center' },
     { type: 'sep' },
-  ];
+  );
+  return righe;
 }
 
-function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, durata, importo) {
+function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, durata, importo, modello) {
   const righe = [
     { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true, size: 'lg' },
     { type: 'sep' },
@@ -318,6 +324,9 @@ function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, dur
     { type: 'spacer' },
     { type: 'sep', dot: true },
     { type: 'text', text: 'Categoria:', right: categoria },
+  ];
+  if (modello) righe.push({ type: 'text', text: 'Modello:', right: modello });
+  righe.push(
     { type: 'text', text: 'Ingresso:', right: ingressoStr },
     { type: 'text', text: 'Uscita:', right: uscitaStr },
     { type: 'text', text: 'Durata:', right: durata },
@@ -401,7 +410,7 @@ async function stampaTicketIngresso(sosta) {
   const cat = CATEGORIE.find(c => c.id === sosta.tipo_veicolo);
   const ingresso = new Date(sosta.ingresso_at);
   const ingressoStr = ingresso.toLocaleDateString('it-IT') + ' ' + ingresso.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
-  const canvas = disegnaTicketCanvas(ticketRigheIngresso(nomeGarage, sosta.targa, cat?.label || sosta.tipo_veicolo, ingressoStr));
+  const canvas = disegnaTicketCanvas(ticketRigheIngresso(nomeGarage, sosta.targa, cat?.label || sosta.tipo_veicolo, ingressoStr, sosta.modello_auto));
   await condividiOStampa(canvas, 'ticket-ingresso.png');
 }
 
@@ -434,7 +443,7 @@ async function stampaTicketUscita(sosta) {
   const uscita = new Date(sosta.uscita_at || new Date());
   const ingressoStr = ingresso.toLocaleDateString('it-IT') + ' ' + ingresso.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
   const uscitaStr = uscita.toLocaleDateString('it-IT') + ' ' + uscita.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
-  const canvas = disegnaTicketCanvas(ticketRigheUscita(nomeGarage, sosta.targa, cat?.label || sosta.tipo_veicolo, ingressoStr, uscitaStr, calcolaDurata(sosta.ingresso_at, sosta.uscita_at), sosta.importo ? 'EUR ' + parseFloat(sosta.importo).toFixed(2) : null));
+  const canvas = disegnaTicketCanvas(ticketRigheUscita(nomeGarage, sosta.targa, cat?.label || sosta.tipo_veicolo, ingressoStr, uscitaStr, calcolaDurata(sosta.ingresso_at, sosta.uscita_at), sosta.importo ? 'EUR ' + parseFloat(sosta.importo).toFixed(2) : null, sosta.modello_auto));
   await condividiOStampa(canvas, 'ticket-uscita.png');
 }
 

@@ -398,6 +398,9 @@ function resetIngresso() {
   document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selected'));
   document.querySelectorAll('.conv-btn').forEach(b => b.classList.remove('selected'));
 
+  const modelloInput = document.getElementById('modello-auto-input');
+  if (modelloInput) modelloInput.value = '';
+
   aggiornaBottoneConferma();
 }
 
@@ -498,11 +501,13 @@ async function confermaIngresso() {
 
   const opId = currentUser?.id || null;
   const opNome = localStorage.getItem('charlotte_operatore_nome') || localStorage.getItem('charlotte_company') || 'Owner';
+  const modelloAuto = (document.getElementById('modello-auto-input')?.value || '').trim() || null;
 
   const { error } = await sbClient.from('soste').insert({
     garage_id: garageCorrente.id,
     targa: targaCorrente,
     tipo_veicolo: categoriaCorrente,
+    modello_auto: modelloAuto,
     convenzione_id: convenzionCorrente?.id || null,
     ingresso_at: new Date().toISOString(),
     uscita_at: null,
