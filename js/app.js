@@ -681,6 +681,39 @@ async function apriLista() {
   await caricaListaSoste();
 }
 
+async function annullaSosta(sostaId, targa) {
+  if (!confirm(`Eliminare la sosta di ${targa}? Questa azione non può essere annullata.`)) return;
+  const { error } = await sbClient.from('soste').delete().eq('id', sostaId);
+  if (error) { alert('Errore eliminazione: ' + error.message); return; }
+  await aggiornaStatistiche();
+  await caricaSosteAttive();
+}
+
+async function apriModificaSosta(sostaId, targa, ingressoAt) {
+  const nuovaTarga = prompt('Targa:', targa);
+  if (nuovaTarga === null) return;
+
+  // Formato datetime-local: YYYY-MM-DDTHH:MM
+  const dtLocale = new Date(ingressoAt);
+  const pad = n => String(n).padStart(2, '0');
+  const dtStr = dtLocale.getFullYear() + '-' + pad(dtLocale.getMonth()+1) + '-' + pad(dtLocale.getDate()) +
+                'T' + pad(dtLocale.getHours()) + ':' + pad(dtLocale.getMinutes());
+  const nuovaOra = prompt('Orario ingresso (AAAA-MM-GG HH:MM):', dtStr.replace('T', ' '));
+  if (nuovaOra === null) return;
+
+  const nuovaData = new Date(nuovaOra.trim().replace(' ', 'T'));
+  if (isNaN(nuovaData.getTime())) { alert('Formato orario non valido. Usa: AAAA-MM-GG HH:MM'); return; }
+
+  const { error } = await sbClient.from('soste').update({
+    targa: nuovaTarga.toUpperCase().replace(/[^A-Z0-9]/g, ''),
+    ingresso_at: nuovaData.toISOString()
+  }).eq('id', sostaId);
+
+  if (error) { alert('Errore modifica: ' + error.message); return; }
+  await aggiornaStatistiche();
+  await caricaSosteAttive();
+}
+
 async function caricaListaSoste() {
   const container = document.getElementById('lista-soste-container');
   if (!container || !garageCorrente) return;
@@ -721,9 +754,18 @@ function cardSosta(s, attiva) {
         <div class="sosta-duration">${durata}</div>
         ${!attiva && s.importo ? `<div class="sosta-time" style="color:var(--green)">${formatEuro(s.importo)}</div>` : ''}
       </div>
-      ${attiva ? `<button class="uscita-quick-btn"
-        onclick="apriConfermaUscita('${s.id}','${s.targa}','${s.ingresso_at}','${s.tipo_veicolo}','${s.convenzione_id || ''}')">
-        USCITA</button>` : ''}
+      ${attiva ? `
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <button class="uscita-quick-btn"
+            onclick="apriConfermaUscita('${s.id}','${s.targa}','${s.ingresso_at}','${s.tipo_veicolo}','${s.convenzione_id || ''}')">
+            USCITA</button>
+          <button onclick="apriModificaSosta('${s.id}','${s.targa}','${s.ingresso_at}')"
+            style="font-size:11px;padding:5px 10px;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent3);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700">
+            ✏️ MODIFICA</button>
+          <button onclick="annullaSosta('${s.id}','${s.targa}')"
+            style="font-size:11px;padding:5px 10px;border:1px solid var(--red);border-radius:8px;background:transparent;color:var(--red);cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700">
+            🗑 ANNULLA</button>
+        </div>` : ''}
     </div>`;
 }
 
