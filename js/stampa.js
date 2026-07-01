@@ -114,7 +114,31 @@ function separatore(char = '-', lunghezza = 32) {
   return char.repeat(lunghezza);
 }
 
-function buildTicketIngresso(sosta, nomeGarage) {
+function buildIntestazione(garage) {
+  const bytes = [...CMD.ALIGN_CENTER];
+  if (garage?.ragione_sociale) {
+    bytes.push(...CMD.BOLD_ON, ...testoBytes(garage.ragione_sociale.toUpperCase()), LF, ...CMD.BOLD_OFF);
+  }
+  if (garage?.address) {
+    bytes.push(...testoBytes(garage.address), LF);
+  }
+  if (garage?.telefono || garage?.piva) {
+    let riga = '';
+    if (garage.telefono) riga += 'TEL ' + garage.telefono;
+    if (garage.telefono && garage.piva) riga += '  ';
+    if (garage.piva) riga += 'P.IVA ' + garage.piva;
+    bytes.push(...testoBytes(riga), LF);
+  }
+  if (garage?.orario_apertura && garage?.orario_chiusura) {
+    bytes.push(...testoBytes('ORARIO ' + garage.orario_apertura + '-' + garage.orario_chiusura), LF);
+  }
+  if (garage?.ragione_sociale || garage?.address || garage?.telefono) {
+    bytes.push(...testoBytes(separatore('-')), LF);
+  }
+  return bytes;
+}
+
+function buildTicketIngresso(sosta, nomeGarage, garage) {
   nomeGarage = 'GARAGE ' + nomeGarage;
   const now = new Date(sosta.ingresso_at);
   const data = now.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -123,6 +147,7 @@ function buildTicketIngresso(sosta, nomeGarage) {
 
   let bytes = [
     ...CMD.INIT,
+    ...buildIntestazione(garage),
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
     ...CMD.DOUBLE_ON,
@@ -160,7 +185,7 @@ function buildTicketIngresso(sosta, nomeGarage) {
   return bytes;
 }
 
-function buildTicketUscita(sosta, nomeGarage) {
+function buildTicketUscita(sosta, nomeGarage, garage) {
   nomeGarage = 'GARAGE ' + nomeGarage;
   const ingresso = new Date(sosta.ingresso_at);
   const uscita = new Date(sosta.uscita_at || new Date());
@@ -174,6 +199,7 @@ function buildTicketUscita(sosta, nomeGarage) {
 
   let bytes = [
     ...CMD.INIT,
+    ...buildIntestazione(garage),
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
     ...CMD.DOUBLE_ON,
@@ -392,7 +418,7 @@ async function stampaTicketIngresso(sosta) {
       await gestisciConnessioneBTNativa();
     }
     if (CHARLOTTE_BT.isConnected()) {
-      const bytes = buildTicketIngresso(sosta, nomeGarage);
+      const bytes = buildTicketIngresso(sosta, nomeGarage, garageCorrente);
       const result = CHARLOTTE_BT.printBytes(bytes.join(','));
       if (result !== 'ok') alert('Errore stampa: ' + result);
     }
@@ -401,7 +427,7 @@ async function stampaTicketIngresso(sosta) {
 
   // 2. Web Bluetooth BLE
   if (btCharacteristic && btDevice?.gatt?.connected) {
-    const bytes = buildTicketIngresso(sosta, nomeGarage);
+    const bytes = buildTicketIngresso(sosta, nomeGarage, garageCorrente);
     await inviaBytes(bytes);
     return;
   }
@@ -423,7 +449,7 @@ async function stampaTicketUscita(sosta) {
       await gestisciConnessioneBTNativa();
     }
     if (CHARLOTTE_BT.isConnected()) {
-      const bytes = buildTicketUscita(sosta, nomeGarage);
+      const bytes = buildTicketUscita(sosta, nomeGarage, garageCorrente);
       const result = CHARLOTTE_BT.printBytes(bytes.join(','));
       if (result !== 'ok') alert('Errore stampa: ' + result);
     }
@@ -432,7 +458,7 @@ async function stampaTicketUscita(sosta) {
 
   // 2. Web Bluetooth BLE
   if (btCharacteristic && btDevice?.gatt?.connected) {
-    const bytes = buildTicketUscita(sosta, nomeGarage);
+    const bytes = buildTicketUscita(sosta, nomeGarage, garageCorrente);
     await inviaBytes(bytes);
     return;
   }

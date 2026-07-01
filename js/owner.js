@@ -21,7 +21,7 @@ async function caricaGaragesOwner() {
 
   const { data } = await sbClient
     .from('garages')
-    .select('id, name, email, telefono, orario_apertura, orario_chiusura, giorni_apertura, lat, lng, raggio_metri, active, address')
+    .select('id, name, address, email, telefono, orario_apertura, orario_chiusura, giorni_apertura, lat, lng, raggio_metri, active, ragione_sociale, piva')
     .eq('account_id', accountId)
     .eq('active', true)
     .order('name');
@@ -291,6 +291,10 @@ async function renderGarages() {
       '<div class="tariffa-field"><label>Indirizzo</label><input class="wz-input" id="g-addr-' + g.id + '" value="' + (g.address || '') + '"></div>' +
       '</div>' +
       '<div class="tariffa-row">' +
+      '<div class="tariffa-field"><label>Ragione sociale</label><input class="wz-input" id="g-rs-' + g.id + '" placeholder="es. City Parking S.R.L." value="' + (g.ragione_sociale || '') + '"></div>' +
+      '<div class="tariffa-field"><label>P.IVA</label><input class="wz-input" id="g-piva-' + g.id + '" placeholder="es. 07108520482" value="' + (g.piva || '') + '"></div>' +
+      '</div>' +
+      '<div class="tariffa-row">' +
       '<div class="tariffa-field"><label>Email contatto</label><input class="wz-input" id="g-email-' + g.id + '" type="email" placeholder="info@garage.it" value="' + (g.email || '') + '"></div>' +
       '<div class="tariffa-field"><label>Telefono contatto</label><input class="wz-input" id="g-tel-' + g.id + '" type="tel" placeholder="+39 055 123456" value="' + (g.telefono || '') + '"></div>' +
       '</div>' +
@@ -317,6 +321,8 @@ async function renderGarages() {
 async function salvaGarage(garageId) {
   const nome = document.getElementById('g-nome-' + garageId)?.value?.trim();
   const addr = document.getElementById('g-addr-' + garageId)?.value?.trim();
+  const ragioneSociale = document.getElementById('g-rs-' + garageId)?.value?.trim() || null;
+  const piva = document.getElementById('g-piva-' + garageId)?.value?.trim() || null;
   const email = document.getElementById('g-email-' + garageId)?.value?.trim() || null;
   const telefono = document.getElementById('g-tel-' + garageId)?.value?.trim() || null;
   const orarioApertura = document.getElementById('g-open-' + garageId)?.value || '07:00';
@@ -327,7 +333,7 @@ async function salvaGarage(garageId) {
   const msg = document.getElementById('msg-g-' + garageId);
 
   const { error } = await sbClient.from('garages').update({
-    name: nome, address: addr, email, telefono,
+    name: nome, address: addr, ragione_sociale: ragioneSociale, piva, email, telefono,
     orario_apertura: orarioApertura, orario_chiusura: orarioChiusura,
     giorni_apertura: giorni, raggio_metri: raggio
   }).eq('id', garageId);
