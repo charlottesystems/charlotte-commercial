@@ -376,10 +376,15 @@ async function stampaTicketIngresso(sosta) {
   const nomeGarage = garageCorrente?.name || 'Garage';
 
   // 1. Bridge nativo Android (Bluetooth Classic — MPT-II e simili)
-  if (CHARLOTTE_BT && CHARLOTTE_BT.isConnected()) {
-    const bytes = buildTicketIngresso(sosta, nomeGarage);
-    const result = CHARLOTTE_BT.printBytes(bytes.join(','));
-    if (result !== 'ok') alert('Errore stampa: ' + result);
+  if (CHARLOTTE_BT) {
+    if (!CHARLOTTE_BT.isConnected()) {
+      await gestisciConnessioneBTNativa();
+    }
+    if (CHARLOTTE_BT.isConnected()) {
+      const bytes = buildTicketIngresso(sosta, nomeGarage);
+      const result = CHARLOTTE_BT.printBytes(bytes.join(','));
+      if (result !== 'ok') alert('Errore stampa: ' + result);
+    }
     return;
   }
 
@@ -402,10 +407,15 @@ async function stampaTicketUscita(sosta) {
   const nomeGarage = garageCorrente?.name || 'Garage';
 
   // 1. Bridge nativo Android (Bluetooth Classic — MPT-II e simili)
-  if (CHARLOTTE_BT && CHARLOTTE_BT.isConnected()) {
-    const bytes = buildTicketUscita(sosta, nomeGarage);
-    const result = CHARLOTTE_BT.printBytes(bytes.join(','));
-    if (result !== 'ok') alert('Errore stampa: ' + result);
+  if (CHARLOTTE_BT) {
+    if (!CHARLOTTE_BT.isConnected()) {
+      await gestisciConnessioneBTNativa();
+    }
+    if (CHARLOTTE_BT.isConnected()) {
+      const bytes = buildTicketUscita(sosta, nomeGarage);
+      const result = CHARLOTTE_BT.printBytes(bytes.join(','));
+      if (result !== 'ok') alert('Errore stampa: ' + result);
+    }
     return;
   }
 
@@ -604,6 +614,14 @@ async function gestisciConnessioneBTNativa() {
   } else {
     charlotteBtAddress = null;
     if (stato) { stato.textContent = result; stato.style.color = 'var(--red)'; }
+  }
+}
+
+function initStampa() {
+  // Nell'app nativa Android con bridge BT Classic, nascondi il pulsante BLE
+  if (CHARLOTTE_BT) {
+    const btn = document.getElementById('bt-btn');
+    if (btn) btn.style.display = 'none';
   }
 }
 

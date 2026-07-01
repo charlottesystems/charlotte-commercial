@@ -17,6 +17,7 @@ let _ingressoTimeout = null;
 async function inizializzaApp() {
   aggiornaOrologio();
   setInterval(aggiornaOrologio, 1000);
+  if (typeof initStampa === 'function') initStampa();
   await caricaGarages();
   await aggiornaStatistiche();
 }
