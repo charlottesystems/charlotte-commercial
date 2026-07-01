@@ -43,6 +43,11 @@ const BT_CHAR_UUIDS = [
 let btDevice = null;
 let btCharacteristic = null;
 
+// Bridge nativo Android (Bluetooth Classic, SPP/RFCOMM) — iniettato da WebViewActivity
+// Presente solo quando l'app gira dentro la WebView nativa Charlotte
+const CHARLOTTE_BT = window.CharlotteBT || null;
+let charlotteBtAddress = null; // indirizzo MAC del dispositivo nativo connesso
+
 // ── CONNESSIONE BLUETOOTH ────────────────────────────────────
 
 async function connettiBluetooth() {
@@ -370,6 +375,15 @@ async function condividiOStampa(canvas, nomeFile) {
 async function stampaTicketIngresso(sosta) {
   const nomeGarage = garageCorrente?.name || 'Garage';
 
+  // 1. Bridge nativo Android (Bluetooth Classic — MPT-II e simili)
+  if (CHARLOTTE_BT && CHARLOTTE_BT.isConnected()) {
+    const bytes = buildTicketIngresso(sosta, nomeGarage);
+    const result = CHARLOTTE_BT.printBytes(bytes.join(','));
+    if (result !== 'ok') alert('Errore stampa: ' + result);
+    return;
+  }
+
+  // 2. Web Bluetooth BLE
   if (btCharacteristic && btDevice?.gatt?.connected) {
     const bytes = buildTicketIngresso(sosta, nomeGarage);
     await inviaBytes(bytes);
@@ -387,6 +401,15 @@ async function stampaTicketIngresso(sosta) {
 async function stampaTicketUscita(sosta) {
   const nomeGarage = garageCorrente?.name || 'Garage';
 
+  // 1. Bridge nativo Android (Bluetooth Classic — MPT-II e simili)
+  if (CHARLOTTE_BT && CHARLOTTE_BT.isConnected()) {
+    const bytes = buildTicketUscita(sosta, nomeGarage);
+    const result = CHARLOTTE_BT.printBytes(bytes.join(','));
+    if (result !== 'ok') alert('Errore stampa: ' + result);
+    return;
+  }
+
+  // 2. Web Bluetooth BLE
   if (btCharacteristic && btDevice?.gatt?.connected) {
     const bytes = buildTicketUscita(sosta, nomeGarage);
     await inviaBytes(bytes);
@@ -491,6 +514,13 @@ function ticketHTML(garage, tipo, targa, categoria, ingresso, uscita, durata, im
 // ── GESTIONE CONNESSIONE UI ──────────────────────────────────
 
 async function gestisciConnessioneBT() {
+  // Se siamo nell'app nativa, mostra lista dispositivi accoppiati
+  if (CHARLOTTE_BT) {
+    await gestisciConnessioneBTNativa();
+    return;
+  }
+
+  // Web Bluetooth BLE
   if (btDevice?.gatt?.connected) {
     btDevice.gatt.disconnect();
     btDevice = null;
@@ -514,14 +544,84 @@ async function gestisciConnessioneBT() {
   }
 }
 
+async function gestisciConnessioneBTNativa() {
+  // Disconnetti se già connesso
+  if (CHARLOTTE_BT.isConnected()) {
+    CHARLOTTE_BT.disconnect();
+    charlotteBtAddress = null;
+    aggiornaStatoBT();
+    return;
+  }
+
+  const stato = document.getElementById('bt-stato');
+
+  // Leggi dispositivi accoppiati
+  let dispositivi = [];
+  try {
+    dispositivi = JSON.parse(CHARLOTTE_BT.getDevicesPaired());
+  } catch (e) {
+    if (stato) { stato.textContent = 'Errore lettura dispositivi BT'; stato.style.color = 'var(--red)'; }
+    return;
+  }
+
+  if (dispositivi.length === 0) {
+    alert('Nessun dispositivo Bluetooth accoppiato. Vai in Impostazioni → Bluetooth e accoppia la stampante MPT-II.');
+    return;
+  }
+
+  // Crea dialog selezione dispositivo
+  const scelta = await new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:var(--card);border-radius:12px;padding:20px;width:min(90vw,340px);';
+    box.innerHTML = '<div style="font-weight:600;margin-bottom:12px;">Seleziona stampante</div>';
+    dispositivi.forEach(d => {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;font-size:14px;';
+      btn.textContent = d.name + '\n' + d.address;
+      btn.style.whiteSpace = 'pre-line';
+      btn.onclick = () => { document.body.removeChild(overlay); resolve(d.address); };
+      box.appendChild(btn);
+    });
+    const annulla = document.createElement('button');
+    annulla.style.cssText = 'display:block;width:100%;padding:10px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;margin-top:4px;';
+    annulla.textContent = 'Annulla';
+    annulla.onclick = () => { document.body.removeChild(overlay); resolve(null); };
+    box.appendChild(annulla);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  });
+
+  if (!scelta) return;
+
+  if (stato) { stato.textContent = 'Connessione in corso...'; stato.style.color = 'var(--amber)'; }
+
+  const result = CHARLOTTE_BT.connect(scelta);
+  if (result === 'ok') {
+    charlotteBtAddress = scelta;
+    aggiornaStatoBT();
+  } else {
+    charlotteBtAddress = null;
+    if (stato) { stato.textContent = result; stato.style.color = 'var(--red)'; }
+  }
+}
+
 function aggiornaStatoBT() {
   const btn = document.getElementById('bt-btn');
   const stato = document.getElementById('bt-stato');
-  const connesso = btDevice?.gatt?.connected;
+
+  // Controlla stato: prima bridge nativo, poi BLE
+  const nativoConnesso = CHARLOTTE_BT?.isConnected() || false;
+  const bleConnesso = !nativoConnesso && (btDevice?.gatt?.connected || false);
+  const connesso = nativoConnesso || bleConnesso;
+  const nomeDispositivo = nativoConnesso ? (CHARLOTTE_BT.getConnectedName() || 'Stampante') : null;
+
   if (btn) {
     const labelEl = document.getElementById('bt-label');
-    if (labelEl) labelEl.textContent = connesso ? 'Stampante connessa' : 'Connetti stampante';
-    else btn.textContent = connesso ? '🔵 Stampante connessa' : '⚪ Connetti stampante';
+    const label = connesso ? ('Connesso: ' + (nomeDispositivo || 'Stampante BLE')) : 'Connetti stampante';
+    if (labelEl) labelEl.textContent = label;
+    else btn.textContent = connesso ? ('🔵 ' + label) : '⚪ Connetti stampante';
     btn.style.borderColor = connesso ? 'var(--green)' : 'var(--border)';
     btn.style.color = connesso ? 'var(--green)' : 'var(--muted)';
   }
