@@ -367,8 +367,8 @@ function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, dur
     { type: 'text', text: 'Uscita:', right: uscitaStr },
     { type: 'text', text: 'Durata:', right: durata },
     { type: 'sep', dot: true },
-    { type: 'spacer' },
-  ];
+    { type: 'spacer' }
+  );
   if (importo) {
     righe.push({ type: 'text', text: 'IMPORTO: ' + importo, align: 'center', bold: true, size: 'lg' });
     righe.push({ type: 'spacer' });
