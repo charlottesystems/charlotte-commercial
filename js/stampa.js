@@ -115,24 +115,34 @@ function separatore(char = '-', lunghezza = 32) {
 }
 
 function buildIntestazione(garage) {
+  // ragione_sociale e piva sono dati aziendali (account), letti da localStorage
+  const ragioneSociale = localStorage.getItem('charlotte_ragione_sociale') || '';
+  const piva = localStorage.getItem('charlotte_piva') || '';
+
   const bytes = [...CMD.ALIGN_CENTER];
-  if (garage?.ragione_sociale) {
-    bytes.push(...CMD.BOLD_ON, ...testoBytes(garage.ragione_sociale.toUpperCase()), LF, ...CMD.BOLD_OFF);
+  let haIntestazione = false;
+
+  if (ragioneSociale) {
+    bytes.push(...CMD.BOLD_ON, ...testoBytes(ragioneSociale.toUpperCase()), LF, ...CMD.BOLD_OFF);
+    haIntestazione = true;
   }
   if (garage?.address) {
     bytes.push(...testoBytes(garage.address), LF);
+    haIntestazione = true;
   }
-  if (garage?.telefono || garage?.piva) {
+  if (garage?.telefono || piva) {
     let riga = '';
-    if (garage.telefono) riga += 'TEL ' + garage.telefono;
-    if (garage.telefono && garage.piva) riga += '  ';
-    if (garage.piva) riga += 'P.IVA ' + garage.piva;
+    if (garage?.telefono) riga += 'TEL ' + garage.telefono;
+    if (garage?.telefono && piva) riga += '  ';
+    if (piva) riga += 'P.IVA ' + piva;
     bytes.push(...testoBytes(riga), LF);
+    haIntestazione = true;
   }
   if (garage?.orario_apertura && garage?.orario_chiusura) {
     bytes.push(...testoBytes('ORARIO ' + garage.orario_apertura + '-' + garage.orario_chiusura), LF);
+    haIntestazione = true;
   }
-  if (garage?.ragione_sociale || garage?.address || garage?.telefono) {
+  if (haIntestazione) {
     bytes.push(...testoBytes(separatore('-')), LF);
   }
   return bytes;

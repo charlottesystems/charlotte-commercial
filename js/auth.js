@@ -106,7 +106,7 @@ function mostraSchermataBloccata(account) {
 async function dopoLoginOwner() {
   const { data: account } = await sbClient
     .from('accounts')
-    .select('id, company_name, onboarding_complete, trial_ends_at, blocked_at, stripe_subscription_id, cancels_at')
+    .select('id, company_name, onboarding_complete, trial_ends_at, blocked_at, stripe_subscription_id, cancels_at, ragione_sociale, piva')
     .eq('owner_id', currentUser.id)
     .maybeSingle();
 
@@ -149,6 +149,8 @@ async function dopoLoginOwner() {
 
   localStorage.setItem('charlotte_account_id', account.id);
   localStorage.setItem('charlotte_company', account.company_name);
+  localStorage.setItem('charlotte_ragione_sociale', account.ragione_sociale || '');
+  localStorage.setItem('charlotte_piva', account.piva || '');
   localStorage.setItem('charlotte_ruolo', 'owner');
   localStorage.removeItem('charlotte_operatore_id');
   localStorage.removeItem('charlotte_operatore_nome');
