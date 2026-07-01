@@ -478,6 +478,10 @@ function waitReady() {
     localStorage.setItem('charlotte_tc_data', new Date().toISOString());
     var tc = document.getElementById('tc-screen');
     if (tc) { tc.style.display = 'none'; tc.classList.remove('active'); }
+    // Mostra subito login mentre controllaSessione carica (evita schermata nera)
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    var ls = document.getElementById('login-screen');
+    if (ls) ls.classList.add('active');
     controllaSessione();
   }
 
