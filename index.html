@@ -623,11 +623,13 @@ function waitReady() {
     }
     localStorage.setItem('charlotte_account_id', acc.id);
     localStorage.setItem('charlotte_company', company);
+    localStorage.setItem('charlotte_ruolo', 'owner');
+    localStorage.removeItem('charlotte_operatore_id');
+    localStorage.removeItem('charlotte_operatore_nome');
     localStorage.removeItem('wz_company');
-    mostraSchermata('main-screen');
-    aggiornaNomeSocietà(company);
-    inizializzaApp();
-    aggiornaHeaderRuolo();
+    // Passa per dopoLoginOwner così attiva subito pending_subscriptions,
+    // imposta il banner trial e configura correttamente header e ruolo
+    await dopoLoginOwner();
   }
 </script>
 

@@ -97,11 +97,13 @@ async function handlePaymentSuccess(event: Stripe.Event) {
     return
   }
 
-  // Determina piano da subscription
+  // Determina piano e data fine trial da subscription
+  let stripeTrialEnd: string | null = null
   if (subscriptionId) {
     const sub = await stripe.subscriptions.retrieve(subscriptionId)
     const amount = sub.items.data[0]?.price?.unit_amount || 0
     plan = amount >= 9900 ? 'enterprise' : amount >= 5900 ? 'pro_plus' : 'pro'
+    stripeTrialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null
   }
 
   console.log('Activating subscription for:', email, 'plan:', plan)
@@ -111,8 +113,9 @@ async function handlePaymentSuccess(event: Stripe.Event) {
 
   if (user) {
     // Utente trovato → attiva abbonamento
-    const trialEnd = new Date()
-    trialEnd.setDate(trialEnd.getDate() + 30)
+    const fallbackTrialEnd = new Date()
+    fallbackTrialEnd.setDate(fallbackTrialEnd.getDate() + 30)
+    const trialEndsAt = stripeTrialEnd ?? fallbackTrialEnd.toISOString()
 
     const { error, count } = await supabase
       .from('accounts')
@@ -122,7 +125,7 @@ async function handlePaymentSuccess(event: Stripe.Event) {
         blocked_at: null,
         cancels_at: null,
         plan,
-        trial_ends_at: trialEnd.toISOString(),
+        trial_ends_at: trialEndsAt,
       }, { count: 'exact' })
       .eq('owner_id', user.id)
 
@@ -153,6 +156,7 @@ async function handlePaymentSuccess(event: Stripe.Event) {
         stripe_customer_id: customerId,
         stripe_subscription_id: subscriptionId,
         plan,
+        trial_ends_at: stripeTrialEnd,
       },
       { onConflict: 'email' }
     )

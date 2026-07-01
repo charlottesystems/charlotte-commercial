@@ -118,14 +118,15 @@ async function dopoLoginOwner() {
       .eq('email', currentUser.email.toLowerCase())
       .maybeSingle();
     if (pending) {
-      const trialEnd = new Date();
-      trialEnd.setDate(trialEnd.getDate() + 30);
+      const fallback = new Date();
+      fallback.setDate(fallback.getDate() + 30);
+      const trialEndsAt = pending.trial_ends_at || fallback.toISOString();
       await sbClient.from('accounts').update({
         stripe_subscription_id: pending.stripe_subscription_id,
         stripe_customer_id: pending.stripe_customer_id,
         blocked_at: null,
         plan: pending.plan || 'pro',
-        trial_ends_at: trialEnd.toISOString(),
+        trial_ends_at: trialEndsAt,
       }).eq('id', account.id);
       await sbClient.from('pending_subscriptions').delete().eq('email', currentUser.email.toLowerCase());
       account.stripe_subscription_id = pending.stripe_subscription_id;
