@@ -159,9 +159,7 @@ function buildTicketIngresso(sosta, nomeGarage, garage) {
     ...buildIntestazione(garage),
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
-    ...CMD.DOUBLE_ON,
     ...testoBytes(nomeGarage.toUpperCase()), LF,
-    ...CMD.DOUBLE_OFF,
     ...CMD.BOLD_OFF,
     ...testoBytes(separatore()), LF,
     ...CMD.BOLD_ON,
@@ -173,9 +171,7 @@ function buildTicketIngresso(sosta, nomeGarage, garage) {
     ...testoBytes('Targa:'), LF,
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
-    ...CMD.DOUBLE_ON,
     ...testoBytes(sosta.targa), LF,
-    ...CMD.DOUBLE_OFF,
     ...CMD.BOLD_OFF,
     LF,
     ...CMD.ALIGN_LEFT,
@@ -210,9 +206,7 @@ function buildTicketUscita(sosta, nomeGarage, garage) {
     ...buildIntestazione(garage),
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
-    ...CMD.DOUBLE_ON,
     ...testoBytes(nomeGarage.toUpperCase()), LF,
-    ...CMD.DOUBLE_OFF,
     ...CMD.BOLD_OFF,
     ...testoBytes(separatore()), LF,
     ...CMD.BOLD_ON,
@@ -224,9 +218,7 @@ function buildTicketUscita(sosta, nomeGarage, garage) {
     ...testoBytes('Targa:'), LF,
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
-    ...CMD.DOUBLE_ON,
     ...testoBytes(sosta.targa), LF,
-    ...CMD.DOUBLE_OFF,
     ...CMD.BOLD_OFF,
     LF,
     ...CMD.ALIGN_LEFT,
@@ -240,9 +232,7 @@ function buildTicketUscita(sosta, nomeGarage, garage) {
     LF,
     ...CMD.ALIGN_CENTER,
     ...CMD.BOLD_ON,
-    ...CMD.DOUBLE_ON,
     ...testoBytes('IMPORTO: ' + importo), LF,
-    ...CMD.DOUBLE_OFF,
     ...CMD.BOLD_OFF,
     LF,
     ...testoBytes(separatore()), LF,
@@ -324,13 +314,13 @@ function disegnaTicketCanvas(righe) {
 
 function ticketRigheIngresso(garage, targa, categoria, ingressoStr, modello) {
   const righe = [
-    { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true, size: 'lg' },
+    { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true },
     { type: 'sep' },
     { type: 'text', text: 'TICKET INGRESSO', align: 'center', bold: true },
     { type: 'sep' },
     { type: 'spacer' },
     { type: 'text', text: 'Targa:', align: 'center' },
-    { type: 'text', text: targa, align: 'center', bold: true, size: 'xl' },
+    { type: 'text', text: targa, align: 'center', bold: true },
     { type: 'spacer' },
     { type: 'sep', dot: true },
     { type: 'text', text: 'Categoria:', right: categoria },
@@ -348,13 +338,13 @@ function ticketRigheIngresso(garage, targa, categoria, ingressoStr, modello) {
 
 function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, durata, importo, modello) {
   const righe = [
-    { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true, size: 'lg' },
+    { type: 'text', text: garage.toUpperCase(), align: 'center', bold: true },
     { type: 'sep' },
     { type: 'text', text: 'TICKET USCITA', align: 'center', bold: true },
     { type: 'sep' },
     { type: 'spacer' },
     { type: 'text', text: 'Targa:', align: 'center' },
-    { type: 'text', text: targa, align: 'center', bold: true, size: 'xl' },
+    { type: 'text', text: targa, align: 'center', bold: true },
     { type: 'spacer' },
     { type: 'sep', dot: true },
     { type: 'text', text: 'Categoria:', right: categoria },
@@ -368,7 +358,7 @@ function ticketRigheUscita(garage, targa, categoria, ingressoStr, uscitaStr, dur
     { type: 'spacer' }
   );
   if (importo) {
-    righe.push({ type: 'text', text: 'IMPORTO: ' + importo, align: 'center', bold: true, size: 'lg' });
+    righe.push({ type: 'text', text: 'IMPORTO: ' + importo, align: 'center', bold: true });
     righe.push({ type: 'spacer' });
   }
   righe.push({ type: 'sep' });
