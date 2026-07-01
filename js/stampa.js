@@ -331,23 +331,35 @@ async function condividiOStampa(canvas, nomeFile) {
   return new Promise((resolve) => {
     canvas.toBlob(async (blob) => {
       const file = new File([blob], nomeFile, { type: 'image/png' });
-      // Prova Web Share API (Android Chrome)
+
+      // 1. Prova Web Share con file (Android Chrome — funziona con app che accettano immagini)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({ files: [file], title: 'Ticket Charlotte Parking' });
           resolve('share');
           return;
         } catch (e) {
-          if (e.name !== 'AbortError') console.warn('share error', e);
+          if (e.name === 'AbortError') { resolve('abort'); return; }
+          // share non riuscita, continua con download
         }
       }
-      // Fallback: scarica l'immagine
+
+      // 2. Download diretto — appare nella barra notifiche Android
+      //    L'utente tocca il file scaricato → "Apri con" → seleziona Print Label
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = nomeFile;
+      document.body.appendChild(a);
       a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+      // Avvisa l'utente di aprire il file scaricato
+      setTimeout(() => {
+        alert('Ticket salvato. Apri il file scaricato dalla barra delle notifiche e scegli "Stampa con Print Label".');
+      }, 500);
+
       resolve('download');
     }, 'image/png');
   });
