@@ -539,7 +539,7 @@ async function confermaIngresso() {
     }
   } catch(e) {
     console.error('Errore stampa ticket ingresso:', e);
-    alert('Impossibile stampare il ticket. Riprova dal dettaglio sosta.');
+    alert('Errore stampa: ' + (e?.message || String(e)));
   }
 
   _ingressoTimeout = setTimeout(() => {
