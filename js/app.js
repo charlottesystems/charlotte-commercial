@@ -687,31 +687,53 @@ async function annullaSosta(sostaId, targa) {
   if (error) { alert('Errore eliminazione: ' + error.message); return; }
   await aggiornaStatistiche();
   await caricaSosteAttive();
+  await caricaListaSoste();
 }
 
 async function apriModificaSosta(sostaId, targa, ingressoAt) {
-  const nuovaTarga = prompt('Targa:', targa);
-  if (nuovaTarga === null) return;
-
-  // Formato datetime-local: YYYY-MM-DDTHH:MM
   const dtLocale = new Date(ingressoAt);
   const pad = n => String(n).padStart(2, '0');
   const dtStr = dtLocale.getFullYear() + '-' + pad(dtLocale.getMonth()+1) + '-' + pad(dtLocale.getDate()) +
                 'T' + pad(dtLocale.getHours()) + ':' + pad(dtLocale.getMinutes());
-  const nuovaOra = prompt('Orario ingresso (AAAA-MM-GG HH:MM):', dtStr.replace('T', ' '));
-  if (nuovaOra === null) return;
 
-  const nuovaData = new Date(nuovaOra.trim().replace(' ', 'T'));
-  if (isNaN(nuovaData.getTime())) { alert('Formato orario non valido. Usa: AAAA-MM-GG HH:MM'); return; }
+  const risultato = await new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML = `
+      <div style="background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:340px">
+        <div style="font-weight:700;font-size:16px;margin-bottom:16px;font-family:Rajdhani,sans-serif">✏️ Modifica sosta</div>
+        <label style="font-size:12px;color:var(--muted)">Targa</label>
+        <input id="mod-targa" class="manual-input" value="${targa}" style="width:100%;margin-bottom:12px;text-transform:uppercase">
+        <label style="font-size:12px;color:var(--muted)">Orario ingresso</label>
+        <input id="mod-ora" type="datetime-local" class="wz-input" value="${dtStr}" style="width:100%;margin-bottom:16px">
+        <div style="display:flex;gap:8px">
+          <button id="mod-salva" style="flex:1;background:var(--accent);border:none;border-radius:10px;padding:12px;color:#fff;font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;cursor:pointer">Salva</button>
+          <button id="mod-annulla" style="flex:1;background:transparent;border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--muted);font-family:Rajdhani,sans-serif;font-weight:700;font-size:15px;cursor:pointer">Annulla</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#mod-salva').onclick = () => {
+      const t = overlay.querySelector('#mod-targa').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+      const o = overlay.querySelector('#mod-ora').value;
+      document.body.removeChild(overlay);
+      resolve({ targa: t, ora: o });
+    };
+    overlay.querySelector('#mod-annulla').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+  });
+
+  if (!risultato) return;
+  const nuovaData = new Date(risultato.ora);
+  if (isNaN(nuovaData.getTime())) { alert('Orario non valido'); return; }
 
   const { error } = await sbClient.from('soste').update({
-    targa: nuovaTarga.toUpperCase().replace(/[^A-Z0-9]/g, ''),
+    targa: risultato.targa,
     ingresso_at: nuovaData.toISOString()
   }).eq('id', sostaId);
 
   if (error) { alert('Errore modifica: ' + error.message); return; }
   await aggiornaStatistiche();
   await caricaSosteAttive();
+  await caricaListaSoste();
 }
 
 async function caricaListaSoste() {
