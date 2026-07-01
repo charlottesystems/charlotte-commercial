@@ -659,7 +659,6 @@ async function gestisciConnessioneBTNativa() {
   if (stato) { stato.textContent = 'Connessione in corso...'; stato.style.color = 'var(--amber)'; }
 
   const result = CHARLOTTE_BT.connect(scelta);
-  alert('Risultato connessione: ' + result);
   if (result === 'ok') {
     charlotteBtAddress = scelta;
     aggiornaStatoBT();
