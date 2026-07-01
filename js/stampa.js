@@ -427,11 +427,13 @@ async function stampaTicketIngresso(sosta) {
     if (!CHARLOTTE_BT.isConnected()) {
       await gestisciConnessioneBTNativa();
     }
-    if (CHARLOTTE_BT.isConnected()) {
-      const bytes = buildTicketIngresso(sosta, nomeGarage, garageCorrente);
-      const result = CHARLOTTE_BT.printBytes(bytes.join(','));
-      if (result !== 'ok') alert('Errore stampa: ' + result);
+    if (!CHARLOTTE_BT.isConnected()) {
+      alert('Stampante non connessa. Riprova.');
+      return;
     }
+    const bytes = buildTicketIngresso(sosta, nomeGarage, garageCorrente);
+    const result = CHARLOTTE_BT.printBytes(bytes.join(','));
+    if (result !== 'ok') alert('Errore stampa: ' + result);
     return;
   }
 
@@ -458,11 +460,13 @@ async function stampaTicketUscita(sosta) {
     if (!CHARLOTTE_BT.isConnected()) {
       await gestisciConnessioneBTNativa();
     }
-    if (CHARLOTTE_BT.isConnected()) {
-      const bytes = buildTicketUscita(sosta, nomeGarage, garageCorrente);
-      const result = CHARLOTTE_BT.printBytes(bytes.join(','));
-      if (result !== 'ok') alert('Errore stampa: ' + result);
+    if (!CHARLOTTE_BT.isConnected()) {
+      alert('Stampante non connessa. Riprova.');
+      return;
     }
+    const bytes = buildTicketUscita(sosta, nomeGarage, garageCorrente);
+    const result = CHARLOTTE_BT.printBytes(bytes.join(','));
+    if (result !== 'ok') alert('Errore stampa: ' + result);
     return;
   }
 
@@ -655,6 +659,7 @@ async function gestisciConnessioneBTNativa() {
   if (stato) { stato.textContent = 'Connessione in corso...'; stato.style.color = 'var(--amber)'; }
 
   const result = CHARLOTTE_BT.connect(scelta);
+  alert('Risultato connessione: ' + result);
   if (result === 'ok') {
     charlotteBtAddress = scelta;
     aggiornaStatoBT();
